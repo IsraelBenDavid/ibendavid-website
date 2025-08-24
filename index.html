@@ -3,14 +3,34 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Israel Ben David — Software Engineer</title>
+    <title>Israel Ben David — Computer Vision & Generative AI</title>
 
     <!-- Basic SEO -->
-    <meta name="description" content="Israel Ben David — Computer Science student and C++ Software Engineer. Machine Learning, Computer Vision, Python, C/C++, research assistant experience at HUJI." />
+    <meta name="description" content="Israel Ben David — M.Sc. candidate (Generative AI in Computer Vision) at HUJI, student researcher under Prof. Dani Lischinski, and Computer Vision Software Engineer at SICK Sensor Intelligence." />
     <meta name="author" content="Israel Ben David" />
-    <meta property="og:title" content="Israel Ben David — Software Engineer" />
-    <meta property="og:description" content="Computer Science student & C++ Software Engineer. ML, CV, Python, C/C++. BiaMed • HUJI Computer Vision Lab." />
+    <meta property="og:title" content="Israel Ben David — Computer Vision & Generative AI" />
+    <meta property="og:description" content="M.Sc. candidate focused on Generative AI (CV) at HUJI • Student researcher (Prof. Dani Lischinski) • Computer Vision Software Engineer at SICK." />
     <meta property="og:type" content="website" />
+    <!-- Optional: set when deployed -->
+    <!-- <link rel="canonical" href="https://israelbendavid.dev/" /> -->
+
+    <!-- Color theming for mobile address bar -->
+    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#f7f9fc" />
+    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0b0d10" />
+
+    <!-- Prevent theme flash: apply stored theme before paint -->
+    <script>
+      (function() {
+        try {
+          const saved = localStorage.getItem('theme');
+          if (saved === 'light' || saved === 'dark') {
+            document.documentElement.setAttribute('data-theme', saved);
+          } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
+            document.documentElement.setAttribute('data-theme', 'light');
+          }
+        } catch (e) {}
+      })();
+    </script>
 
     <style>
       /* ========== Design Tokens (Light/Dark via [data-theme]) ========== */
@@ -27,6 +47,7 @@
         --warn: #ffd166;
         --shadow: 0 10px 30px rgba(0,0,0,0.35);
         --radius: 18px;
+        --header-h: 64px;
       }
       html[data-theme="light"] {
         --bg: #f7f9fc;
@@ -50,9 +71,20 @@
         background: radial-gradient(1200px 800px at 80% -10%, rgba(106,167,255,0.15), transparent 60%),
                     radial-gradient(900px 700px at -10% 10%, rgba(126,246,215,0.12), transparent 55%),
                     linear-gradient(180deg, var(--bg), var(--bg));
+        scroll-behavior: smooth;
       }
       a { color: inherit; }
       .container { width: min(1100px, 92vw); margin: 0 auto; }
+
+      /* Skip link for accessibility */
+      .skip-link { position: absolute; left: -9999px; top: auto; width: 1px; height: 1px; overflow: hidden; }
+      .skip-link:focus { left: 12px; top: 12px; width: auto; height: auto; padding: 8px 12px; border-radius: 8px; background: var(--card); border: 1px solid color-mix(in oklab, var(--text) 15%, transparent); z-index: 100; }
+
+      /* Focus styles */
+      :where(a, button, [role="button"]) :focus-visible,
+      :where(a, button, [role="button"]) :focus { outline: none; }
+      :where(a, button, [role="button"]).focus-ring:focus-visible,
+      :where(button, .btn):focus-visible { box-shadow: 0 0 0 4px var(--ring); outline: 2px solid color-mix(in oklab, var(--brand) 60%, var(--text) 20%); }
 
       /* ========== Header / Nav ========== */
       header {
@@ -67,25 +99,41 @@
         background: linear-gradient(135deg, var(--brand), var(--brand-2));
         box-shadow: var(--shadow);
       }
-      .nav a.nav-link { text-decoration: none; opacity: 0.9; margin: 0 10px; }
+      .nav a.nav-link { text-decoration: none; opacity: 0.9; margin: 0 10px; position: relative; }
       .nav a.nav-link:hover { opacity: 1; }
+      .nav a.nav-link.active::after { content: ""; position: absolute; left: 8px; right: 8px; bottom: -8px; height: 2px; border-radius: 1px; background: linear-gradient(90deg, var(--brand), var(--brand-2)); }
+
       .nav-cta { display: flex; align-items: center; gap: 10px; }
       .btn, button.btn { text-decoration: none; border: 1px solid color-mix(in oklab, var(--text) 15%, transparent);
         background: color-mix(in oklab, var(--card) 85%, transparent);
         padding: 10px 14px; border-radius: 12px; display: inline-flex; align-items: center; gap: 10px; 
-        box-shadow: var(--shadow); font-weight: 600; }
+        box-shadow: var(--shadow); font-weight: 600; transition: transform .06s ease-in-out; }
+      .btn:hover { transform: translateY(-1px); }
+      .btn:active { transform: translateY(0); }
       .btn.primary { border-color: color-mix(in oklab, var(--brand) 35%, var(--text) 8%);
         background: linear-gradient(135deg, color-mix(in oklab, var(--brand) 85%, transparent), color-mix(in oklab, var(--brand-2) 35%, transparent)); }
       .icon { width: 18px; height: 18px; }
 
+      /* Mobile nav */
+      .hamburger { display: none; border: 1px solid color-mix(in oklab, var(--text) 15%, transparent); background: color-mix(in oklab, var(--card) 85%, transparent); border-radius: 10px; padding: 8px 10px; }
+      @media (max-width: 720px) {
+        nav.row { display: none; }
+        .hamburger { display: inline-flex; align-items: center; gap: 8px; }
+        .mobile-menu { display: none; position: absolute; left: 0; right: 0; top: calc(var(--header-h) + 8px); background: color-mix(in oklab, var(--panel) 85%, transparent); border-top: 1px solid color-mix(in oklab, var(--text) 10%, transparent); box-shadow: var(--shadow); padding: 10px 0; }
+        .mobile-menu.open { display: block; }
+        .mobile-menu a { display: block; padding: 10px 20px; text-decoration: none; }
+      }
+
       /* ========== Hero ========== */
       .hero { padding: 70px 0 30px; display: grid; gap: 24px; }
       .hero h1 { font-size: clamp(28px, 4.5vw, 44px); margin: 0; line-height: 1.1; }
-      .hero p.lead { margin: 6px 0 0; max-width: 60ch; color: var(--muted); font-size: clamp(15px, 2.2vw, 18px); }
+      .hero p.lead { margin: 6px 0 0; max-width: 70ch; color: var(--muted); font-size: clamp(15px, 2.2vw, 18px); }
       .hero-cta { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 16px; }
+      .now { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; color: var(--muted); }
+      .dot { width: 8px; height: 8px; border-radius: 999px; background: color-mix(in oklab, var(--ok) 70%, transparent); box-shadow: 0 0 0 6px color-mix(in oklab, var(--ring) 40%, transparent) }
 
       /* ========== Section ========== */
-      section { padding: 26px 0; }
+      section { padding: 26px 0; scroll-margin-top: 86px; }
       .section-title { font-size: 22px; margin: 0 0 14px; letter-spacing: 0.2px; }
       .grid { display: grid; gap: 14px; }
       @media (min-width: 820px) { .grid.cols-2 { grid-template-columns: 1fr 1fr; } }
@@ -111,12 +159,30 @@
       .kbd { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; background: color-mix(in oklab, var(--card) 80%, transparent); border: 1px solid color-mix(in oklab, var(--text) 10%, transparent); padding: 2px 6px; border-radius: 6px; font-size: 12px; }
       .tag { font-size: 12px; padding: 4px 8px; border-radius: 6px; background: color-mix(in oklab, var(--ok) 12%, transparent); border: 1px solid color-mix(in oklab, var(--ok) 30%, transparent); }
       .warn { background: color-mix(in oklab, var(--warn) 15%, transparent); border-color: color-mix(in oklab, var(--warn) 45%, transparent); }
+
+      /* Back to top */
+      .to-top { position: fixed; right: 16px; bottom: 16px; display: none; padding: 10px 12px; border-radius: 12px; border: 1px solid color-mix(in oklab, var(--text) 12%, transparent); background: color-mix(in oklab, var(--card) 85%, transparent); box-shadow: var(--shadow); }
+      .to-top.show { display: inline-flex; }
+
+      /* Print */
+      @media print {
+        header, .to-top, .mobile-menu, .btn { display: none !important; }
+        .card { box-shadow: none; }
+      }
+
+      /* Reduced motion */
+      @media (prefers-reduced-motion: reduce) {
+        * { scroll-behavior: auto !important; }
+        .btn { transition: none; }
+      }
     </style>
   </head>
   <body>
+    <a class="skip-link" href="#about">Skip to content</a>
     <header>
-      <div class="container nav">
+      <div class="container nav" role="navigation" aria-label="Main">
         <div class="brand">
+          <button class="hamburger" id="mobileToggle" aria-label="Open menu" aria-expanded="false">☰ Menu</button>
           <div class="brand-badge" aria-hidden="true">
             <!-- Simple monogram icon -->
             <svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -126,7 +192,7 @@
           </div>
           <span>Israel Ben David</span>
         </div>
-        <nav class="row">
+        <nav class="row" id="desktopNav">
           <a class="nav-link" href="#about">About</a>
           <a class="nav-link" href="#experience">Experience</a>
           <a class="nav-link" href="#education">Education</a>
@@ -136,32 +202,38 @@
           <button class="btn" id="themeToggle" aria-label="Toggle theme">🌙 Theme</button>
         </nav>
       </div>
+      <div class="mobile-menu" id="mobileMenu" aria-label="Mobile menu">
+        <a href="#about" class="nav-link">About</a>
+        <a href="#experience" class="nav-link">Experience</a>
+        <a href="#education" class="nav-link">Education</a>
+        <a href="#skills" class="nav-link">Skills</a>
+        <a href="#projects" class="nav-link">Hackathons</a>
+        <a href="#contact" class="nav-link">Contact</a>
+      </div>
     </header>
 
-    <main class="container">
+    <main class="container" id="main">
       <!-- ===== Hero / Intro ===== -->
       <section class="hero" id="about">
-        <h1>Computer Science Student & C++ Software Engineer</h1>
+        <h1>Generative AI (CV) Researcher & Computer Vision Engineer</h1>
         <p class="lead">
-          Nearing completion of a B.Sc. and commencing an M.Sc. in October 2024 at The Hebrew University of Jerusalem. Currently a C++ software engineer at BiaMed. Background in deep learning for industrial anomaly detection and academic tutoring.
+          M.Sc. candidate in Computer Science (Generative AI for Computer Vision) at The Hebrew University of Jerusalem. Student researcher under Prof. <strong>Dani Lischinski</strong> (since Mar 2025). Currently a <strong>Computer Vision Software Engineer at SICK Sensor Intelligence</strong> (since Sep 2024). Former C++ software engineer at BiaMed (until Aug 2024).
         </p>
+        <p class="now"><span class="dot" aria-hidden="true"></span>Currently open to research internships & ML/CV roles.</p>
         <div class="hero-cta">
           <a class="btn primary" href="mailto:israelbd98@gmail.com" aria-label="Email Israel">
-            <!-- mail icon -->
             <svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 6h18v12H3z" stroke="currentColor" stroke-width="1.5"/><path d="m3 7 9 6 9-6" stroke="currentColor" stroke-width="1.5"/></svg>
             Email Me
           </a>
-          <a class="btn" href="#" target="_blank" rel="noopener" aria-label="Open GitHub profile">
-            <!-- github icon -->
+          <a class="btn" href="https://github.com/IsraelBenDavid" target="_blank" rel="me noopener" aria-label="Open GitHub profile">
             <svg class="icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 .5a12 12 0 0 0-3.79 23.4c.6.11.82-.26.82-.58v-2.02c-3.34.73-4.04-1.6-4.04-1.6-.55-1.39-1.34-1.76-1.34-1.76-1.1-.76.09-.74.09-.74 1.22.09 1.86 1.26 1.86 1.26 1.08 1.86 2.83 1.32 3.52 1.01.11-.79.42-1.32.76-1.62-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.25-3.22-.13-.31-.54-1.56.12-3.26 0 0 1.01-.32 3.3 1.23a11.45 11.45 0 0 1 6.01 0c2.28-1.55 3.29-1.23 3.29-1.23.66 1.7.25 2.95.12 3.26.78.84 1.24 1.9 1.24 3.22 0 4.61-2.81 5.62-5.49 5.92.43.37.82 1.1.82 2.24v3.32c0 .32.22.7.83.58A12 12 0 0 0 12 .5Z"/></svg>
             GitHub
           </a>
-          <a class="btn" href="#" target="_blank" rel="noopener" aria-label="Open LinkedIn profile">
-            <!-- linkedin icon -->
+          <a class="btn" href="https://www.linkedin.com/in/israel-ben-david/" target="_blank" rel="me noopener" aria-label="Open LinkedIn profile">
             <svg class="icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.45 20.45h-3.56V14.9c0-1.32-.02-3.01-1.84-3.01-1.85 0-2.14 1.44-2.14 2.92v5.64H9.35V9h3.42v1.56h.05c.48-.9 1.66-1.84 3.41-1.84 3.65 0 4.33 2.4 4.33 5.51v6.22ZM5.34 7.43a2.07 2.07 0 1 1 0-4.14 2.07 2.07 0 0 1 0 4.14ZM7.12 20.45H3.56V9h3.56v11.45Z"/></svg>
             LinkedIn
           </a>
-          <a class="btn" href="tel:+972525399007" aria-label="Call Israel">📞 Call</a>
+          
           <a class="btn" href="Israel_Ben_David_CV.docx" download aria-label="Download CV">⬇️ Download CV</a>
         </div>
       </section>
@@ -171,12 +243,21 @@
         <h2 class="section-title">Experience</h2>
         <div class="grid">
           <article class="card">
-            <h3>C++ Software Engineer — BiaMed</h3>
-            <div class="subtle">Jan 2024 – Present</div>
+            <h3>Computer Vision Software Engineer — SICK Sensor Intelligence</h3>
+            <div class="subtle">Sep 2024 – Present</div>
             <ul class="clean">
-              <li>ESP controller programming in modern C++ for medical devices at a Weizmann Institute–led startup.</li>
+              <li>Building real-time computer-vision solutions on industrial sensors and edge devices; bridging classical vision with deep learning in production environments.</li>
             </ul>
           </article>
+
+          <article class="card">
+            <h3>Student Researcher — HUJI (Prof. Dani Lischinski)</h3>
+            <div class="subtle">Mar 2025 – Present</div>
+            <ul class="clean">
+              <li>Research in generative AI for computer vision (image generation/editing; evaluation; model adaptation).</li>
+            </ul>
+          </article>
+
           <article class="card">
             <h3>Research Assistant — HUJI Computer Vision Lab (Yedid Hoshen)</h3>
             <div class="subtle">2023 – 2024</div>
@@ -184,11 +265,12 @@
               <li>Unified anomaly detection in industrial images using deep learning features; supported data pipelines and experiments.</li>
             </ul>
           </article>
+
           <article class="card">
-            <h3>Academic Tutor — The Hebrew University of Jerusalem</h3>
-            <div class="subtle">2021 – Present</div>
+            <h3>C++ Software Engineer — BiaMed</h3>
+            <div class="subtle">Jan 2024 – Aug 2024</div>
             <ul class="clean">
-              <li>Tutored <strong>Computability & Complexity</strong>, <strong>Data Structures</strong>, and <strong>C/C++ Programming</strong>.</li>
+              <li>ESP controller programming in modern C++ for medical devices at a Weizmann Institute–led startup.</li>
             </ul>
           </article>
         </div>
@@ -201,19 +283,11 @@
           <article class="card">
             <h3>M.Sc. in Computer Science — The Hebrew University of Jerusalem</h3>
             <div class="subtle">Oct 2024 – Aug 2026 (expected)</div>
-            <span class="tag">In progress</span>
+            <span class="tag">Generative AI (Computer Vision) • In progress</span>
           </article>
           <article class="card">
             <h3>B.Sc. in Computer Science — The Hebrew University of Jerusalem</h3>
             <div class="subtle">Oct 2020 – Aug 2024</div>
-            <div class="spacer"></div>
-            <strong>Selected coursework & grades</strong>
-            <ul class="clean">
-              <li>Probability & Statistics — <strong>100</strong></li>
-              <li>Computability & Complexity — <strong>96</strong></li>
-              <li>Machine Learning — <strong>92</strong></li>
-              <li>Operating Systems — <strong>91</strong></li>
-            </ul>
           </article>
         </div>
       </section>
@@ -246,31 +320,53 @@
       </section>
 
       <!-- ===== Online Courses & Hackathons ===== -->
-      <section id="projects">
-        <h2 class="section-title">Online Courses & Hackathons</h2>
-        <div class="grid">
+      $1
+          <article class="card">
+            <h3>Blockudoku AI Agents — Deep RL & Search</h3>
+            <div class="subtle">Python • PyTorch • 2024</div>
+            <ul class="clean">
+              <li>Implemented <strong>deep reinforcement learning</strong> agents for Blockudoku: a <strong>Policy Gradient</strong> agent and a <strong>DQN</strong> baseline in PyTorch.</li>
+              <li>Compared against <strong>Minimax / Alpha-Beta / Expectimax</strong> search agents; includes a CLI to run episodes with adjustable depths and thresholds.</li>
+              <li>Training resources include a <em>policy-gradient</em> notebook and modular <code>PolicyNetwork</code>/<code>Engine</code> components.</li>
+            </ul>
+            <p class="subtle">
+              <a href="https://github.com/IsraelBenDavid/Blockudoku-AI-Agents" target="_blank" rel="noopener">GitHub repo</a>
+            </p>
+          </article>
+          <article class="card">
+            <h3>SICK Solution Hackathon — <strong>1st Place</strong> (Team “Felix Farm”)</h3>
+            <div class="subtle">Oct 2024 • International (Waldkirch, Germany)</div>
+            <ul class="clean">
+              <li>Optimized agricultural water use via sensor fusion & ML; jury + audience winner.</li>
+            </ul>
+            <p class="subtle">
+              <a href="https://www.sick.com/au/en/sick-solution-hackathon-2024-endless-ideas-in-just-48-hoursyoung-talents-from-around-the-world-develop-technological-solutions-for-the-internet-of-things-iot-digitalization-and-industrial-automation/w/press-2024-hackathon" target="_blank" rel="noopener">Press release</a> •
+              <a href="https://hackathon.sick.com/teams-2024/" target="_blank" rel="noopener">Team page</a>
+            </p>
+          </article>
+
           <article class="card">
             <h3>Deep Learning Specialization — Coursera</h3>
             <div class="subtle">Completed Aug 2023</div>
-            <p class="subtle">Certificate link (add URL)</p>
+            <p class="subtle"><a href="https://www.linkedin.com/in/israel-ben-david/details/certifications/" target="_blank" rel="noopener">View certificate on LinkedIn</a></p>
           </article>
           <article class="card">
             <h3>Node.js Developer Course — Udemy</h3>
             <div class="subtle">Completed Aug 2022</div>
-            <p class="subtle">Course link (add URL)</p>
+            <p class="subtle"><a href="https://www.linkedin.com/in/israel-ben-david/details/certifications/" target="_blank" rel="noopener">View certificate on LinkedIn</a></p>
           </article>
           <article class="card">
             <h3>Machine Learning Hackathon — Hebrew University</h3>
             <div class="subtle">June 2023</div>
             <ul class="clean">
-              <li>Forecasted hotel reservation prices from tabular data under time constraints; built end‑to‑end baseline to submission.</li>
+              <li>Forecasted hotel reservation prices from tabular data under time constraints; built end-to-end baseline to submission.</li>
             </ul>
           </article>
           <article class="card">
-            <h3>HUJI‑CSE Hackathon — Productivity (24h)</h3>
+            <h3>HUJI-CSE Hackathon — Productivity (24h)</h3>
             <div class="subtle">April 2022</div>
             <ul class="clean">
-              <li>Built <em>Shark‑Tank</em>, a ReactJS platform to help students find workout buddies.</li>
+              <li>Built <em>Shark-Tank</em>, a ReactJS platform to help students find workout buddies.</li>
             </ul>
           </article>
         </div>
@@ -291,9 +387,10 @@
         <h2 class="section-title">Contact</h2>
         <div class="card">
           <div class="row">
-            <span>📧 <a href="mailto:israelbd98@gmail.com">israelbd98@gmail.com</a></span>
-            <span>•</span>
-            <span>📞 <a href="tel:+972525399007">052‑5399007</a></span>
+            <span>📧 <a id="emailLink" href="mailto:israelbd98@gmail.com">israelbd98@gmail.com</a></span>
+            <button class="btn" id="copyEmail" aria-label="Copy email to clipboard">Copy</button>
+            
+            <a class="btn" id="downloadVcf" aria-label="Download contact card (.vcf)">vCard</a>
           </div>
           <p class="subtle" style="margin-top:10px">Open to software engineering and ML/CV opportunities.</p>
         </div>
@@ -306,32 +403,100 @@
       </div>
     </footer>
 
+    <button class="to-top" id="toTop" aria-label="Back to top">↑ Top</button>
+
     <!-- Structured Data (SEO) -->
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
         "@type": "Person",
         "name": "Israel Ben David",
-        "jobTitle": "C++ Software Engineer",
+        "jobTitle": "Computer Vision Software Engineer",
+        "worksFor": {"@type":"Organization","name":"SICK Sensor Intelligence"},
         "email": "mailto:israelbd98@gmail.com",
-        "telephone": "+972525399007",
         "alumniOf": {"@type":"CollegeOrUniversity","name":"The Hebrew University of Jerusalem"},
-        "knowsAbout": ["Machine Learning", "Deep Learning", "Computer Vision", "Python", "C++"],
-        "url": "",
-        "sameAs": ["", ""]
+        "award": "SICK Solution Hackathon 2024 — 1st Place",
+        "knowsAbout": ["Generative AI", "Computer Vision", "Machine Learning", "Python", "C++"],
+        "knowsLanguage": ["Hebrew", "English", "Russian"],
+        "sameAs": [
+          "https://www.linkedin.com/in/israel-ben-david/",
+          "https://github.com/IsraelBenDavid"
+        ]
       }
     </script>
 
     <script>
-      // Theme toggle
+      // Theme toggle with persistence
       const toggle = document.getElementById('themeToggle');
       toggle?.addEventListener('click', () => {
         const html = document.documentElement;
-        html.setAttribute('data-theme', html.getAttribute('data-theme') === 'light' ? 'dark' : 'light');
-        toggle.textContent = html.getAttribute('data-theme') === 'light' ? '🌙 Dark' : '🌞 Light';
+        const next = html.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+        html.setAttribute('data-theme', next);
+        try { localStorage.setItem('theme', next); } catch (e) {}
+        toggle.textContent = next === 'light' ? '🌙 Dark' : '🌞 Light';
       });
+
       // Year stamp
       document.getElementById('year').textContent = new Date().getFullYear();
+
+      // Scroll spy: highlight active section in nav
+      const links = Array.from(document.querySelectorAll('nav a.nav-link'));
+      const sections = links.map(a => document.querySelector(a.getAttribute('href'))).filter(Boolean);
+      const activate = (id) => {
+        links.forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#' + id));
+      };
+      const obs = new IntersectionObserver((entries) => {
+        entries.forEach(entry => { if (entry.isIntersecting) activate(entry.target.id) });
+      }, { rootMargin: '-50% 0px -40% 0px', threshold: 0.1 });
+      sections.forEach(s => obs.observe(s));
+
+      // Back to top button
+      const toTop = document.getElementById('toTop');
+      window.addEventListener('scroll', () => {
+        toTop.classList.toggle('show', window.scrollY > 600);
+      });
+      toTop?.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+
+      // Mobile menu
+      const mobileToggle = document.getElementById('mobileToggle');
+      const mobileMenu = document.getElementById('mobileMenu');
+      mobileToggle?.addEventListener('click', () => {
+        const open = mobileMenu.classList.toggle('open');
+        mobileToggle.setAttribute('aria-expanded', String(open));
+      });
+      mobileMenu?.addEventListener('click', (e) => {
+        if (e.target.matches('a')) mobileMenu.classList.remove('open');
+      });
+
+      // Copy email
+      document.getElementById('copyEmail')?.addEventListener('click', async () => {
+        try {
+          await navigator.clipboard.writeText('israelbd98@gmail.com');
+          const btn = document.getElementById('copyEmail');
+          const old = btn.textContent; btn.textContent = 'Copied!';
+          setTimeout(() => btn.textContent = old, 1200);
+        } catch (e) {}
+      });
+
+      // Generate a minimal vCard on the fly
+      document.getElementById('downloadVcf')?.addEventListener('click', () => {
+        const v = [
+          'BEGIN:VCARD',
+          'VERSION:3.0',
+          'FN:Israel Ben David',
+          'EMAIL;TYPE=INTERNET:israelbd98@gmail.com',
+                    'TITLE:Computer Vision Software Engineer',
+          'ORG:SICK Sensor Intelligence',
+          'END:VCARD' 
+        ].join('
+');
+        const blob = new Blob([v], { type: 'text/vcard' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url; a.download = 'Israel_Ben_David.vcf';
+        document.body.appendChild(a); a.click(); a.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+      });
     </script>
   </body>
 </html>
