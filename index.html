@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="system">
+<html lang="en" data-theme="light">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -25,16 +25,6 @@
         --radius: 14px;
         --shadow: 0 10px 24px rgba(2,6,23,.06);
         --maxw: 1120px;
-      }
-      @media (prefers-color-scheme: dark) {
-        :root {
-          --bg: #0b0d11;
-          --ink: #e8edf4;
-          --muted: #97a3b3;
-          --line: #1a1f27;
-          --card: #10151b;
-          --shadow: 0 12px 28px rgba(0,0,0,.45);
-        }
       }
 
       /* ================= Base ================= */
@@ -74,14 +64,12 @@
 
       .cta { display: grid; gap: 10px; }
       .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--line); background: white; font-weight: 700; }
-      @media (prefers-color-scheme: dark) { .btn { background: #0f141a; } }
       .btn.primary { background: linear-gradient(135deg, color-mix(in oklab, var(--accent) 88%, transparent), color-mix(in oklab, var(--accent-2) 38%, transparent)); color: #fff; border-color: transparent; }
 
       nav.side { padding: 12px 12px 14px; border-top: 1px solid var(--line); }
       .navlist { list-style: none; padding: 0; margin: 0; display: grid; gap: 6px; }
       .navlist a { display: block; padding: 10px 10px; border-radius: 8px; color: var(--muted); font-weight: 600; }
       .navlist a:hover, .navlist a.active { color: var(--ink); background: rgba(37,99,235,.09); }
-      @media (prefers-color-scheme: dark) { .navlist a:hover, .navlist a.active { background: rgba(37,99,235,.18); } }
 
       .side-footer { padding: 12px; border-top: 1px solid var(--line); display: flex; gap: 10px; flex-wrap: wrap; }
       .pill { display: inline-flex; align-items: center; gap: 8px; padding: 6px 10px; border-radius: 999px; font-weight: 700; font-size: 12px; border: 1px solid var(--line); color: var(--muted); }
@@ -109,7 +97,6 @@
       /* Skills */
       .skills { display: flex; flex-wrap: wrap; gap: 10px; }
       .skill { border: 1px solid var(--line); padding: 6px 10px; border-radius: 999px; font-weight: 700; font-size: 12px; background: white; color: #0b1220; }
-      @media (prefers-color-scheme: dark) { .skill { background: #0f141a; color: var(--ink); } }
 
       /* Footer */
       footer { width: min(var(--maxw), 94vw); margin: 16px auto 40px; color: var(--muted); font-size: 13px; display: flex; justify-content: space-between; flex-wrap: wrap; }
@@ -286,7 +273,7 @@
     <footer>
       <div style="width:min(var(--maxw),94vw);margin:12px auto 34px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;color:var(--muted);font-size:13px">
         <span>© <span id="year"></span> Israel Ben David</span>
-        <span>Theme: system (auto light/dark)</span>
+        <span>Theme: light</span>
       </div>
     </footer>
 
