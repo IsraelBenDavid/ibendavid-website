@@ -45,7 +45,8 @@
     hr{border:0; border-top:1px solid var(--hr); margin:16px 0 24px}
 
     .list{display:grid; gap:14px}
-    .item{padding:14px 14px; border:1px solid var(--border); border-radius:12px; background:#fff}
+    .item{display:flex; gap:14px; padding:14px; border:1px solid var(--border); border-radius:12px; background:#fff}
+    .logo{width:40px; height:40px; object-fit:contain; border-radius:6px}
     .item h3{margin:0 0 6px; font-size:18px}
     .meta{color:var(--muted); font-size:14px; display:flex; gap:12px; flex-wrap:wrap}
     .item p{margin:8px 0 0}
@@ -88,9 +89,21 @@
       <hr />
       <div class="list">
         <article class="item">
-          <h3>B.Sc. Computer Science — The Hebrew University of Jerusalem</h3>
-          <div class="meta"><span>Expected 2026</span></div>
-          <p>Relevant coursework: Machine Learning, Computer Vision, 3D Representation &amp; Generation, Algorithms.</p>
+          <img class="logo" src="https://upload.wikimedia.org/wikipedia/en/thumb/7/79/HebrewUniversity.svg/240px-HebrewUniversity.svg.png" alt="Hebrew University logo" />
+          <div>
+            <h3>The Hebrew University of Jerusalem</h3>
+            <div class="meta"><span>Master of Science — MSc, Computer Science</span><span>Oct 2024 – Aug 2026</span></div>
+            <p>Focusing on advanced machine learning and generative AI in the domain of image generation under the supervision of <a href="https://www.cs.huji.ac.il/~danix">Prof. Dani Lischinski</a>.</p>
+          </div>
+        </article>
+
+        <article class="item">
+          <img class="logo" src="https://upload.wikimedia.org/wikipedia/en/thumb/7/79/HebrewUniversity.svg/240px-HebrewUniversity.svg.png" alt="Hebrew University logo" />
+          <div>
+            <h3>The Hebrew University of Jerusalem</h3>
+            <div class="meta"><span>Bachelor of Science — BSc, Computer Science</span><span>Oct 2020 – Sep 2024</span></div>
+            <p>Relevant coursework: Machine Learning, Computer Vision, 3D Representation &amp; Generation, Algorithms.</p>
+          </div>
         </article>
       </div>
     </section>

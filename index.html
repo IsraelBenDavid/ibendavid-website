@@ -32,6 +32,10 @@
     .links a{display:inline-flex; align-items:center; gap:8px; text-decoration:none; color:inherit; padding:6px 10px; border:1px solid var(--border); border-radius:999px; background:#fff}
     .links a:hover{background:var(--card)}
 
+    /* Skill badges */
+    .skills{display:flex; flex-wrap:wrap; gap:8px; margin:16px 0}
+    .skills span{background:#fff; padding:6px 10px; border:1px solid var(--border); border-radius:999px; font-size:14px}
+
     /* Sticky section nav */
     .section-nav{position:sticky; top:0; background:rgba(255,255,255,.9); backdrop-filter:saturate(180%) blur(8px);
       border-bottom:1px solid var(--hr); margin:28px 0 20px; z-index:10}
@@ -45,7 +49,8 @@
     hr{border:0; border-top:1px solid var(--hr); margin:16px 0 24px}
 
     .list{display:grid; gap:14px}
-    .item{padding:14px 14px; border:1px solid var(--border); border-radius:12px; background:#fff}
+    .item{display:flex; gap:14px; padding:14px; border:1px solid var(--border); border-radius:12px; background:#fff}
+    .logo{width:40px; height:40px; object-fit:contain; border-radius:6px}
     .item h3{margin:0 0 6px; font-size:18px}
     .meta{color:var(--muted); font-size:14px; display:flex; gap:12px; flex-wrap:wrap}
     .item p{margin:8px 0 0}
@@ -82,11 +87,59 @@
       </div>
     </nav>
 
+    <!-- Skills -->
+    <div class="skills">
+      <span>Python</span>
+      <span>C++</span>
+      <span>Machine Learning</span>
+      <span>Computer Vision</span>
+      <span>Generative AI</span>
+      <span>PyTorch</span>
+      <span>TensorFlow</span>
+      <span>OpenCV</span>
+    </div>
+
     <!-- Experience -->
     <section id="experience">
       <h2>Experience</h2>
       <hr />
-      <div class="list"></div>
+      <div class="list">
+        <article class="item">
+          <img class="logo" src="https://upload.wikimedia.org/wikipedia/en/thumb/7/79/HebrewUniversity.svg/240px-HebrewUniversity.svg.png" alt="Hebrew University logo" />
+          <div>
+            <h3>Student Researcher — Computer Vision Lab, The Hebrew University of Jerusalem</h3>
+            <div class="meta"><span>Apr 2024 – Present</span></div>
+            <p>Researching advanced machine learning and generative AI for image generation under <a href="https://www.cs.huji.ac.il/~danix">Prof. Dani Lischinski</a>.</p>
+          </div>
+        </article>
+
+        <article class="item">
+          <img class="logo" src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/b5/SICK_AG_logo.svg/256px-SICK_AG_logo.svg.png" alt="SICK Sensor Intelligence logo" />
+          <div>
+            <h3>Computer Vision Software Engineer — SICK Sensor Intelligence</h3>
+            <div class="meta"><span>Part-time</span><span>Sep 2024 – Present</span></div>
+            <p>Building anomaly detection in industrial images using deep learning features.</p>
+          </div>
+        </article>
+
+        <article class="item">
+          <img class="logo" src="https://upload.wikimedia.org/wikipedia/en/thumb/7/79/HebrewUniversity.svg/240px-HebrewUniversity.svg.png" alt="Hebrew University logo" />
+          <div>
+            <h3>Research Assistant — The Hebrew University of Jerusalem</h3>
+            <div class="meta"><span>Sep 2023 – Aug 2024</span></div>
+            <p>Contributed to a project on unified anomaly detection in industrial images using deep learning features.</p>
+          </div>
+        </article>
+
+        <article class="item">
+          <img class="logo" src="https://upload.wikimedia.org/wikipedia/en/thumb/7/79/HebrewUniversity.svg/240px-HebrewUniversity.svg.png" alt="Hebrew University logo" />
+          <div>
+            <h3>Academic Tutor — The Hebrew University of Jerusalem</h3>
+            <div class="meta"><span>Nov 2021 – Aug 2024</span></div>
+            <p>Tutored in Algorithms, Image Processing, Data Structures, and C/C++ programming.</p>
+          </div>
+        </article>
+      </div>
     </section>
 
     <footer>
