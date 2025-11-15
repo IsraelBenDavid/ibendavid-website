@@ -36,6 +36,9 @@ const buildNav = (currentId) => {
 
   return `
     <nav class="section-nav" aria-label="Section navigation">
+      <button class="nav-toggle" type="button" aria-expanded="false">
+        Sections <span aria-hidden="true">&#9662;</span>
+      </button>
       <div class="inner">
         ${links}
       </div>
@@ -50,6 +53,22 @@ const injectHeaderAndNav = () => {
   const template = document.createElement('template');
   template.innerHTML = `${headerMarkup}${buildNav(currentPage)}`;
   wrap.insertBefore(template.content, wrap.firstChild || null);
+
+  const nav = wrap.querySelector('.section-nav');
+  const toggle = nav?.querySelector('.nav-toggle');
+  if (nav && toggle) {
+    const setState = (expanded) => {
+      toggle.setAttribute('aria-expanded', String(expanded));
+      nav.classList.toggle('open', expanded);
+    };
+    toggle.addEventListener('click', () => {
+      const expanded = toggle.getAttribute('aria-expanded') === 'true';
+      setState(!expanded);
+    });
+    nav.querySelectorAll('.inner a').forEach((link) => {
+      link.addEventListener('click', () => setState(false));
+    });
+  }
 };
 
 if (document.readyState === 'loading') {
