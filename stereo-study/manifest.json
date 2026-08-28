@@ -1,0 +1,450 @@
+{
+ "title": "Stereo generation user study",
+ "version": "2026-08-28 16:23",
+ "est_minutes": 21,
+ "practice": {
+  "kind": "image",
+  "url": "media/practice/practice.jpg"
+ },
+ "tasks": [
+  {
+   "id": "t2i",
+   "title": "Text \u2192 stereo image",
+   "kind": "image",
+   "mock": false,
+   "description": "Stereo photographs generated from a text description.",
+   "context_label": "Prompt",
+   "ours": "ours_sd2",
+   "baselines": [
+    "stereodiffusion",
+    "zerostereo",
+    "stereospace",
+    "genstereo"
+   ],
+   "trials": 12,
+   "samples": [
+    {
+     "id": "p006",
+     "context": "A bamboo grove with dozens of vertical stalks at every distance from arm's length to far back, low sun raking through them, thin leaves and light haze filling the gaps.",
+     "cells": {
+      "ours_sd2": "media/t2i/p006/33a95f89ad6a.jpg",
+      "ours_flux2": "media/t2i/p006/0b48bfcb3b7c.jpg",
+      "stereodiffusion": "media/t2i/p006/0ec2af9cba0f.jpg",
+      "zerostereo": "media/t2i/p006/e25c887430c3.jpg",
+      "stereospace": "media/t2i/p006/45fe1ff7d842.jpg",
+      "genstereo": "media/t2i/p006/7bcaa087bfaa.jpg"
+     }
+    },
+    {
+     "id": "p009",
+     "context": "A rowboat tied to a weathered wooden dock on a glassy lake at dawn, the dock planks running away from the camera, reeds in the near foreground, mirror reflections of pine-covered hills across the water.",
+     "cells": {
+      "ours_sd2": "media/t2i/p009/bfb6412ab6c7.jpg",
+      "ours_flux2": "media/t2i/p009/6c32e6e42ad8.jpg",
+      "stereodiffusion": "media/t2i/p009/d5b63a556a33.jpg",
+      "zerostereo": "media/t2i/p009/a81d0e8d8897.jpg",
+      "stereospace": "media/t2i/p009/3ce0817ebc2e.jpg",
+      "genstereo": "media/t2i/p009/c03768cab3e2.jpg"
+     }
+    },
+    {
+     "id": "p012",
+     "context": "A pier of barnacled wooden pilings receding into calm sea fog, the nearest piling filling the left of the frame, the far end of the pier dissolving into white.",
+     "cells": {
+      "ours_sd2": "media/t2i/p012/7757d0703f3a.jpg",
+      "ours_flux2": "media/t2i/p012/6345bed465f6.jpg",
+      "stereodiffusion": "media/t2i/p012/1cefd2673b84.jpg",
+      "zerostereo": "media/t2i/p012/2a807e6bce73.jpg",
+      "stereospace": "media/t2i/p012/a8245e1930dd.jpg",
+      "genstereo": "media/t2i/p012/d309918fe079.jpg"
+     }
+    },
+    {
+     "id": "p015",
+     "context": "A rain-soaked city street at night, a wet asphalt foreground mirroring neon signs, a row of parked cars receding, blurred traffic lights and a tangle of overhead wires against dark buildings.",
+     "cells": {
+      "ours_sd2": "media/t2i/p015/12d520101f0e.jpg",
+      "ours_flux2": "media/t2i/p015/e04236318d01.jpg",
+      "stereodiffusion": "media/t2i/p015/2dd7e62cbc40.jpg",
+      "zerostereo": "media/t2i/p015/80eacc23c52e.jpg",
+      "stereospace": "media/t2i/p015/752a7792557a.jpg",
+      "genstereo": "media/t2i/p015/b7a0dc913852.jpg"
+     }
+    },
+    {
+     "id": "p018",
+     "context": "A subway platform with tiled columns receding into the distance, a train emerging from the tunnel mouth at the far end with its headlights flaring, a yellow safety line running along the platform edge.",
+     "cells": {
+      "ours_sd2": "media/t2i/p018/ddac14995c1d.jpg",
+      "ours_flux2": "media/t2i/p018/a89fc1ff3273.jpg",
+      "stereodiffusion": "media/t2i/p018/46c7fa0bf107.jpg",
+      "zerostereo": "media/t2i/p018/0a542443500f.jpg",
+      "stereospace": "media/t2i/p018/76415cf83c38.jpg",
+      "genstereo": "media/t2i/p018/a976b8b767fc.jpg"
+     }
+    },
+    {
+     "id": "p022",
+     "context": "An empty basketball court behind a chain-link fence in late afternoon, the diamond mesh sharp and close across the whole frame, the hoop and painted lines beyond it, apartment blocks in the distance.",
+     "cells": {
+      "ours_sd2": "media/t2i/p022/9828b640bce2.jpg",
+      "ours_flux2": "media/t2i/p022/8d9ea4906bc8.jpg",
+      "stereodiffusion": "media/t2i/p022/e2d3c7c0e070.jpg",
+      "zerostereo": "media/t2i/p022/6b0582511ab6.jpg",
+      "stereospace": "media/t2i/p022/55e5af563708.jpg",
+      "genstereo": "media/t2i/p022/7f68accc4204.jpg"
+     }
+    },
+    {
+     "id": "p027",
+     "context": "A modern kitchen with a marble island in the foreground holding a glass of water and a bowl of lemons, brushed-steel appliances and cabinets behind, a window onto a garden at the far end.",
+     "cells": {
+      "ours_sd2": "media/t2i/p027/678ad6c325b4.jpg",
+      "ours_flux2": "media/t2i/p027/b03385d36992.jpg",
+      "stereodiffusion": "media/t2i/p027/e4bbcc3ff893.jpg",
+      "zerostereo": "media/t2i/p027/9184e73c251e.jpg",
+      "stereospace": "media/t2i/p027/60b4d1f86f9a.jpg",
+      "genstereo": "media/t2i/p027/11fe4726f80e.jpg"
+     }
+    },
+    {
+     "id": "p039",
+     "context": "A rustic bakery counter, sourdough loaves and croissants in a glass display case, the glass reflecting overhead lights, a chalkboard menu and shelves of bread behind the counter.",
+     "cells": {
+      "ours_sd2": "media/t2i/p039/0960023b0200.jpg",
+      "ours_flux2": "media/t2i/p039/b3af6a28a96e.jpg",
+      "stereodiffusion": "media/t2i/p039/4ac92b32d17c.jpg",
+      "zerostereo": "media/t2i/p039/684c79a230de.jpg",
+      "stereospace": "media/t2i/p039/dd68e7118ca2.jpg",
+      "genstereo": "media/t2i/p039/7a9fd3e142b0.jpg"
+     }
+    },
+    {
+     "id": "p042",
+     "context": "A macro shot of a dew-covered spiderweb strung between two stems at dawn, individual droplets on the radial threads, the background a soft wash of out-of-focus meadow and rising sun.",
+     "cells": {
+      "ours_sd2": "media/t2i/p042/6f4e3dd075a5.jpg",
+      "ours_flux2": "media/t2i/p042/11d851b7c47a.jpg",
+      "stereodiffusion": "media/t2i/p042/3b25cb6906c6.jpg",
+      "zerostereo": "media/t2i/p042/03cfec6069c1.jpg",
+      "stereospace": "media/t2i/p042/2b12bc002e7b.jpg",
+      "genstereo": "media/t2i/p042/cc7eb66b6410.jpg"
+     }
+    },
+    {
+     "id": "p045",
+     "context": "A busy pedestrian crossing shot from waist height, one person walking past very close on the left, a crowd of people at many different distances, department store facades behind them.",
+     "cells": {
+      "ours_sd2": "media/t2i/p045/767f4396627d.jpg",
+      "ours_flux2": "media/t2i/p045/eb0c28070c26.jpg",
+      "stereodiffusion": "media/t2i/p045/bb86b0c71bed.jpg",
+      "zerostereo": "media/t2i/p045/d34c57d6e210.jpg",
+      "stereospace": "media/t2i/p045/2995b4b66535.jpg",
+      "genstereo": "media/t2i/p045/60e86a776567.jpg"
+     }
+    }
+   ]
+  },
+  {
+   "id": "i2s",
+   "title": "Photo \u2192 stereo image",
+   "kind": "image",
+   "mock": false,
+   "description": "A single real photograph converted into a stereo pair.",
+   "context_label": "Both results were generated from the photograph shown on the left (click it to enlarge).",
+   "ours": "ours_sd2",
+   "baselines": [
+    "stereodiffusion",
+    "zerostereo",
+    "stereospace",
+    "genstereo"
+   ],
+   "trials": 12,
+   "samples": [
+    {
+     "id": "middlebury/Adirondack",
+     "context": "",
+     "cells": {
+      "ours_sd2": "media/i2s/middlebury_Adirondack/14c1f64e3ad8.jpg",
+      "ours_flux2": "media/i2s/middlebury_Adirondack/c5b402ed0570.jpg",
+      "stereodiffusion": "media/i2s/middlebury_Adirondack/23c1f5893592.jpg",
+      "zerostereo": "media/i2s/middlebury_Adirondack/ddb214bc93b1.jpg",
+      "stereospace": "media/i2s/middlebury_Adirondack/ae587336dbbc.jpg",
+      "genstereo": "media/i2s/middlebury_Adirondack/2799354f9507.jpg"
+     },
+     "input": "media/i2s/middlebury_Adirondack/input.jpg"
+    },
+    {
+     "id": "middlebury/Motorcycle",
+     "context": "",
+     "cells": {
+      "ours_sd2": "media/i2s/middlebury_Motorcycle/57afd0173a2d.jpg",
+      "ours_flux2": "media/i2s/middlebury_Motorcycle/711cc88b3ac2.jpg",
+      "stereodiffusion": "media/i2s/middlebury_Motorcycle/e63325dd141a.jpg",
+      "zerostereo": "media/i2s/middlebury_Motorcycle/d12c110854ca.jpg",
+      "stereospace": "media/i2s/middlebury_Motorcycle/59b40e094c3b.jpg",
+      "genstereo": "media/i2s/middlebury_Motorcycle/d947962560d6.jpg"
+     },
+     "input": "media/i2s/middlebury_Motorcycle/input.jpg"
+    },
+    {
+     "id": "middlebury/Piano",
+     "context": "",
+     "cells": {
+      "ours_sd2": "media/i2s/middlebury_Piano/17ee60c6266d.jpg",
+      "ours_flux2": "media/i2s/middlebury_Piano/8cae65e754ef.jpg",
+      "stereodiffusion": "media/i2s/middlebury_Piano/1c3b7bb0cdd2.jpg",
+      "zerostereo": "media/i2s/middlebury_Piano/d0cf50918415.jpg",
+      "stereospace": "media/i2s/middlebury_Piano/96aa8208dd62.jpg",
+      "genstereo": "media/i2s/middlebury_Piano/1b36f062fd21.jpg"
+     },
+     "input": "media/i2s/middlebury_Piano/input.jpg"
+    },
+    {
+     "id": "drivingstereo/cloudy/2018-10-31-06-55-01_2018-10-31-06-55-02-084",
+     "context": "",
+     "cells": {
+      "ours_sd2": "media/i2s/drivingstereo_cloudy_2018-10-31-06-55-01_2018-10-31-06-55-02-084/afe04a811a5a.jpg",
+      "ours_flux2": "media/i2s/drivingstereo_cloudy_2018-10-31-06-55-01_2018-10-31-06-55-02-084/fec285dc3b9e.jpg",
+      "stereodiffusion": "media/i2s/drivingstereo_cloudy_2018-10-31-06-55-01_2018-10-31-06-55-02-084/98b74bddf496.jpg",
+      "zerostereo": "media/i2s/drivingstereo_cloudy_2018-10-31-06-55-01_2018-10-31-06-55-02-084/de5512b1fe5a.jpg",
+      "stereospace": "media/i2s/drivingstereo_cloudy_2018-10-31-06-55-01_2018-10-31-06-55-02-084/0e933dc45d47.jpg",
+      "genstereo": "media/i2s/drivingstereo_cloudy_2018-10-31-06-55-01_2018-10-31-06-55-02-084/64fb2431acbf.jpg"
+     },
+     "input": "media/i2s/drivingstereo_cloudy_2018-10-31-06-55-01_2018-10-31-06-55-02-084/input.jpg"
+    },
+    {
+     "id": "drivingstereo/rainy/2018-08-17-09-45-58_2018-08-17-10-11-16-157",
+     "context": "",
+     "cells": {
+      "ours_sd2": "media/i2s/drivingstereo_rainy_2018-08-17-09-45-58_2018-08-17-10-11-16-157/4b09103801e2.jpg",
+      "ours_flux2": "media/i2s/drivingstereo_rainy_2018-08-17-09-45-58_2018-08-17-10-11-16-157/8ded6dd86322.jpg",
+      "stereodiffusion": "media/i2s/drivingstereo_rainy_2018-08-17-09-45-58_2018-08-17-10-11-16-157/fb716f7b66d1.jpg",
+      "zerostereo": "media/i2s/drivingstereo_rainy_2018-08-17-09-45-58_2018-08-17-10-11-16-157/737e40d148b9.jpg",
+      "stereospace": "media/i2s/drivingstereo_rainy_2018-08-17-09-45-58_2018-08-17-10-11-16-157/dd5cce651bb1.jpg",
+      "genstereo": "media/i2s/drivingstereo_rainy_2018-08-17-09-45-58_2018-08-17-10-11-16-157/5fe36d2c8f45.jpg"
+     },
+     "input": "media/i2s/drivingstereo_rainy_2018-08-17-09-45-58_2018-08-17-10-11-16-157/input.jpg"
+    },
+    {
+     "id": "booster/test/balanced/Balance",
+     "context": "",
+     "cells": {
+      "ours_sd2": "media/i2s/booster_test_balanced_Balance/440a709f0f74.jpg",
+      "ours_flux2": "media/i2s/booster_test_balanced_Balance/20f66e87cc96.jpg",
+      "stereodiffusion": "media/i2s/booster_test_balanced_Balance/bf0df1b09875.jpg",
+      "zerostereo": "media/i2s/booster_test_balanced_Balance/1bf5ff15b188.jpg",
+      "stereospace": "media/i2s/booster_test_balanced_Balance/69b4aaa8747e.jpg",
+      "genstereo": "media/i2s/booster_test_balanced_Balance/4d34f7f5e2e1.jpg"
+     },
+     "input": "media/i2s/booster_test_balanced_Balance/input.jpg"
+    },
+    {
+     "id": "booster/train/balanced/Bucket",
+     "context": "",
+     "cells": {
+      "ours_sd2": "media/i2s/booster_train_balanced_Bucket/6b5bec128f00.jpg",
+      "ours_flux2": "media/i2s/booster_train_balanced_Bucket/ee825fa51779.jpg",
+      "stereodiffusion": "media/i2s/booster_train_balanced_Bucket/bad04d8829fb.jpg",
+      "zerostereo": "media/i2s/booster_train_balanced_Bucket/772104cb9e2a.jpg",
+      "stereospace": "media/i2s/booster_train_balanced_Bucket/cbcd964c8fe5.jpg",
+      "genstereo": "media/i2s/booster_train_balanced_Bucket/70a85e8495e7.jpg"
+     },
+     "input": "media/i2s/booster_train_balanced_Bucket/input.jpg"
+    },
+    {
+     "id": "layeredflow/test/200_0",
+     "context": "",
+     "cells": {
+      "ours_sd2": "media/i2s/layeredflow_test_200_0/e16b993adb21.jpg",
+      "ours_flux2": "media/i2s/layeredflow_test_200_0/db4c0c36881a.jpg",
+      "stereodiffusion": "media/i2s/layeredflow_test_200_0/c464d7121c7d.jpg",
+      "zerostereo": "media/i2s/layeredflow_test_200_0/396ff0be53aa.jpg",
+      "stereospace": "media/i2s/layeredflow_test_200_0/d8892267c1dc.jpg",
+      "genstereo": "media/i2s/layeredflow_test_200_0/fcbc7c2fe908.jpg"
+     },
+     "input": "media/i2s/layeredflow_test_200_0/input.jpg"
+    },
+    {
+     "id": "layeredflow/test/401_0",
+     "context": "",
+     "cells": {
+      "ours_sd2": "media/i2s/layeredflow_test_401_0/33c97b5a3ce6.jpg",
+      "ours_flux2": "media/i2s/layeredflow_test_401_0/5506f8c46cad.jpg",
+      "stereodiffusion": "media/i2s/layeredflow_test_401_0/b97308103c53.jpg",
+      "zerostereo": "media/i2s/layeredflow_test_401_0/873b290f36fe.jpg",
+      "stereospace": "media/i2s/layeredflow_test_401_0/1416eed98b4c.jpg",
+      "genstereo": "media/i2s/layeredflow_test_401_0/d95ce7dcb59e.jpg"
+     },
+     "input": "media/i2s/layeredflow_test_401_0/input.jpg"
+    },
+    {
+     "id": "layeredflow/val/160_0",
+     "context": "",
+     "cells": {
+      "ours_sd2": "media/i2s/layeredflow_val_160_0/ba407b004092.jpg",
+      "ours_flux2": "media/i2s/layeredflow_val_160_0/183c8c3ee4e9.jpg",
+      "stereodiffusion": "media/i2s/layeredflow_val_160_0/69a449510a63.jpg",
+      "zerostereo": "media/i2s/layeredflow_val_160_0/3798405e5ecb.jpg",
+      "stereospace": "media/i2s/layeredflow_val_160_0/5f6b5ff02647.jpg",
+      "genstereo": "media/i2s/layeredflow_val_160_0/ef3724a2bb9d.jpg"
+     },
+     "input": "media/i2s/layeredflow_val_160_0/input.jpg"
+    },
+    {
+     "id": "shampi",
+     "context": "",
+     "cells": {
+      "ours_sd2": "media/i2s/shampi/2d904e28727c.jpg",
+      "ours_flux2": "media/i2s/shampi/247f129a7629.jpg",
+      "stereodiffusion": "media/i2s/shampi/44f82fb76cbb.jpg",
+      "zerostereo": "media/i2s/shampi/b893ae67d69d.jpg",
+      "stereospace": "media/i2s/shampi/17d02d14ba1f.jpg",
+      "genstereo": "media/i2s/shampi/d83b02dec0ec.jpg"
+     },
+     "input": "media/i2s/shampi/input.jpg"
+    }
+   ]
+  },
+  {
+   "id": "t2v",
+   "title": "Text \u2192 stereo video",
+   "kind": "video",
+   "mock": false,
+   "description": "Stereo video clips generated from a text description.",
+   "context_label": "Prompt",
+   "ours": "ours",
+   "baselines": [
+    "stereoworld",
+    "stereocrafter",
+    "svg"
+   ],
+   "trials": 9,
+   "samples": [
+    {
+     "id": "p000",
+     "context": "A long library aisle lined with tall bookshelves receding into shadow, dust motes drifting in a shaft of afternoon light. Static camera.",
+     "cells": {
+      "ours": "media/t2v/p000/171cf6b816df.mp4",
+      "stereoworld": "media/t2v/p000/1745168e98de.mp4",
+      "stereocrafter": "media/t2v/p000/55cb98f6b9d8.mp4",
+      "svg": "media/t2v/p000/de9968aac4b5.mp4"
+     }
+    },
+    {
+     "id": "p001",
+     "context": "A subway platform with a train arriving from the far end of the tunnel, tiled columns receding down the platform. Static camera.",
+     "cells": {
+      "ours": "media/t2v/p001/d13d060f1092.mp4",
+      "stereoworld": "media/t2v/p001/7d557bf8f3a8.mp4",
+      "stereocrafter": "media/t2v/p001/d7760025ed7f.mp4",
+      "svg": "media/t2v/p001/d932204cee7a.mp4"
+     }
+    },
+    {
+     "id": "p002",
+     "context": "A cluttered workshop bench with hand tools and wood shavings in the foreground, a lathe and shelves in the background. Static camera.",
+     "cells": {
+      "ours": "media/t2v/p002/7e6db7d13eda.mp4",
+      "stereoworld": "media/t2v/p002/c184f20ff4f5.mp4",
+      "stereocrafter": "media/t2v/p002/7775aae1e562.mp4",
+      "svg": "media/t2v/p002/28fa48bd0715.mp4"
+     }
+    },
+    {
+     "id": "p003",
+     "context": "A narrow canal in Venice with boats moored along the walls, laundry strung between buildings, water lapping at the steps. Static camera.",
+     "cells": {
+      "ours": "media/t2v/p003/edcae127f8e0.mp4",
+      "stereoworld": "media/t2v/p003/6fc3a826e984.mp4",
+      "stereocrafter": "media/t2v/p003/1e3568b5a5bc.mp4",
+      "svg": "media/t2v/p003/f19dd9ecdf43.mp4"
+     }
+    },
+    {
+     "id": "p004",
+     "context": "A cinematic wide shot of a forest path at sunrise, sunlight filtering through tall pine trees, mist drifting between the trunks. Static camera.",
+     "cells": {
+      "ours": "media/t2v/p004/b67f3c6e874e.mp4",
+      "stereoworld": "media/t2v/p004/b9719594ddfb.mp4",
+      "stereocrafter": "media/t2v/p004/26c1ef26de47.mp4",
+      "svg": "media/t2v/p004/e38d4ae57e16.mp4"
+     }
+    }
+   ]
+  },
+  {
+   "id": "v2s",
+   "title": "Video \u2192 stereo video",
+   "kind": "video",
+   "mock": false,
+   "description": "A real video (the left eye of a captured stereo clip) converted into a stereo video.",
+   "context_label": "Clip",
+   "ours": "ours",
+   "baselines": [
+    "stereoworld",
+    "stereocrafter",
+    "svg",
+    "captured_gt"
+   ],
+   "trials": 12,
+   "samples": [
+    {
+     "id": "261",
+     "context": "A camera pans up a stone staircase, capturing the texture and wear of the steps as it ascends. The staircase is flanked by a metal railing on the left and a stone wall on the right, with patches of moss and fallen leaves scattered along the path. The surrounding environment includes a mix of greenery and autumn foliage, with trees and bushes visible in the background. The lighting suggests it is daytime, with shadows indicating the presence of sunlight. The camera angle remains steady, providing a clear view of the staircase and its surroundings as it moves upwards.",
+     "cells": {
+      "ours": "media/v2s/261/52c682a979a7.mp4",
+      "stereoworld": "media/v2s/261/2741146fc60f.mp4",
+      "stereocrafter": "media/v2s/261/b6631739945f.mp4",
+      "svg": "media/v2s/261/79130245ebb8.mp4",
+      "captured_gt": "media/v2s/261/b641f90adfa0.mp4"
+     }
+    },
+    {
+     "id": "2610",
+     "context": "A musician is seated on a drum throne in a studio setting, playing a set of drums. The room is equipped with various musical instruments, including a keyboard and several Marshall amplifiers. The musician is wearing a black outfit and a mask, and is focused on playing the drums. The camera angle is slightly elevated, capturing the musician and the surrounding equipment. The environment is well-lit, with a carpeted floor and a warm, inviting atmosphere.",
+     "cells": {
+      "ours": "media/v2s/2610/f2a4f3b345f7.mp4",
+      "stereoworld": "media/v2s/2610/55b8146967c8.mp4",
+      "stereocrafter": "media/v2s/2610/589373cb2bae.mp4",
+      "svg": "media/v2s/2610/f0a4ef8bd795.mp4",
+      "captured_gt": "media/v2s/2610/de31841e10f1.mp4"
+     }
+    },
+    {
+     "id": "3847",
+     "context": "A bustling outdoor event is taking place on a sunny day. The scene is framed by a large stadium in the background, with a clear blue sky overhead. In the foreground, there are several orange and white traffic cones arranged in a line, guiding the flow of people. A group of individuals is seen walking or standing, some pushing strollers, indicating a family-friendly event. The area is populated with various stalls and booths, each with unique designs and colors, suggesting a market or fair. The camera angle is slightly elevated, providing a comprehensive view of the event and its surroundings. The overall atmosphere is lively and organized, with people moving purposefully through the space.",
+     "cells": {
+      "ours": "media/v2s/3847/378c07b03789.mp4",
+      "stereoworld": "media/v2s/3847/16958a8cc981.mp4",
+      "stereocrafter": "media/v2s/3847/fbf3cd41e910.mp4",
+      "svg": "media/v2s/3847/85b09fb293af.mp4",
+      "captured_gt": "media/v2s/3847/7c7ab3d32d1e.mp4"
+     }
+    },
+    {
+     "id": "5469",
+     "context": "A man in a red jacket and black cap stands on a large, flat, straw-covered area. He is playing a wooden instrument, possibly a flute or a similar wind instrument. In the background, there are several straw huts with thatched roofs, and a few people are standing around, engaged in various activities. The sky is clear and blue, indicating a sunny day. The camera angle is slightly elevated, capturing the man in the foreground and the huts and people in the background. The environment suggests a rural or agricultural setting, possibly in a region where such huts are common.",
+     "cells": {
+      "ours": "media/v2s/5469/58590831b750.mp4",
+      "stereoworld": "media/v2s/5469/2897fa7eba88.mp4",
+      "stereocrafter": "media/v2s/5469/c3a33b22b056.mp4",
+      "svg": "media/v2s/5469/6055a3c8a881.mp4",
+      "captured_gt": "media/v2s/5469/a01bfd7d18bd.mp4"
+     }
+    },
+    {
+     "id": "6916",
+     "context": "A modern passenger train, painted in white with red accents, is captured in motion as it travels along a railway track. The train is seen from a side angle, with its sleek design and multiple carriages visible. The track is bordered by a gravel path and a metal fence, with a clear blue sky in the background. The camera angle is slightly elevated, providing a comprehensive view of the train's movement and the surrounding environment. The scene is set in a rural or semi-rural area, with no visible buildings or other structures in the immediate vicinity.",
+     "cells": {
+      "ours": "media/v2s/6916/66229dfe562e.mp4",
+      "stereoworld": "media/v2s/6916/b2f4928ec10f.mp4",
+      "stereocrafter": "media/v2s/6916/85b8c42b2551.mp4",
+      "svg": "media/v2s/6916/c5d0f6bb39e0.mp4",
+      "captured_gt": "media/v2s/6916/4871e9d36ec2.mp4"
+     }
+    }
+   ]
+  }
+ ]
+}
