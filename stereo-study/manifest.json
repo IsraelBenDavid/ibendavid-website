@@ -1,10 +1,10 @@
 {
  "title": "Stereo generation user study",
- "version": "2026-08-28 16:23",
+ "version": "2026-08-28 16:37",
  "est_minutes": 21,
  "practice": {
-  "kind": "image",
-  "url": "media/practice/practice.jpg"
+  "kind": "video",
+  "url": "media/practice/practice.mp4"
  },
  "tasks": [
   {

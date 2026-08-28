@@ -67,7 +67,9 @@ class StereoViewer {
     this.mode = "sbs";
     this.dead = false;
     this.ready = false;
+    this.error = false;
     this.playing = true;
+    this.onToggleRequest = null; // set by the trial to pause/play A and B together
 
     this.canvas = document.createElement("canvas");
     this.ctx = this.canvas.getContext("2d");
@@ -77,9 +79,13 @@ class StereoViewer {
     this.wrap = $(".canvas-wrap", cellEl);
     this.wrap.appendChild(this.canvas);
     this.status = $(".cell-status", cellEl);
-    if (this.status) this.status.textContent = "loading…";
+    if (this.status) {
+      this.status.textContent = "loading…";
+      this.status.style.color = ""; // the cell is reused across trials; clear error tint
+    }
 
-    this.canvas.addEventListener("click", () => this.togglePlay());
+    this.canvas.addEventListener("click", () =>
+      this.onToggleRequest ? this.onToggleRequest() : this.togglePlay());
 
     if (src.kind === "video") {
       const v = document.createElement("video");
@@ -90,7 +96,12 @@ class StereoViewer {
       v.src = src.url;
       v.addEventListener("loadeddata", () => this._onReady());
       v.addEventListener("error", () => this._onError());
-      v.play().catch(() => {}); // autoplay of muted video; a click also resumes it
+      // muted autoplay is usually allowed; when it isn't (low-power mode etc.),
+      // reflect reality so the participant knows to tap
+      v.play().catch(() => {
+        this.playing = false;
+        if (!this.dead && this.status) this.status.textContent = "tap to play";
+      });
       this.media = v;
     } else {
       const img = new Image();
@@ -112,12 +123,18 @@ class StereoViewer {
   _onReady() {
     if (this.dead) return;
     this.ready = true;
-    if (this.status) this.status.textContent = this.src.kind === "video" ? "click to pause" : "";
+    if (this.status && this.src.kind === "video") {
+      this.status.textContent = this.media.paused ? "tap to play" : "click to pause";
+    } else if (this.status) {
+      this.status.textContent = "";
+    }
     this._resize();
     this._drawnStatic = false;
   }
 
   _onError() {
+    if (this.dead) return;
+    this.error = true;
     if (this.status) {
       this.status.textContent = "failed to load: " + this.src.url;
       this.status.style.color = "#f76f6f";
@@ -145,11 +162,17 @@ class StereoViewer {
     this.onModeUse(mode);
   }
 
+  setPlaying(play) {
+    if (this.src.kind !== "video") return;
+    if (play) this.media.play().catch(() => {});
+    else this.media.pause();
+    this.playing = play;
+    if (this.status) this.status.textContent = play ? "click to pause" : "paused – click to play";
+  }
+
   togglePlay() {
     if (this.src.kind !== "video") return;
-    if (this.media.paused) { this.media.play().catch(() => {}); this.playing = true; }
-    else { this.media.pause(); this.playing = false; }
-    if (this.status) this.status.textContent = this.media.paused ? "paused – click to play" : "click to pause";
+    this.setPlaying(this.media.paused);
   }
 
   restart() {
@@ -266,10 +289,14 @@ function buildTrials(manifest) {
       ? Infinity
       : task.trials;
     const chosen = [];
+    // shuffled round-robin so a quota that doesn't divide evenly doesn't always give
+    // the extra trials to the first-listed baselines
+    const order = shuffle([...perBaseline.keys()]);
     let exhausted = false;
     while (chosen.length < quota && !exhausted) {
       exhausted = true;
-      for (const pool of perBaseline.values()) {
+      for (const key of order) {
+        const pool = perBaseline.get(key);
         if (pool.length > 0 && chosen.length < quota) {
           chosen.push(pool.pop());
           exhausted = false;
@@ -307,6 +334,8 @@ let trialT0 = 0;
 let trialModesUsed = null; // Set
 let trialFullscreenUsed = false;
 let practiceViewer = null;
+let pairToggle = null;     // pause/play both trial videos together
+let pairSyncTimer = null;
 
 const MODES = [
   { id: "sbs", label: "Side-by-side", key: "1" },
@@ -340,7 +369,28 @@ async function init() {
     `${nTasks} short sections (images and videos), about ${manifest.est_minutes || 15} minutes in total.`;
 
   const saved = loadState();
-  if (saved && !saved.finished && saved.trials && saved.idx < saved.trials.length) {
+  // a saved session is only resumable against the same manifest: a rebuild changes the
+  // blinded media urls and may add/remove tasks, so stale trials would 404 or crash
+  const savedValid = !!(saved && saved.trials && saved.participant &&
+    saved.manifest_version === (manifest.version || null) &&
+    saved.trials.every((t) => manifest.tasks.some((x) => x.id === t.task) && t.urlA && t.urlB));
+
+  if (saved && saved.finished && !saved.submitted) {
+    // finished but never submitted (e.g. static hosting + closed the tab before
+    // downloading): let them recover the results instead of losing them
+    $("#resume-banner").style.display = "block";
+    $("#resume-info").textContent =
+      "Found a completed session whose answers were never submitted.";
+    $("#btn-resume").textContent = "Recover my answers";
+    $("#btn-resume").onclick = () => {
+      state = saved;
+      finishStudy();
+    };
+    $("#btn-discard").onclick = () => {
+      clearState();
+      $("#resume-banner").style.display = "none";
+    };
+  } else if (saved && savedValid && !saved.finished && saved.idx < saved.trials.length) {
     $("#resume-banner").style.display = "block";
     $("#resume-info").textContent =
       `Found an unfinished session (${saved.idx}/${saved.trials.length} comparisons done).`;
@@ -352,6 +402,8 @@ async function init() {
       clearState();
       $("#resume-banner").style.display = "none";
     };
+  } else if (saved && !savedValid) {
+    clearState(); // stale (older manifest) — a fresh start is the only safe option
   }
 
   $("#btn-start").onclick = onStart;
@@ -438,12 +490,18 @@ function setModeSwitchActive(container, mode) {
 }
 
 function requestFs(el) {
-  trialFullscreenUsed = true;
   const fn = el.requestFullscreen || el.webkitRequestFullscreen;
   if (fn) {
     const p = fn.call(el);
     if (p && p.catch) p.catch(() => {});
   }
+}
+
+// log fullscreen use only when fullscreen actually engaged
+for (const evt of ["fullscreenchange", "webkitfullscreenchange"]) {
+  document.addEventListener(evt, () => {
+    if (document.fullscreenElement || document.webkitFullscreenElement) trialFullscreenUsed = true;
+  });
 }
 
 function taskById(id) {
@@ -486,6 +544,7 @@ function startTrial() {
   // viewers
   if (viewerA) viewerA.destroy();
   if (viewerB) viewerB.destroy();
+  if (pairSyncTimer) { clearInterval(pairSyncTimer); pairSyncTimer = null; }
   trialModesUsed = new Set([defaultMode()]);
   trialFullscreenUsed = false;
   const onModeUse = (m) => trialModesUsed.add(m);
@@ -495,6 +554,29 @@ function startTrial() {
   viewerA.setMode(mode);
   viewerB.setMode(mode);
   setModeSwitchActive($("#trial-mode-switch"), mode);
+
+  if (trial.kind === "video") {
+    // A and B loop independently, so keep them a unit: start both together once both
+    // are loaded (matters most for v2s, where both derive from the same source clip),
+    // and make click / Space pause or play both at once.
+    const a = viewerA, b = viewerB;
+    pairToggle = () => {
+      const play = a.media.paused;
+      a.setPlaying(play);
+      b.setPlaying(play);
+    };
+    a.onToggleRequest = b.onToggleRequest = pairToggle;
+    pairSyncTimer = setInterval(() => {
+      if (a.dead || b.dead) { clearInterval(pairSyncTimer); pairSyncTimer = null; return; }
+      if ((a.ready || a.error) && (b.ready || b.error)) {
+        clearInterval(pairSyncTimer);
+        pairSyncTimer = null;
+        if (a.ready && b.ready) { a.restart(); b.restart(); }
+      }
+    }, 100);
+  } else {
+    pairToggle = null;
+  }
 
   buildModeSwitch($("#trial-mode-switch"), (m) => {
     viewerA.setMode(m);
@@ -543,6 +625,7 @@ function onNextTrial() {
   const trial = state.trials[state.idx];
   const a = currentAnswers();
   if (!a.depth || !a.quality) return;
+  const mediaErrors = [viewerA?.error ? "A" : null, viewerB?.error ? "B" : null].filter(Boolean);
   state.responses.push({
     task: trial.task,
     mock: trial.mock,
@@ -554,6 +637,7 @@ function onNextTrial() {
     comment: $("#q-comment").value.trim() || null,
     modes_used: [...trialModesUsed],
     fullscreen_used: trialFullscreenUsed,
+    media_errors: mediaErrors, // non-empty -> a stimulus failed to load; exclude in analysis
     seconds: Math.round((performance.now() - trialT0) / 100) / 10,
     at: new Date().toISOString(),
   });
@@ -605,10 +689,19 @@ async function finishStudy() {
   const payload = resultPayload();
   $("#result-json").value = JSON.stringify(payload, null, 2);
   $("#btn-download").onclick = downloadResults;
-  $("#btn-copy").onclick = () => {
-    navigator.clipboard?.writeText($("#result-json").value);
-    $("#btn-copy").textContent = "Copied!";
-    setTimeout(() => ($("#btn-copy").textContent = "Copy to clipboard"), 1500);
+  $("#btn-copy").onclick = async () => {
+    const ta = $("#result-json");
+    let ok = false;
+    try {
+      await navigator.clipboard.writeText(ta.value);
+      ok = true;
+    } catch (e) {
+      ta.focus();
+      ta.select();
+      try { ok = document.execCommand("copy"); } catch (e2) { ok = false; }
+    }
+    $("#btn-copy").textContent = ok ? "Copied!" : "Copy failed — select the text manually";
+    setTimeout(() => ($("#btn-copy").textContent = "Copy to clipboard"), 2500);
   };
   $("#btn-restart").onclick = () => {
     clearState();
@@ -635,7 +728,9 @@ async function finishStudy() {
     });
     if (!resp.ok) throw new Error("HTTP " + resp.status);
     state.submitted = true;
-    saveState();
+    // submission succeeded — clear the saved session so the next participant on this
+    // computer starts clean (the payload is safely on the server now)
+    clearState();
     statusEl.textContent = "✓ Your answers were submitted automatically. Thank you!";
     statusEl.className = "submit-status ok";
     $("#manual-submit").style.display = "none";
@@ -660,6 +755,7 @@ function downloadResults() {
 
 document.addEventListener("keydown", (ev) => {
   if (ev.target.tagName === "INPUT" || ev.target.tagName === "TEXTAREA") return;
+  if (ev.ctrlKey || ev.metaKey || ev.altKey) return; // don't hijack browser shortcuts
   const onTrial = $("#screen-trial").classList.contains("active");
   const onPractice = $("#screen-practice").classList.contains("active");
   if (!onTrial && !onPractice) return;
@@ -680,8 +776,7 @@ document.addEventListener("keydown", (ev) => {
     requestFs($("#compare-area"));
   } else if (ev.key === " " && onTrial && viewerA) {
     ev.preventDefault();
-    viewerA.togglePlay();
-    viewerB.togglePlay();
+    if (pairToggle) pairToggle();
   }
 });
 
