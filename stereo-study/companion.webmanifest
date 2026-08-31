@@ -1,0 +1,12 @@
+{
+  "name": "Stereo Study VR Companion",
+  "short_name": "VR Study",
+  "display": "fullscreen",
+  "orientation": "landscape",
+  "background_color": "#000000",
+  "theme_color": "#000000",
+  "start_url": "companion.html",
+  "icons": [
+    { "src": "companion-icon.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}
