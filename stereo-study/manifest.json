@@ -1,6 +1,6 @@
 {
  "title": "Stereo generation user study",
- "version": "2026-08-31 20:31",
+ "version": "2026-08-31 21:15",
  "est_minutes": 11,
  "practice": {
   "kind": "video",
@@ -269,5 +269,7 @@
     }
    ]
   }
- ]
+ ],
+ "submit_url": "https://script.google.com/macros/s/AKfycbzsXgTP9S-nCmSxuFULoK2QWnd3gvp9PR8M3VmiiPnMziMtGtpa6lSbs-LbogksrnoPKQ/exec",
+ "sync_url": "https://script.google.com/macros/s/AKfycbzsXgTP9S-nCmSxuFULoK2QWnd3gvp9PR8M3VmiiPnMziMtGtpa6lSbs-LbogksrnoPKQ/exec"
 }

@@ -378,13 +378,32 @@ function makeTrial(task, sample, ours, baseline) {
 let companionKey = null;
 let companionView = null;      // "A" | "B" | null — what the phone reports
 let companionOnline = false;   // phone polled within the last few seconds
-let syncAvailable = null;      // null = unknown, false = no /sync on this host
+let syncMode = null;           // null = probing, "local" | "relay", false = unavailable
 let syncInflight = false;
 let syncTimer = null;
 let replayNonce = 0;           // bumped on Replay so the phone restarts its videos too
 let currentScreenId = "screen-intro";
 
-function initCompanion() {
+/* One sync request. "local" talks to serve_study.py; "relay" talks to the external
+ * Apps Script named by manifest.sync_url — there the key/role travel as query params
+ * and the body goes as text/plain, keeping the request "simple" (no CORS preflight,
+ * which Apps Script cannot answer). Both speak the same JSON protocol. */
+function syncRequest(mode, role, body) {
+  if (mode === "relay") {
+    return fetch(`${manifest.sync_url}?sync=${companionKey}&role=${role}`, {
+      method: "POST",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify(body),
+    });
+  }
+  return fetch(`sync/${companionKey}/${role}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+}
+
+async function initCompanion() {
   try { companionKey = localStorage.getItem("stereo_companion_key_v1"); } catch (e) {}
   if (!companionKey || !/^[A-Z0-9]{4}$/.test(companionKey)) {
     const alpha = "ABCDEFGHJKMNPQRSTUVWXYZ23456789"; // no 0/O/1/I/L lookalikes
@@ -398,8 +417,24 @@ function initCompanion() {
     urlEl.textContent =
       location.origin + location.pathname.replace(/[^/]*$/, "") + "companion";
   }
+
+  // pick the transport once: the local /sync if this host has one (serve_study.py),
+  // else the online relay if the manifest names one, else hide the feature
+  try {
+    const r = await syncRequest("local", "desktop", companionState());
+    if (!r.ok) throw new Error("HTTP " + r.status);
+    const d = await r.json();
+    if (!d.ok) throw new Error("bad reply");
+    syncMode = "local";
+  } catch (e) {
+    syncMode = manifest && manifest.sync_url ? "relay" : false;
+  }
+  updateCompanionUI();
+  if (!syncMode) return;
+  // the relay adds ~0.5 s per hop and Apps Script has a daily runtime quota, so it
+  // polls more gently; screen/trial changes still push immediately via syncTick()
   syncTick();
-  syncTimer = setInterval(syncTick, 1200);
+  syncTimer = setInterval(syncTick, syncMode === "relay" ? 2000 : 1200);
 }
 
 function companionState() {
@@ -418,26 +453,19 @@ function companionState() {
 }
 
 async function syncTick() {
-  if (syncInflight || syncAvailable === false || !companionKey) return;
+  if (syncInflight || !syncMode || !companionKey) return;
   syncInflight = true;
   try {
-    const r = await fetch(`sync/${companionKey}/desktop`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(companionState()),
-    });
-    if (r.status === 404) {           // static hosting: no /sync, drop the feature
-      syncAvailable = false;
-      clearInterval(syncTimer);
-      companionOnline = false;
-      return;
-    }
+    const r = await syncRequest(syncMode, "desktop", companionState());
+    if (!r.ok) throw new Error("HTTP " + r.status);
     const d = await r.json();
-    syncAvailable = true;
-    companionOnline = d.companion_age != null && d.companion_age < 5;
+    // the phone counts as connected if it polled within the last few seconds
+    // (the relay hop is slower, so it gets a wider window)
+    const window_ = syncMode === "relay" ? 8 : 5;
+    companionOnline = d.companion_age != null && d.companion_age < window_;
     companionView = companionOnline ? d.view : null;
   } catch (e) {
-    companionOnline = false;
+    companionOnline = false; // transient — the chosen transport is kept
   } finally {
     syncInflight = false;
     updateCompanionUI();
@@ -446,10 +474,16 @@ async function syncTick() {
 
 function updateCompanionUI() {
   const card = $("#companion-card");
-  if (card) card.style.display = syncAvailable === false ? "none" : "";
+  if (card) card.style.display = syncMode === false ? "none" : "";
+  const tEl = $("#companion-transport");
+  if (tEl) {
+    tEl.textContent = syncMode === "relay"
+      ? "Paired through the online relay — works from anywhere."
+      : "Paired through this computer's study server.";
+  }
   const chip = $("#companion-chip");
   if (chip) {
-    chip.style.display = syncAvailable === false ? "none" : "";
+    chip.style.display = syncMode === false ? "none" : "";
     chip.classList.toggle("online", companionOnline);
     chip.textContent = companionOnline ? `📱 ${companionView || "?"}` : "📱 —";
     chip.title = companionOnline

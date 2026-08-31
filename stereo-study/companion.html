@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="robots" content="noindex">
+<title>Stereo study — VR companion</title>
+<!--
+  Phone half of the study: shows ONE stimulus of the current comparison fullscreen as a
+  raw side-by-side (left eye | right eye), for a phone inserted in a VR box. A clicker
+  or keyboard flips between the two stimuli (arrow keys / PageUp-PageDown; tapping the
+  screen toggles). Pairs with the desktop page through the 4-character session key via
+  POST /sync/<key>/companion (serve_study.py) — the desktop drives which trial is shown
+  and live-displays which view (A/B) this phone is on. All HUD text is duplicated at
+  the centre of each half so both eyes can read it through the lenses.
+-->
+<style>
+  html, body {
+    margin: 0; padding: 0; height: 100%;
+    background: #000; color: #dfe3ec; overflow: hidden;
+    font-family: -apple-system, "Segoe UI", system-ui, sans-serif;
+    -webkit-user-select: none; user-select: none; -webkit-tap-highlight-color: transparent;
+  }
+  #stage { position: fixed; inset: 0; background: #000; }
+  #stage img, #stage video {
+    position: absolute; inset: 0; width: 100%; height: 100%;
+    object-fit: contain; background: #000;
+  }
+  .hidden { display: none !important; }
+
+  /* per-eye HUD: one copy centred in each half so both eyes read it in the box */
+  .eyelabels {
+    position: fixed; top: calc(env(safe-area-inset-top, 0px) + 6px); left: 0; width: 100%;
+    display: flex; pointer-events: none; z-index: 5;
+  }
+  .eyelabels span {
+    flex: 1; text-align: center; font-size: 15px; font-weight: 700;
+    letter-spacing: 0.12em; opacity: 0.55; text-shadow: 0 1px 3px #000;
+  }
+  #flash { position: fixed; inset: 0; display: flex; pointer-events: none; z-index: 6;
+           opacity: 0; transition: opacity 0.45s ease; }
+  #flash div { flex: 1; display: flex; align-items: center; justify-content: center;
+               font-size: 16vh; font-weight: 800; color: #fff; text-shadow: 0 2px 14px #000; }
+  #flash.show { opacity: 0.85; transition: none; }
+
+  .overlay {
+    position: fixed; inset: 0; background: #000; z-index: 10;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 14px; padding: 24px; text-align: center;
+  }
+  .overlay h1 { margin: 0; font-size: 20px; }
+  .overlay p { margin: 0; color: #9aa1b0; font-size: 14px; line-height: 1.5; max-width: 36em; }
+  .waitmsg { display: flex; width: 100%; }
+  .waitmsg span { flex: 1; text-align: center; color: #9aa1b0; font-size: 16px; padding: 0 12px; }
+  input#key {
+    font-size: 30px; letter-spacing: 0.35em; text-transform: uppercase; text-align: center;
+    width: 6.5em; padding: 10px 0 10px 0.35em;
+    background: #15161c; color: #fff; border: 1px solid #3a3f4e; border-radius: 10px; outline: none;
+  }
+  button { font-size: 17px; padding: 12px 34px; border-radius: 12px; border: 0;
+           background: #4f8ef7; color: #fff; }
+  #err { color: #f76f6f; font-size: 14px; min-height: 1.2em; }
+  #rotate { z-index: 20; }
+  @media (orientation: landscape) { #rotate { display: none; } }
+</style>
+</head>
+<body>
+
+<div id="stage"></div>
+<div class="eyelabels hidden" id="eyelabels"><span id="lab-l"></span><span id="lab-r"></span></div>
+<div id="flash"><div id="flash-l"></div><div id="flash-r"></div></div>
+
+<div class="overlay" id="pair">
+  <h1>VR companion</h1>
+  <p>Enter the 4-character key shown on the study computer, then put the phone in the VR box.</p>
+  <input id="key" maxlength="4" autocapitalize="characters" autocomplete="off"
+         spellcheck="false" inputmode="text" placeholder="KEY">
+  <button id="connect">Connect</button>
+  <div id="err"></div>
+  <p>Clicker / keyboard: <b>&larr;</b> shows A, <b>&rarr;</b> shows B
+     (PageUp / PageDown work too; tapping the screen toggles).<br>
+     For true fullscreen on iPhone, add this page to the Home Screen and open it from there.</p>
+</div>
+
+<div class="overlay hidden" id="wait">
+  <div class="waitmsg"><span id="wait-l"></span><span id="wait-r"></span></div>
+</div>
+<div class="overlay" id="rotate"><p>Rotate the phone to landscape &#128260;</p></div>
+
+<script>
+"use strict";
+
+const $ = (sel) => document.querySelector(sel);
+
+let key = null;          // 4-char session key, set on connect
+let view = "A";          // which stimulus of the pair is on screen
+let cur = null;          // signature of what the stage currently shows
+let elA = null, elB = null;
+let inflight = false;
+let lastOk = 0;
+let mode = null;         // "local" (serve_study.py) | "relay" (manifest.sync_url)
+let relayUrl = null;     // external Apps Script relay, read from manifest.json
+
+/* ------------------------------ stage ------------------------------ */
+
+function setWait(msg) {
+  if (!msg) { $("#wait").classList.add("hidden"); return; }
+  $("#wait-l").textContent = msg;
+  $("#wait-r").textContent = msg;
+  $("#wait").classList.remove("hidden");
+}
+
+function setEyeLabels(text) {
+  $("#lab-l").textContent = text;
+  $("#lab-r").textContent = text;
+  $("#eyelabels").classList.toggle("hidden", !text);
+}
+
+function makeMedia(kind, url) {
+  let el;
+  if (kind === "video") {
+    el = document.createElement("video");
+    el.muted = true;
+    el.loop = true;
+    el.playsInline = true;
+    el.setAttribute("playsinline", "");
+    el.preload = "auto";
+    el.src = url;
+  } else {
+    el = new Image();
+    el.src = url;
+  }
+  return el;
+}
+
+function showTrial(st) {
+  // rebuild only when the trial (or the desktop's replay counter) changes
+  const sig = ["trial", st.idx, st.urlA, st.urlB, st.replay | 0].join("|");
+  if (cur === sig) return applyView(false);
+  cur = sig;
+  const stage = $("#stage");
+  stage.textContent = "";
+  elA = makeMedia(st.kind, st.urlA);
+  elB = makeMedia(st.kind, st.urlB);
+  stage.append(elA, elB);
+  if (st.kind === "video") {
+    // both keep playing so an A<->B flip compares the same moment in time
+    elA.play().catch(() => {});
+    elB.play().catch(() => {});
+  }
+  setWait("");
+  view = "A"; // every comparison starts on A
+  applyView(true);
+  sendNow();
+}
+
+function showSingle(st, label) {
+  const sig = ["single", st.url].join("|");
+  if (cur !== sig) {
+    cur = sig;
+    const stage = $("#stage");
+    stage.textContent = "";
+    elA = makeMedia(st.kind, st.url);
+    elB = null;
+    stage.append(elA);
+    if (st.kind === "video") elA.play().catch(() => {});
+    setWait("");
+  }
+  setEyeLabels(label);
+}
+
+function showWaiting(msg) {
+  cur = "wait|" + msg;
+  $("#stage").textContent = "";
+  elA = elB = null;
+  setEyeLabels("");
+  setWait(msg);
+}
+
+function applyView(flash) {
+  if (!elB) return;
+  elA.classList.toggle("hidden", view !== "A");
+  elB.classList.toggle("hidden", view !== "B");
+  setEyeLabels(view);
+  if (flash) {
+    $("#flash-l").textContent = view;
+    $("#flash-r").textContent = view;
+    const f = $("#flash");
+    f.classList.add("show");
+    clearTimeout(applyView._t);
+    applyView._t = setTimeout(() => f.classList.remove("show"), 350);
+  }
+}
+
+function setView(v) {
+  if (!elB || v === view) return;
+  view = v;
+  applyView(true);
+  sendNow(); // so the desktop's "participant is viewing X" marker updates fast
+}
+
+/* ------------------------------ sync ------------------------------ */
+
+/* Same protocol over either transport; the relay wants query params + a text/plain
+ * body ("simple" request — Apps Script cannot answer a CORS preflight). */
+function syncRequest() {
+  if (mode === "relay") {
+    return fetch(`${relayUrl}?sync=${key}&role=companion`, {
+      method: "POST",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify({ view }),
+    });
+  }
+  return fetch(`sync/${key}/companion`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ view }),
+  });
+}
+
+async function pickTransport() {
+  try {
+    const r = await fetch("manifest.json", { cache: "no-store" });
+    relayUrl = (await r.json()).sync_url || null;
+  } catch (e) { relayUrl = null; }
+  try {
+    mode = "local";
+    const r = await syncRequest();
+    if (!r.ok) throw new Error("HTTP " + r.status);
+    if (!(await r.json()).ok) throw new Error("bad reply");
+    return "local";
+  } catch (e) {
+    mode = relayUrl ? "relay" : null;
+    return mode;
+  }
+}
+
+async function tick(force) {
+  if (!key || !mode || (inflight && !force)) return;
+  inflight = true;
+  try {
+    const r = await syncRequest();
+    const d = await r.json();
+    lastOk = Date.now();
+    const st = d.state;
+    if (!st || d.desktop_age == null || d.desktop_age > (mode === "relay" ? 25 : 15)) {
+      showWaiting("Waiting for the study computer…");
+    } else if (st.screen === "trial") {
+      showTrial(st);
+    } else if (st.screen === "practice") {
+      showSingle(st, "PRACTICE");
+    } else if (st.screen === "break") {
+      showWaiting("Section complete — one moment…");
+    } else if (st.screen === "finish") {
+      showWaiting("All done — thank you!");
+    } else {
+      showWaiting("Waiting for the study to start…");
+    }
+  } catch (e) {
+    if (Date.now() - lastOk > 6000) showWaiting("Reconnecting…");
+  } finally {
+    inflight = false;
+  }
+}
+
+function sendNow() { tick(true); }
+
+/* --------------------------- connect flow --------------------------- */
+
+let wakeLock = null;
+async function requestWakeLock() {
+  try { wakeLock = await navigator.wakeLock?.request("screen"); } catch (e) {}
+}
+document.addEventListener("visibilitychange", () => {
+  if (document.visibilityState === "visible") { requestWakeLock(); sendNow(); }
+});
+
+async function connect() {
+  const k = ($("#key").value || "").trim().toUpperCase();
+  if (!/^[A-Z0-9]{4}$/.test(k)) {
+    $("#err").textContent = "The key is 4 letters/digits.";
+    return;
+  }
+  key = k;
+  $("#err").textContent = "";
+  if (!(await pickTransport())) {
+    key = null;
+    $("#err").textContent =
+      "This copy has no sync channel — run serve_study.py, or set SYNC_URL and redeploy.";
+    return;
+  }
+  try { localStorage.setItem("stereo_companion_key", k); } catch (e) {}
+  $("#pair").classList.add("hidden");
+  document.documentElement.requestFullscreen?.().catch(() => {}); // no-op on iPhone
+  requestWakeLock();
+  showWaiting("Connecting…");
+  tick(true);
+  setInterval(tick, mode === "relay" ? 1400 : 900);
+}
+
+$("#connect").addEventListener("click", connect);
+$("#key").addEventListener("keydown", (e) => { if (e.key === "Enter") connect(); });
+
+/* ------------------------- clicker / keyboard ------------------------- */
+
+document.addEventListener("keydown", (e) => {
+  if (!key) return;
+  if (e.key === "ArrowLeft" || e.key === "PageUp") { setView("A"); e.preventDefault(); }
+  else if (e.key === "ArrowRight" || e.key === "PageDown") { setView("B"); e.preventDefault(); }
+  else if (e.key === " " || e.key === "Enter" || e.key === "." || e.key === "b") {
+    setView(view === "A" ? "B" : "A");
+    e.preventDefault();
+  }
+});
+$("#stage").addEventListener("click", () => { if (key) setView(view === "A" ? "B" : "A"); });
+
+/* prefill the key from #XXXX in the URL, else from the last session */
+(function prefill() {
+  const h = (location.hash || "").replace("#", "").toUpperCase();
+  let k = /^[A-Z0-9]{4}$/.test(h) ? h : null;
+  if (!k) { try { k = localStorage.getItem("stereo_companion_key"); } catch (e) {} }
+  if (k) $("#key").value = k;
+})();
+</script>
+</body>
+</html>
