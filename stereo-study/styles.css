@@ -192,8 +192,6 @@ textarea { width: 100%; min-width: 0; resize: vertical; }
 .choice-btn:hover { border-color: #55556a; }
 .choice-btn.selected { border-color: var(--accent); background: #4f8ef726; color: var(--accent-2); }
 .trial-nav { display: flex; justify-content: space-between; align-items: center; margin-top: 16px; }
-.comment-field { margin-top: 8px; }
-.comment-field input { width: 100%; min-width: 0; }
 
 /* ---------- practice / intro extras ---------- */
 .mode-help { display: grid; grid-template-columns: 130px 1fr; gap: 6px 16px; margin: 10px 0; }

@@ -269,14 +269,31 @@ class StereoViewer {
 
 /**
  * Build this participant's randomized trial list from the manifest.
- * For each task: all (sample x baseline) pairs, balanced-subsampled down to the task's
- * quota (round-robin across baselines so every baseline keeps equal coverage), then
- * shuffled within the task. Task sections run in manifest order.
+ *
+ * A task may pin its comparisons explicitly (task.comparisons = [{sample, ours,
+ * baseline}, ...]) — then every participant answers exactly that fixed set, which is
+ * what the 20-comparison study uses, and `ours` may differ per comparison (each one
+ * names the specific ours cell it was selected with). Otherwise the legacy path is
+ * used: all (sample x baseline) pairs, balanced-subsampled down to the task's quota
+ * (round-robin across baselines so every baseline keeps equal coverage).
+ *
+ * Either way, sides are randomized per trial and the task's trials are shuffled.
+ * Task sections run in manifest order.
  */
 function buildTrials(manifest) {
   const trials = [];
   for (const task of manifest.tasks) {
     if (!task.samples || task.samples.length === 0) continue;
+
+    if (Array.isArray(task.comparisons) && task.comparisons.length) {
+      const byId = new Map(task.samples.map((s) => [s.id, s]));
+      const fixed = task.comparisons
+        .map((c) => ({ sample: byId.get(c.sample), ours: c.ours || task.ours, baseline: c.baseline }))
+        .filter((c) => c.sample && c.sample.cells[c.ours] && c.sample.cells[c.baseline]);
+      trials.push(...shuffle(fixed.map((c) => makeTrial(task, c.sample, c.ours, c.baseline))));
+      continue;
+    }
+
     const perBaseline = new Map();
     for (const baseline of task.baselines) {
       const pool = task.samples
@@ -303,25 +320,29 @@ function buildTrials(manifest) {
         }
       }
     }
-    const sectionTrials = chosen.map(({ sample, baseline }) => {
-      const oursIsA = Math.random() < 0.5;
-      return {
-        task: task.id,
-        kind: task.kind,
-        mock: !!task.mock,
-        sample: sample.id,
-        context: sample.context || "",
-        input: sample.input || null,
-        methodA: oursIsA ? task.ours : baseline,
-        methodB: oursIsA ? baseline : task.ours,
-        urlA: sample.cells[oursIsA ? task.ours : baseline],
-        urlB: sample.cells[oursIsA ? baseline : task.ours],
-      };
-    });
+    const sectionTrials = chosen.map(({ sample, baseline }) =>
+      makeTrial(task, sample, task.ours, baseline));
     shuffle(sectionTrials);
     trials.push(...sectionTrials);
   }
   return trials;
+}
+
+/** One blinded trial: ours vs one baseline on one sample, sides randomized. */
+function makeTrial(task, sample, ours, baseline) {
+  const oursIsA = Math.random() < 0.5;
+  return {
+    task: task.id,
+    kind: task.kind,
+    mock: !!task.mock,
+    sample: sample.id,
+    context: sample.context || "",
+    input: sample.input || null,
+    methodA: oursIsA ? ours : baseline,
+    methodB: oursIsA ? baseline : ours,
+    urlA: sample.cells[oursIsA ? ours : baseline],
+    urlB: sample.cells[oursIsA ? baseline : ours],
+  };
 }
 
 /* ================================ app state ================================ */
@@ -557,7 +578,7 @@ function startTrial() {
 
   if (trial.kind === "video") {
     // A and B loop independently, so keep them a unit: start both together once both
-    // are loaded (matters most for v2s, where both derive from the same source clip),
+    // are loaded (both arms share the same left eye, so they must stay in step),
     // and make click / Space pause or play both at once.
     const a = viewerA, b = viewerB;
     pairToggle = () => {
@@ -592,7 +613,6 @@ function startTrial() {
 
   // questions
   $$(".choice-btn").forEach((b) => b.classList.remove("selected"));
-  $("#q-comment").value = "";
   $("#btn-next").disabled = true;
   $("#btn-next").onclick = onNextTrial;
   trialT0 = performance.now();
@@ -634,7 +654,6 @@ function onNextTrial() {
     methodB: trial.methodB,
     q_depth: a.depth,          // "A" | "B"
     q_quality: a.quality,      // "A" | "B"
-    comment: $("#q-comment").value.trim() || null,
     modes_used: [...trialModesUsed],
     fullscreen_used: trialFullscreenUsed,
     media_errors: mediaErrors, // non-empty -> a stimulus failed to load; exclude in analysis
