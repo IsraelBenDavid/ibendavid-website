@@ -1,6 +1,6 @@
 {
  "title": "Stereo generation user study",
- "version": "2026-08-31 18:47",
+ "version": "2026-08-31 20:31",
  "est_minutes": 11,
  "practice": {
   "kind": "video",
@@ -200,8 +200,9 @@
      "id": "p003",
      "context": "A narrow canal in Venice with boats moored along the walls, laundry strung between buildings, water lapping at the steps. Static camera.",
      "cells": {
-      "ours_wan21@w024_d28": "media/t2v/p003/e0fa13a0ceeb.mp4",
+      "ours_wan21@w024_d12": "media/t2v/p003/f2b3055828bf.mp4",
       "stereoworld": "media/t2v/p003/6fc3a826e984.mp4",
+      "ours_wan21@w024_d28": "media/t2v/p003/e0fa13a0ceeb.mp4",
       "stereocrafter": "media/t2v/p003/1e3568b5a5bc.mp4"
      }
     },
@@ -233,7 +234,7 @@
     },
     {
      "sample": "p003",
-     "ours": "ours_wan21@w024_d28",
+     "ours": "ours_wan21@w024_d12",
      "baseline": "stereoworld"
     },
     {

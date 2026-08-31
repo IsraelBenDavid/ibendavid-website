@@ -58,6 +58,18 @@
     </p>
     <button class="btn primary" id="btn-start">Start</button>
   </div>
+
+  <div class="card" id="companion-card" style="display:none">
+    <h2>Phone / VR companion <span class="muted small">(optional)</span></h2>
+    <p class="muted small" style="margin-top:4px">
+      On the iPhone, open <code id="companion-url">…/companion</code> and enter this key,
+      then put the phone in the VR box. The participant flips between A and B with the
+      clicker's <kbd>←</kbd> <kbd>→</kbd> keys (or by tapping); the cell they are
+      currently seeing is outlined live on this screen. Enter their spoken answers here
+      as usual — the phone follows automatically on “Next”.
+    </p>
+    <div class="key-badge companion-key">····</div>
+  </div>
 </section>
 
 <!-- =============================== practice =============================== -->
@@ -103,6 +115,7 @@
   <div class="study-header">
     <div class="row">
       <span class="task-badge" id="trial-task-badge"></span>
+      <span class="companion-chip" id="companion-chip" style="display:none"></span>
       <span class="spacer"></span>
       <span class="trial-count" id="trial-count"></span>
     </div>

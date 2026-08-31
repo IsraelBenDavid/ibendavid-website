@@ -22,9 +22,28 @@
 const $ = (sel, root = document) => root.querySelector(sel);
 const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
 
+/* Deterministic RNG: every participant must see the SAME comparison order and the
+ * same A/B side assignment. Seeded from the manifest version in buildTrials(), so a
+ * study rebuild reshuffles once — never per session. */
+let rand = Math.random; // reseeded before any trial-construction use
+function seedRand(str) {
+  let h = 1779033703 ^ str.length; // xmur3 string hash -> mulberry32 stream
+  for (let i = 0; i < str.length; i++) {
+    h = Math.imul(h ^ str.charCodeAt(i), 3432918353);
+    h = (h << 13) | (h >>> 19);
+  }
+  let a = (Math.imul(h ^ (h >>> 16), 2246822507) ^ 0) >>> 0;
+  rand = () => {
+    a |= 0; a = (a + 0x6D2B79F5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
 function shuffle(arr) {
   for (let i = arr.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
+    const j = Math.floor(rand() * (i + 1));
     [arr[i], arr[j]] = [arr[j], arr[i]];
   }
   return arr;
@@ -277,10 +296,12 @@ class StereoViewer {
  * used: all (sample x baseline) pairs, balanced-subsampled down to the task's quota
  * (round-robin across baselines so every baseline keeps equal coverage).
  *
- * Either way, sides are randomized per trial and the task's trials are shuffled.
- * Task sections run in manifest order.
+ * Either way, sides and the within-task order come from the seeded RNG above, so
+ * every participant gets the identical (still blinded) sequence. Task sections run
+ * in manifest order.
  */
 function buildTrials(manifest) {
+  seedRand("stereo-study|" + (manifest.version || ""));
   const trials = [];
   for (const task of manifest.tasks) {
     if (!task.samples || task.samples.length === 0) continue;
@@ -330,7 +351,7 @@ function buildTrials(manifest) {
 
 /** One blinded trial: ours vs one baseline on one sample, sides randomized. */
 function makeTrial(task, sample, ours, baseline) {
-  const oursIsA = Math.random() < 0.5;
+  const oursIsA = rand() < 0.5;
   return {
     task: task.id,
     kind: task.kind,
@@ -343,6 +364,102 @@ function makeTrial(task, sample, ours, baseline) {
     urlA: sample.cells[oursIsA ? ours : baseline],
     urlB: sample.cells[oursIsA ? baseline : ours],
   };
+}
+
+/* ============================ VR companion sync ============================ */
+/*
+ * Optional phone-in-a-VR-box companion (companion.html): the desktop pushes the
+ * current screen/trial to serve_study.py's /sync channel under a short session key,
+ * and learns which view (A/B) the participant is currently looking at, which is
+ * marked live on the compare cells. Static hosting has no /sync — the first 404
+ * hides the whole feature.
+ */
+
+let companionKey = null;
+let companionView = null;      // "A" | "B" | null — what the phone reports
+let companionOnline = false;   // phone polled within the last few seconds
+let syncAvailable = null;      // null = unknown, false = no /sync on this host
+let syncInflight = false;
+let syncTimer = null;
+let replayNonce = 0;           // bumped on Replay so the phone restarts its videos too
+let currentScreenId = "screen-intro";
+
+function initCompanion() {
+  try { companionKey = localStorage.getItem("stereo_companion_key_v1"); } catch (e) {}
+  if (!companionKey || !/^[A-Z0-9]{4}$/.test(companionKey)) {
+    const alpha = "ABCDEFGHJKMNPQRSTUVWXYZ23456789"; // no 0/O/1/I/L lookalikes
+    companionKey = Array.from({ length: 4 }, () =>
+      alpha[Math.floor(Math.random() * alpha.length)]).join("");
+    try { localStorage.setItem("stereo_companion_key_v1", companionKey); } catch (e) {}
+  }
+  $$(".companion-key").forEach((el) => { el.textContent = companionKey; });
+  const urlEl = $("#companion-url");
+  if (urlEl) {
+    urlEl.textContent =
+      location.origin + location.pathname.replace(/[^/]*$/, "") + "companion";
+  }
+  syncTick();
+  syncTimer = setInterval(syncTick, 1200);
+}
+
+function companionState() {
+  if (currentScreenId === "screen-trial" && state && state.idx < state.trials.length) {
+    const t = state.trials[state.idx];
+    return { screen: "trial", idx: state.idx, n: state.trials.length, kind: t.kind,
+             urlA: t.urlA, urlB: t.urlB, task: t.task, sample: t.sample,
+             replay: replayNonce };
+  }
+  if (currentScreenId === "screen-practice" && manifest && manifest.practice) {
+    return { screen: "practice", kind: manifest.practice.kind, url: manifest.practice.url };
+  }
+  if (currentScreenId === "screen-break") return { screen: "break" };
+  if (currentScreenId === "screen-finish") return { screen: "finish" };
+  return { screen: "intro" };
+}
+
+async function syncTick() {
+  if (syncInflight || syncAvailable === false || !companionKey) return;
+  syncInflight = true;
+  try {
+    const r = await fetch(`sync/${companionKey}/desktop`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(companionState()),
+    });
+    if (r.status === 404) {           // static hosting: no /sync, drop the feature
+      syncAvailable = false;
+      clearInterval(syncTimer);
+      companionOnline = false;
+      return;
+    }
+    const d = await r.json();
+    syncAvailable = true;
+    companionOnline = d.companion_age != null && d.companion_age < 5;
+    companionView = companionOnline ? d.view : null;
+  } catch (e) {
+    companionOnline = false;
+  } finally {
+    syncInflight = false;
+    updateCompanionUI();
+  }
+}
+
+function updateCompanionUI() {
+  const card = $("#companion-card");
+  if (card) card.style.display = syncAvailable === false ? "none" : "";
+  const chip = $("#companion-chip");
+  if (chip) {
+    chip.style.display = syncAvailable === false ? "none" : "";
+    chip.classList.toggle("online", companionOnline);
+    chip.textContent = companionOnline ? `📱 ${companionView || "?"}` : "📱 —";
+    chip.title = companionOnline
+      ? `VR companion connected (key ${companionKey}) — participant is viewing ${companionView || "?"}`
+      : `VR companion not connected — open /companion on the phone and enter key ${companionKey}`;
+  }
+  const marking = currentScreenId === "screen-trial" && companionOnline;
+  const a = $("#cell-a"), b = $("#cell-b");
+  if (a) a.classList.toggle("phone-view", marking && companionView === "A");
+  if (b) b.classList.toggle("phone-view", marking && companionView === "B");
 }
 
 /* ================================ app state ================================ */
@@ -366,8 +483,10 @@ const MODES = [
 ];
 
 function showScreen(id) {
+  currentScreenId = id;
   $$(".screen").forEach((s) => s.classList.toggle("active", s.id === id));
   window.scrollTo(0, 0);
+  syncTick(); // keep the phone in step with every screen change
 }
 
 /* ------------------------------- intro ------------------------------- */
@@ -429,6 +548,7 @@ async function init() {
 
   $("#btn-start").onclick = onStart;
   showScreen("screen-intro");
+  initCompanion();
 }
 
 function onStart() {
@@ -606,7 +726,12 @@ function startTrial() {
   setModeSwitchActive($("#trial-mode-switch"), mode);
 
   $("#btn-fs-pair").onclick = () => requestFs($("#compare-area"));
-  $("#btn-replay").onclick = () => { viewerA.restart(); viewerB.restart(); };
+  $("#btn-replay").onclick = () => {
+    viewerA.restart();
+    viewerB.restart();
+    replayNonce += 1; // the companion watches this and reloads its videos too
+    syncTick();
+  };
   $("#btn-replay").style.display = trial.kind === "video" ? "" : "none";
   $("#fs-a").onclick = () => requestFs($("#cell-a"));
   $("#fs-b").onclick = () => requestFs($("#cell-b"));
@@ -662,6 +787,7 @@ function onNextTrial() {
   });
   state.idx += 1;
   saveState();
+  syncTick(); // same-screen trial advance: push the new comparison to the phone
 
   if (state.idx >= state.trials.length) return finishStudy();
 
