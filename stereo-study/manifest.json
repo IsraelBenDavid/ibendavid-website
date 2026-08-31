@@ -1,6 +1,6 @@
 {
  "title": "Stereo generation user study",
- "version": "2026-08-31 21:15",
+ "version": "2026-08-31 23:39",
  "est_minutes": 11,
  "practice": {
   "kind": "video",
@@ -23,134 +23,113 @@
    "samples": [
     {
      "id": "p002",
-     "context": "A moss-covered stone footbridge arching over a shallow creek in a temperate rainforest, wet ferns crowding the foreground bank, dappled light on the water, dense green canopy closing overhead.",
+     "context": "A young woman in a red raincoat standing in the center of a wet city street, facing the camera, neon signs and traffic lights receding into the drizzle behind her.",
      "cells": {
-      "ours_sd2@w020_d24": "media/t2i/p002/682598e6658a.jpg",
-      "genstereo": "media/t2i/p002/8d267721880e.jpg"
+      "ours_sd2@w030_d24": "media/t2i/p002/d8e723be8b4a.jpg",
+      "genstereo": "media/t2i/p002/8d267721880e.jpg",
+      "zerostereo": "media/t2i/p002/036332058788.jpg"
      }
     },
     {
      "id": "p003",
-     "context": "A single bare birch tree in deep fresh snow under a flat overcast sky, thin black branches spidering across the white, faint tracks leading away from the camera into a featureless white field.",
+     "context": "A border collie standing in the center of a wooden jetty, the planks and mooring posts receding to a calm mountain lake behind it.",
      "cells": {
-      "ours_sd2@w020_d24": "media/t2i/p003/d3577e341189.jpg",
+      "ours_sd2@w030_d24": "media/t2i/p003/eaa1eb650052.jpg",
       "genstereo": "media/t2i/p003/3841ed2e09dd.jpg"
      }
     },
     {
+     "id": "p004",
+     "context": "A white horse standing in the center of a misty meadow facing the camera, a split-rail fence receding toward distant hills.",
+     "cells": {
+      "ours_sd2@w025_d24": "media/t2i/p004/bd16fc8c186b.jpg",
+      "genstereo": "media/t2i/p004/a38582334a74.jpg",
+      "zerostereo": "media/t2i/p004/43fbc6ed63a4.jpg"
+     }
+    },
+    {
      "id": "p005",
-     "context": "An alpine meadow after rain, purple lupines in the near foreground, a split-rail fence running diagonally into the middle distance, snow-capped peaks under towering cumulus clouds.",
+     "context": "A great horned owl perched on a fence post in the center of the frame, golden grassland stretching away to a treeline far behind it.",
      "cells": {
-      "ours_sd2@w020_d24": "media/t2i/p005/fcbba8ec65ac.jpg",
-      "genstereo": "media/t2i/p005/21159f892e6c.jpg"
+      "ours_sd2@w030_d24": "media/t2i/p005/3ac072d591ac.jpg",
+      "genstereo": "media/t2i/p005/21159f892e6c.jpg",
+      "zerostereo": "media/t2i/p005/c942c34fd5ce.jpg"
      }
     },
     {
-     "id": "p008",
-     "context": "A tide pool on a rocky shore at low tide, clear water revealing anemones and barnacles beneath a mirrored surface that also reflects the sky, wet black rock in the foreground, surf and headland behind.",
+     "id": "p006",
+     "context": "An old man with a white beard sitting on a chair in the center of a long library aisle, bookshelves receding into shadow behind him.",
      "cells": {
-      "ours_sd2@w025_d24": "media/t2i/p008/24fc839c3c85.jpg",
-      "genstereo": "media/t2i/p008/c315e6535721.jpg"
+      "ours_sd2@w030_d24": "media/t2i/p006/a2ba8b5a6d65.jpg",
+      "genstereo": "media/t2i/p006/7bcaa087bfaa.jpg"
      }
     },
     {
-     "id": "p011",
-     "context": "A frozen river with jagged plates of pale blue ice stacked in the foreground, bare willows along both banks, a small stone bridge far downstream in flat winter light.",
+     "id": "p001",
+     "context": "A tabby cat sitting upright in the center of a narrow cobblestone alley, lanterns and flower boxes receding into the evening light behind it.",
      "cells": {
-      "ours_sd2@w025_d20": "media/t2i/p011/219047024e0d.jpg",
-      "genstereo": "media/t2i/p011/36872a4518a5.jpg"
+      "ours_sd2@w025_d24": "media/t2i/p001/c27b00043a9c.jpg",
+      "zerostereo": "media/t2i/p001/4b7fc08f7256.jpg"
      }
     },
     {
-     "id": "p020",
-     "context": "A market stall piled with fruit under a striped awning, crates stacked toward the camera, a shopkeeper in the middle distance, a busy blurred street of other stalls receding behind.",
+     "id": "p007",
+     "context": "A red fox sitting in the center of a snowy forest trail, facing the camera, snow-laden pines receding into blue winter fog.",
      "cells": {
-      "ours_sd2@w025_d24": "media/t2i/p020/7da790d5c1c1.jpg",
-      "zerostereo": "media/t2i/p020/7b35b71cf34e.jpg"
-     }
-    },
-    {
-     "id": "p027",
-     "context": "A modern kitchen with a marble island in the foreground holding a glass of water and a bowl of lemons, brushed-steel appliances and cabinets behind, a window onto a garden at the far end.",
-     "cells": {
-      "ours_sd2@w030_d20": "media/t2i/p027/cfe744198cf8.jpg",
-      "zerostereo": "media/t2i/p027/9184e73c251e.jpg"
-     }
-    },
-    {
-     "id": "p029",
-     "context": "A vintage record shop, densely packed browsing bins running away from the camera, hand-lettered dividers, framed posters on the back wall, warm tungsten light.",
-     "cells": {
-      "ours_sd2@w025_d20": "media/t2i/p029/3aee983d4512.jpg",
-      "zerostereo": "media/t2i/p029/15902d40cc28.jpg"
-     }
-    },
-    {
-     "id": "p032",
-     "context": "An abandoned factory hall, broken windows in a long side wall, shafts of dusty light, rusted machinery in the foreground, pigeons and peeling paint, the far end lost in gloom.",
-     "cells": {
-      "ours_sd2@w030_d24": "media/t2i/p032/1e89085b5ecc.jpg",
-      "zerostereo": "media/t2i/p032/59e9044ef451.jpg"
-     }
-    },
-    {
-     "id": "p034",
-     "context": "The cockpit of a small propeller aircraft in flight, instrument panel and control yoke sharp in the foreground, the propeller disc blurred beyond the windscreen, patchwork farmland far below.",
-     "cells": {
-      "ours_sd2@w020_d24": "media/t2i/p034/678198f7145b.jpg",
-      "zerostereo": "media/t2i/p034/2376f6fe08cd.jpg"
+      "ours_sd2@w030_d24": "media/t2i/p007/1291498305dd.jpg",
+      "zerostereo": "media/t2i/p007/54b6fa7913f7.jpg"
      }
     }
    ],
    "comparisons": [
     {
      "sample": "p002",
-     "ours": "ours_sd2@w020_d24",
+     "ours": "ours_sd2@w030_d24",
      "baseline": "genstereo"
     },
     {
      "sample": "p003",
-     "ours": "ours_sd2@w020_d24",
+     "ours": "ours_sd2@w030_d24",
+     "baseline": "genstereo"
+    },
+    {
+     "sample": "p004",
+     "ours": "ours_sd2@w025_d24",
      "baseline": "genstereo"
     },
     {
      "sample": "p005",
-     "ours": "ours_sd2@w020_d24",
+     "ours": "ours_sd2@w030_d24",
      "baseline": "genstereo"
     },
     {
-     "sample": "p008",
-     "ours": "ours_sd2@w025_d24",
+     "sample": "p006",
+     "ours": "ours_sd2@w030_d24",
      "baseline": "genstereo"
     },
     {
-     "sample": "p011",
-     "ours": "ours_sd2@w025_d20",
-     "baseline": "genstereo"
-    },
-    {
-     "sample": "p020",
+     "sample": "p001",
      "ours": "ours_sd2@w025_d24",
      "baseline": "zerostereo"
     },
     {
-     "sample": "p027",
-     "ours": "ours_sd2@w030_d20",
-     "baseline": "zerostereo"
-    },
-    {
-     "sample": "p029",
-     "ours": "ours_sd2@w025_d20",
-     "baseline": "zerostereo"
-    },
-    {
-     "sample": "p032",
+     "sample": "p002",
      "ours": "ours_sd2@w030_d24",
      "baseline": "zerostereo"
     },
     {
-     "sample": "p034",
-     "ours": "ours_sd2@w020_d24",
+     "sample": "p004",
+     "ours": "ours_sd2@w025_d24",
+     "baseline": "zerostereo"
+    },
+    {
+     "sample": "p005",
+     "ours": "ours_sd2@w030_d24",
+     "baseline": "zerostereo"
+    },
+    {
+     "sample": "p007",
+     "ours": "ours_sd2@w030_d24",
      "baseline": "zerostereo"
     }
    ]
@@ -171,16 +150,17 @@
    "samples": [
     {
      "id": "p000",
-     "context": "A long library aisle lined with tall bookshelves receding into shadow, dust motes drifting in a shaft of afternoon light. Static camera.",
+     "context": "A golden retriever sitting in the center of a gravel garden path, panting happily with its tail wagging, rose bushes lining the path as it recedes to a wooden gate far behind. Static camera.",
      "cells": {
-      "ours_wan21@w024_d28": "media/t2v/p000/cbeb3a17e388.mp4",
+      "ours_wan21@w024_d20": "media/t2v/p000/ecaea5cfad98.mp4",
       "stereoworld": "media/t2v/p000/1745168e98de.mp4",
+      "ours_wan21@w024_d28": "media/t2v/p000/cbeb3a17e388.mp4",
       "stereocrafter": "media/t2v/p000/55cb98f6b9d8.mp4"
      }
     },
     {
      "id": "p001",
-     "context": "A subway platform with a train arriving from the far end of the tunnel, tiled columns receding down the platform. Static camera.",
+     "context": "A tabby cat sitting upright in the center of a narrow cobblestone alley, tail curling slowly, laundry lines and lanterns receding into the dusk behind it. Static camera.",
      "cells": {
       "ours_wan21@w024_d28": "media/t2v/p001/f1707143a290.mp4",
       "stereoworld": "media/t2v/p001/7d557bf8f3a8.mp4",
@@ -188,19 +168,10 @@
      }
     },
     {
-     "id": "p002",
-     "context": "A cluttered workshop bench with hand tools and wood shavings in the foreground, a lathe and shelves in the background. Static camera.",
-     "cells": {
-      "ours_wan21@w024_d28": "media/t2v/p002/6046b72f13af.mp4",
-      "stereoworld": "media/t2v/p002/c184f20ff4f5.mp4",
-      "stereocrafter": "media/t2v/p002/7775aae1e562.mp4"
-     }
-    },
-    {
      "id": "p003",
-     "context": "A narrow canal in Venice with boats moored along the walls, laundry strung between buildings, water lapping at the steps. Static camera.",
+     "context": "A brown horse standing in the center of a misty paddock facing the camera, mane stirring in the wind, a wooden fence line receding toward hills on the horizon. Static camera.",
      "cells": {
-      "ours_wan21@w024_d12": "media/t2v/p003/f2b3055828bf.mp4",
+      "ours_wan21@w024_d20": "media/t2v/p003/39f5774326bb.mp4",
       "stereoworld": "media/t2v/p003/6fc3a826e984.mp4",
       "ours_wan21@w024_d28": "media/t2v/p003/e0fa13a0ceeb.mp4",
       "stereocrafter": "media/t2v/p003/1e3568b5a5bc.mp4"
@@ -208,18 +179,28 @@
     },
     {
      "id": "p004",
-     "context": "A cinematic wide shot of a forest path at sunrise, sunlight filtering through tall pine trees, mist drifting between the trunks. Static camera.",
+     "context": "A scarlet macaw perched on a mossy branch in the center of the frame, ruffling its feathers, layered jungle foliage falling away into deep green shadow behind it. Static camera.",
      "cells": {
       "ours_wan21@w024_d28": "media/t2v/p004/bc129f882328.mp4",
       "stereoworld": "media/t2v/p004/b9719594ddfb.mp4",
       "stereocrafter": "media/t2v/p004/26c1ef26de47.mp4"
+     }
+    },
+    {
+     "id": "p005",
+     "context": "An elderly fisherman standing in the center of a wooden pier, mending a net in his hands, the pier planks and mooring posts receding to boats on the water behind him. Static camera.",
+     "cells": {
+      "ours_wan21@w024_d20": "media/t2v/p005/09f4b53b3acb.mp4",
+      "stereoworld": "media/t2v/p005/475d2bc486c4.mp4",
+      "ours_wan21@w024_d36": "media/t2v/p005/fde271a8363d.mp4",
+      "stereocrafter": "media/t2v/p005/e59e2f15359b.mp4"
      }
     }
    ],
    "comparisons": [
     {
      "sample": "p000",
-     "ours": "ours_wan21@w024_d28",
+     "ours": "ours_wan21@w024_d20",
      "baseline": "stereoworld"
     },
     {
@@ -228,18 +209,18 @@
      "baseline": "stereoworld"
     },
     {
-     "sample": "p002",
-     "ours": "ours_wan21@w024_d28",
-     "baseline": "stereoworld"
-    },
-    {
      "sample": "p003",
-     "ours": "ours_wan21@w024_d12",
+     "ours": "ours_wan21@w024_d20",
      "baseline": "stereoworld"
     },
     {
      "sample": "p004",
      "ours": "ours_wan21@w024_d28",
+     "baseline": "stereoworld"
+    },
+    {
+     "sample": "p005",
+     "ours": "ours_wan21@w024_d20",
      "baseline": "stereoworld"
     },
     {
@@ -253,11 +234,6 @@
      "baseline": "stereocrafter"
     },
     {
-     "sample": "p002",
-     "ours": "ours_wan21@w024_d28",
-     "baseline": "stereocrafter"
-    },
-    {
      "sample": "p003",
      "ours": "ours_wan21@w024_d28",
      "baseline": "stereocrafter"
@@ -265,6 +241,11 @@
     {
      "sample": "p004",
      "ours": "ours_wan21@w024_d28",
+     "baseline": "stereocrafter"
+    },
+    {
+     "sample": "p005",
+     "ours": "ours_wan21@w024_d36",
      "baseline": "stereocrafter"
     }
    ]
