@@ -259,3 +259,7 @@ kbd {
   padding: 1px 8px;
   pointer-events: none;
 }
+
+/* "can't decide" sits visually apart from the two real choices */
+.choice-btn.tie { flex: 0 1 auto; padding-left: 18px; padding-right: 18px; font-size: 0.92rem; color: var(--muted); }
+.choice-btn.tie.selected { color: var(--accent-2); }

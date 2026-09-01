@@ -811,8 +811,8 @@ function onNextTrial() {
     sample: trial.sample,
     methodA: trial.methodA,
     methodB: trial.methodB,
-    q_depth: a.depth,          // "A" | "B"
-    q_quality: a.quality,      // "A" | "B"
+    q_depth: a.depth,          // "A" | "B" | "C" (C = can't decide)
+    q_quality: a.quality,      // "A" | "B" | "C"
     modes_used: [...trialModesUsed],
     fullscreen_used: trialFullscreenUsed,
     media_errors: mediaErrors, // non-empty -> a stimulus failed to load; exclude in analysis
