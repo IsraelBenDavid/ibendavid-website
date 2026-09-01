@@ -631,7 +631,7 @@ function startPractice() {
 }
 
 function defaultMode() {
-  return state && state.participant.glasses ? "anaglyph" : "wiggle";
+  return "anaglyph"; // the VR-box / red-cyan workflow: depth first, other modes by key
 }
 
 function updateGlassesNote() {
