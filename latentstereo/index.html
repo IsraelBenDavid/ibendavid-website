@@ -43,6 +43,7 @@
 
 <!-- ============================================================ 1 TITLE -->
 <section class="slide title-slide" data-title="Title">
+  <div class="stage">
   <h1>LatentStereo</h1>
   <p class="sub">Latent Diffusion Warping for Text-to-Stereo Generation</p>
   <p class="who">Israel Ben David &nbsp;·&nbsp; Lab meeting &nbsp;·&nbsp; with Noam &amp; Dani Lischinski &nbsp;·&nbsp; HUJI</p>
@@ -51,10 +52,12 @@
   </div>
   <p class="hint"><span><span class="kbd">→</span> advance</span><span><span class="kbd">W</span> wiggle mode if you have no glasses</span><span><span class="kbd">N</span> notes</span><span><span class="kbd">F</span> fullscreen</span><span><span class="kbd">?</span> all keys</span></p>
   <aside class="notes"><p>Everything you will see is red–cyan anaglyph; glasses help but are not required — press W and every stereo image wiggles between the two eyes, which reads as depth on a flat screen.</p><p>One sentence: we turn a frozen diffusion model into a stereo generator by warping its noisy latent to the second viewpoint halfway through denoising, and letting the remaining steps clean up.</p></aside>
+  </div>
 </section>
 
 <!-- ============================================================ 2 MOTIVATION -->
 <section class="slide" data-title="Motivation">
+  <div class="stage">
   <div class="eyebrow">Motivation <span class="n">01</span></div>
   <h2 class="enter">Spatial computing needs stereo content — and there is no way to make it <b>from text</b>.</h2>
   <div class="body cols c-5-7">
@@ -76,10 +79,12 @@
   </div>
   <div class="foot"><span class="src">images: FLUX.2 [dev], 1024², t<sub>w</sub>=20, d<sub>max</sub>=12 px · video: Wan2.1-T2V-1.3B, VBench prompt “beach”</span><span>LatentStereo</span></div>
   <aside class="notes"><p>Frame the gap: every published system converts a finished monocular result. Text-to-stereo VIDEO in particular does not exist as a single model — it is a T2V model chained with a converter.</p><p>The tiles are real outputs at the paper's table settings. Give the room 10 seconds with the glasses; the redwood and the subway have the strongest depth.</p></aside>
+  </div>
 </section>
 
 <!-- ============================================================ 3 TWO-STEP -->
 <section class="slide" data-title="The two-step affair">
+  <div class="stage">
   <div class="eyebrow">Motivation <span class="n">02</span></div>
   <h2 class="enter">Stereo generation today is a <b>two-step affair</b> — and the second step is where it breaks.</h2>
   <div class="body cols c-7-5">
@@ -102,10 +107,12 @@
   </div>
   <div class="foot"><span class="src">panels: real FLUX.2 run, finished left view of “a man walking in the street looking at his phone”, forward-warped at d<sub>max</sub>=24 px</span><span>LatentStereo</span></div>
   <aside class="notes"><p>The pink map is the whole story of training-free converters: the warp is fine, the holes are the problem, and they sit exactly on the object boundaries.</p><p>Trained converters hide the holes but you inherit whatever disparity the training data had, and you need that data — stereo video in particular is scarce and narrow-baseline (Stereo4D mines VR180 footage for exactly this reason).</p></aside>
+  </div>
 </section>
 
 <!-- ============================================================ 4 RELATED -->
 <section class="slide" data-title="What other methods do">
+  <div class="stage">
   <div class="eyebrow">Related work <span class="n">03</span></div>
   <h2 class="enter">Every existing method <b>consumes a finished image</b> — disparity is either baked into weights or applied to finished pixels.</h2>
   <div class="body">
@@ -140,10 +147,12 @@
   </div>
   <div class="foot"><span class="src">taxonomy from the paper's related-work plan; every baseline in the tables later appears here</span><span>LatentStereo</span></div>
   <aside class="notes"><p>Land the same contrast from three angles: prior work either bakes disparity into weights or operates on a finished generation. We branch a semi-noised trajectory — nothing is committed, disparity stays a knob, the backbone is exchangeable.</p><p>StereoDiffusion is the one to pre-empt: yes it also shifts latents mid-sampling, but as a raw copy — no noise law, holes filled from neighbours, and it realises almost no depth (see the T2I figure later).</p><p>Noise warping (HIWYN / gwtf) is our core tool, but there it warps complete noise across frames for coherence; we warp a semi-noised state across viewpoints, untrained.</p></aside>
+  </div>
 </section>
 
 <!-- ============================================================ 5 KEY OBSERVATION -->
 <section class="slide" data-title="Key observation">
+  <div class="stage">
   <div class="eyebrow">Idea <span class="n">04</span></div>
   <h2 class="enter">One observation: a depth-based warp is <b>far more forgiving midway through denoising</b> than on a finished image.</h2>
   <div class="body cols c-5-7">
@@ -170,10 +179,12 @@
   </div>
   <div class="foot"><span class="src">panels: one FLUX.2 run, t<sub>w</sub> = step 25 of 50 — see figures/method/ASSETS.md</span><span>LatentStereo</span></div>
   <aside class="notes"><p>This is the whole idea in one slide; everything after is mechanics and evidence.</p><p>Emphasise: the fresh noise in the disoccluded cells is not a hole — it is a perfectly valid diffusion state. The model has 25 steps left and does what it always does with noise.</p></aside>
+  </div>
 </section>
 
 <!-- ============================================================ 6 METHOD AT A GLANCE -->
 <section class="slide" data-title="Method at a glance">
+  <div class="stage">
   <div class="eyebrow">Method — overview <span class="n">05</span></div>
   <h2 class="enter">LatentStereo <b>branches a single sampling trajectory</b>. Every component is pretrained and frozen.</h2>
   <div class="body" style="grid-template-rows:minmax(0,1fr) auto">
@@ -187,10 +198,12 @@
   </div>
   <div class="foot"><span class="src">Fig. 2 of the paper — all panels are real intermediates of one FLUX.2 run (t<sub>w</sub> = 25 of 50, d<sub>max</sub> = 24 px). User knobs in amber: t<sub>w</sub>, d<sub>max</sub>, convergence plane.</span><span>LatentStereo</span></div>
   <aside class="notes"><p>Walk the figure left to right: trunk = ordinary sampling; the callout at t_w is the only thing we add; after the fork, two ribbons denoised as one batch. Point at the dashed entry from “existing image / video” — same fork, different way of reaching t_w.</p><p>Three user choices, all at inference: branch step, max disparity, convergence plane.</p></aside>
+  </div>
 </section>
 
 <!-- ============================================================ 7 FLOW MATCHING -->
 <section class="slide" data-title="Background: flow matching">
+  <div class="stage">
   <div class="eyebrow">Background <span class="n">06</span></div>
   <h2 class="enter">The sampler always holds a <b>preview of its finished image</b> — and the preview's layout freezes early.</h2>
   <div class="body cols c-5-7">
@@ -225,10 +238,12 @@
   </div>
   <div class="foot"><span class="src">Eqs. 1–3 and 5 of the paper · trajectory panels: figures/method/traj, the run of Fig. 2</span><span>LatentStereo</span></div>
   <aside class="notes"><p>Drag the slider slowly from 05 to 25: the latent looks like grain the whole way, the preview sharpens, but the DEPTH is essentially final by step 10–15.</p><p>That is the licence to read depth off the preview mid-trajectory and still have half the schedule left.</p></aside>
+  </div>
 </section>
 
 <!-- ============================================================ 8 STEREO GEOMETRY -->
 <section class="slide" data-title="Background: stereo geometry">
+  <div class="stage">
   <div class="eyebrow">Background <span class="n">07</span></div>
   <h2 class="enter">In a rectified pair, depth becomes a <b>horizontal shift</b> — and we make its scale a <span class="k">knob</span>.</h2>
   <div class="body cols c-5-7">
@@ -253,10 +268,12 @@
   </div>
   <div class="foot"><span class="src">Eqs. 6–7 · dial panels: flux_play fox_disp_sweep, red–cyan anaglyphs</span><span>LatentStereo</span></div>
   <aside class="notes"><p>Two conventions to state once: max disparity sits on the nearest content; the convergence plane sits at the far end (everything pops out of the screen rather than into it). Both are knobs.</p><p>Trained converters cannot do this dial at all — StereoSpace's only knob is a baseline in metres spanning what its training data exposed.</p></aside>
+  </div>
 </section>
 
 <!-- ============================================================ 9 GWTF 1 -->
 <section class="slide" data-title="Noise warping I: why not interpolate">
+  <div class="stage">
   <div class="eyebrow">Distribution-preserving noise warping <span class="n">08</span></div>
   <h2 class="enter">Warping noise the ordinary way <b>destroys it</b>: blending neighbours shrinks variance and correlates cells.</h2>
   <div class="body cols c-7-5">
@@ -285,10 +302,12 @@
   </div>
   <div class="foot"><span class="src">interactive: 20×14 synthetic noise field, object displacement 1.5 cells; the operator is Eq. 4 of the paper</span><span>LatentStereo</span></div>
   <aside class="notes"><p>Press replay. Both panels start from the SAME noise and the SAME fractional displacement. Bilinear ends up smooth and grey inside the object (std ~0.7); the routing operator ends up as grainy as it started, with red cells where fresh noise was drawn.</p><p>The point for the audience: this is not cosmetic — a diffusion model fed non-white noise is off-distribution from step one.</p></aside>
+  </div>
 </section>
 
 <!-- ============================================================ 10 GWTF 2 -->
 <section class="slide" data-title="Noise warping II: the operator">
+  <div class="stage">
   <div class="eyebrow">Distribution-preserving noise warping <span class="n">09</span></div>
   <h2 class="enter">Move cells, merge collisions with \(1/\sqrt{k}\), refill holes with fresh draws — and the warped field is <b>again exact white noise</b>.</h2>
   <div class="body cols c-7-5">
@@ -314,10 +333,12 @@
   </div>
   <div class="foot"><span class="src">Eq. 4 and Fig. 3 of the paper · right: figures/gwtf_fig, the run of Fig. 2</span><span>LatentStereo</span></div>
   <aside class="notes"><p>The schematic is one row: three cells stay, two shift by +2, two collide with what was already there (merged, scaled by 1/√2), two vacated cells get fresh draws.</p><p>Why it matters for us specifically comes on the next slides: the latent at t_w is a linear mix of signal and noise, and this operator is linear on occupied cells.</p></aside>
+  </div>
 </section>
 
 <!-- ============================================================ 11 METHOD A -->
 <section class="slide" data-title="Method I: at the branch step">
+  <div class="stage">
   <div class="eyebrow">Method — details <span class="n">10</span></div>
   <h2 class="enter">At \(t_w\) the model <b>reads its own preview</b>: prediction → depth → disparity → integer-cell flow.</h2>
   <div class="body cols c-7-5">
@@ -342,10 +363,12 @@
   </div>
   <div class="foot"><span class="src">Eqs. 5–8 · panels: figures/method (x0_tw, depth_tw, flow_quiver, latent_R_tw_mask)</span><span>LatentStereo</span></div>
   <aside class="notes"><p>Four panels, one arrow each. Note the flow quiver: teal arrows are 2-cell shifts on the man, nothing on the background where 24 px of near disparity rounds to zero far away; red cells are where a destination got no source.</p></aside>
+  </div>
 </section>
 
 <!-- ============================================================ 12 METHOD B -->
 <section class="slide" data-title="Method II: why the latent warp is legitimate">
+  <div class="stage">
   <div class="eyebrow">Method — details <span class="n">11</span></div>
   <h2 class="enter">Why warping a <b>semi-noised</b> latent is legitimate: signal and noise <b>route independently</b>.</h2>
   <div class="body cols c-5-7">
@@ -372,10 +395,12 @@
   </div>
   <div class="foot"><span class="src">Eq. 8 and the linearity argument of Sec. 4.2 · panels: figures/method</span><span>LatentStereo</span></div>
   <aside class="notes"><p>This is the slide a diffusion person will push on. The argument is two lines: the state is linear in (signal, noise); the operator is linear on occupied cells; the noise part is provably still white; the signal part is just shifted. Nothing about the operator knows it is handling an image.</p><p>Bottom-right pair is the payoff: red cells at t_w, background by t=0.</p></aside>
+  </div>
 </section>
 
 <!-- ============================================================ 13 METHOD C -->
 <section class="slide" data-title="Method III: joint denoising">
+  <div class="stage">
   <div class="eyebrow">Method — details <span class="n">12</span></div>
   <h2 class="enter">From \(t_w\) on, both views denoise as <b>one batch</b> — the shared noise realisation locks them together.</h2>
   <div class="body cols c-7-5">
@@ -402,10 +427,12 @@
   </div>
   <div class="foot"><span class="src">Eq. 9 · panels: figures/method (rx0_after / rx0_32 / rx0_joint / rx0_44 / right_final / anaglyph)</span><span>LatentStereo</span></div>
   <aside class="notes"><p>Step 26 is the surprise: one step after the branch, the right preview is already a coherent shifted view — because the signal was transported, only the disoccluded slivers had to be invented.</p></aside>
+  </div>
 </section>
 
 <!-- ============================================================ 14 METHOD D -->
 <section class="slide" data-title="Method IV: mono to stereo">
+  <div class="stage">
   <div class="eyebrow">Method — details <span class="n">13</span></div>
   <h2 class="enter">The same fork <b>converts existing media</b>: only the way the left trajectory reaches \(t_w\) changes.</h2>
   <div class="body cols c-5-7">
@@ -434,10 +461,12 @@
   </div>
   <div class="foot"><span class="src">Eq. 10 · Sec. 4.2 “Mono-to-Stereo” · clips: wan_play (cups), ablation/v2s (Stereo4D 8188)</span><span>LatentStereo</span></div>
   <aside class="notes"><p>The point of this slide is that mono-to-stereo is not a second method: it is the same branch with a different entry. Depth comes from the real input, which is sharper than any preview.</p><p>For video, pinning the left is what makes “source fidelity” exact — every baseline round-trips the clip through its own pipeline (MAD 1.3–4.0 of 255); ours is 0.</p></aside>
+  </div>
 </section>
 
 <!-- ============================================================ 15 CHOOSING t_w -->
 <section class="slide" data-title="Choosing the branch step">
+  <div class="stage">
   <div class="eyebrow">Method — the one hyper-parameter <span class="n">14</span></div>
   <h2 class="enter">Branch with <b>one to two thirds of the schedule remaining</b>: early costs geometry, late costs the synthesized view.</h2>
   <div class="body" style="grid-template-rows:minmax(0,1.1fr) minmax(0,1fr)">
@@ -456,10 +485,12 @@
   </div>
   <div class="foot"><span class="src">Figs. 9–10 of the paper · data: ablation/images/out/eval_metrics/flux_dev_warp_step_ablation</span><span>LatentStereo</span></div>
   <aside class="notes"><p>The curves are paired samples (same 50 prompts at every step), so they are tighter than the bands suggest.</p><p>Read them as two failure modes, one per end: geometry (MEt3R, CLIP-F) punishes early branching; right-view quality (TOPIQ) punishes late branching; iSQoE bottoms out in between.</p></aside>
+  </div>
 </section>
 
 <!-- ============================================================ 16 RESULTS T2I -->
 <section class="slide" data-title="Results: text → stereo image">
+  <div class="stage">
   <div class="eyebrow">Results <span class="n">15</span> · text → stereo image</div>
   <h2 class="enter">On the shared backbone we <b>lead every column</b>; swapping in FLUX.2 [dev] improves every pair metric at once — nothing retrained.</h2>
   <div class="body cols c-5-7">
@@ -485,10 +516,12 @@
   </div>
   <div class="foot"><span class="src">Table 1 and Fig. 4 of the paper</span><span>LatentStereo</span></div>
   <aside class="notes"><p>Pre-empt the TOPIQ question on the FLUX row: it scores the right image alone and moves with content; every SD2 row is anchored to the same rendering, the FLUX row samples its own.</p><p>StereoSpace's 17.33 MEt3R: no depth to lean on and running above its 768 training resolution, its right views drift.</p></aside>
+  </div>
 </section>
 
 <!-- ============================================================ 17 RESULTS I2S -->
 <section class="slide" data-title="Results: image → stereo">
+  <div class="stage">
   <div class="eyebrow">Results <span class="n">16</span> · image → stereo</div>
   <h2 class="enter">Lowest MEt3R of any published method on <b>all four real-world benchmarks</b> — with one fixed disparity and no per-scene calibration.</h2>
   <div class="body cols c-7-5">
@@ -515,10 +548,12 @@
   </div>
   <div class="foot"><span class="src">Table 2 and Fig. 5 of the paper · Lyra not in the figure (separate environment)</span><span>LatentStereo</span></div>
   <aside class="notes"><p>The clearest separation is geometric, and it is on the benchmark designed to break depth warping. Say why: no finished image is ever committed and inpainted; a wrong disparity edge is just a slightly wrong latent.</p><p>Training-free means a stronger backbone substitutes in at zero cost — that is the FLUX row, and no trained baseline can claim it.</p></aside>
+  </div>
 </section>
 
 <!-- ============================================================ 18 RESULTS T2V -->
 <section class="slide" data-title="Results: text → stereo video">
+  <div class="stage">
   <div class="eyebrow">Results <span class="n">17</span> · text → stereo video</div>
   <h2 class="enter">Text → stereo <b>video</b>, in one pass: MEt3R 3.86 vs 5.70 for a stereo LoRA trained on the <i>same</i> backbone.</h2>
   <div class="body cols c-5-7">
@@ -549,10 +584,12 @@
   </div>
   <div class="foot"><span class="src">Table 3 and Fig. 6 of the paper · clips: ablation/videos VBench run, red–cyan anaglyph (hover for L | R or wiggle)</span><span>LatentStereo</span></div>
   <aside class="notes"><p>Let the three clips play for a moment with glasses on; the cyclist is the most legible. Then the table: geometric separation again — a third below StereoWorld, less than half of StereoCrafter.</p><p>Careful claim: VBench dimensions here are computed over ALL prompts, comparable across our rows, not to leaderboard numbers.</p></aside>
+  </div>
 </section>
 
 <!-- ============================================================ 19 RESULTS V2S -->
 <section class="slide" data-title="Results: video → stereo">
+  <div class="stage">
   <div class="eyebrow">Results <span class="n">18</span> · video → stereo, real footage</div>
   <h2 class="enter">On real Stereo4D footage the synthesized eye lands <b>closest to the one the camera actually recorded</b>.</h2>
   <div class="body cols c-5-7">
@@ -573,9 +610,9 @@
     </div>
     <div class="enter figcol">
       <div class="cols c3" style="gap:10px; flex:none">
-        <figure style="margin:0"><div class="imgbox" style="aspect-ratio:1"><video src="assets/video/s4d_8188_left.mp4" muted loop playsinline preload="metadata" poster="assets/video/s4d_8188_poster.jpg"></video></div><figcaption class="cap"><b>input:</b> the recorded left eye</figcaption></figure>
-        <figure style="margin:0"><div class="imgbox" style="aspect-ratio:1; border-color:var(--teal)"><video src="assets/video/s4d_8188_right.mp4" muted loop playsinline preload="metadata"></video></div><figcaption class="cap"><b>ours:</b> the synthesized right eye</figcaption></figure>
-        <figure style="margin:0"><div class="imgbox" style="aspect-ratio:1"><video src="assets/video/s4d_8188_gt_right.mp4" muted loop playsinline preload="metadata"></video></div><figcaption class="cap"><b>reference:</b> the right eye the camera recorded — never seen by any method</figcaption></figure>
+        <figure style="margin:0"><div class="imgbox" style="aspect-ratio:1; max-height:215px; margin:0 auto"><video src="assets/video/s4d_8188_left.mp4" muted loop playsinline preload="metadata" poster="assets/video/s4d_8188_poster.jpg"></video></div><figcaption class="cap" style="text-align:center"><b>input:</b> the recorded left eye</figcaption></figure>
+        <figure style="margin:0"><div class="imgbox" style="aspect-ratio:1; max-height:215px; margin:0 auto; border-color:var(--teal)"><video src="assets/video/s4d_8188_right.mp4" muted loop playsinline preload="metadata"></video></div><figcaption class="cap" style="text-align:center"><b>ours:</b> the synthesized right eye</figcaption></figure>
+        <figure style="margin:0"><div class="imgbox" style="aspect-ratio:1; max-height:215px; margin:0 auto"><video src="assets/video/s4d_8188_gt_right.mp4" muted loop playsinline preload="metadata"></video></div><figcaption class="cap" style="text-align:center"><b>reference:</b> the right eye the camera recorded — never seen by any method</figcaption></figure>
       </div>
       <div class="imgbox fit zoomable" style="background:#fff; padding:8px"><img src="assets/fig/v2s_qual_fig.jpg" alt="video-to-stereo qualitative comparison with the captured eye"></div>
       <p class="cap"><b>A music shop (clip 2610).</b> Rightmost column is the absolute difference from the captured eye — EPE made visible. The near guitar: StereoCrafter and SVG stretch the body and smear the strings, StereoWorld barely separates it from the left, ours re-renders it and lands nearest the capture (mean error 14.4 vs 18.8 / 21.3 / 19.3 levels).</p>
@@ -583,19 +620,23 @@
   </div>
   <div class="foot"><span class="src">Table 4 and Fig. 7 of the paper · clip 8188 from ablation/v2s (left / ours / captured right)</span><span>LatentStereo</span></div>
   <aside class="notes"><p>This is the experiment that removes the “you're scoring against a depth estimate” objection: the reference is a physically captured second eye.</p><p>Read the disparity columns with the realised parallax in mind — StereoCrafter and SVG apply budgets calibrated for wider rigs and overshoot; the unconfounded comparison is StereoWorld, and we beat it while producing more parallax.</p></aside>
+  </div>
 </section>
 
 <!-- ============================================================ 20 GALLERY -->
 <section class="slide" data-title="Gallery: FLUX.2 [dev]">
+  <div class="stage">
   <div class="eyebrow">Gallery <span class="n">19</span> · text → stereo image</div>
   <h2 class="enter">Sixteen scenes from FLUX.2 [dev] at 1024² — <b>one seed, nothing trained</b>. Click any tile.</h2>
   <div class="body"><div class="gallery enter" id="gallery"></div></div>
   <div class="foot"><span class="src">16 of the 50 evaluation prompts at the configuration of Table 1: t<sub>w</sub>=20, d<sub>max</sub>=12 px, seed 42 · ablation/images flux_dev_1024 grid</span><span>LatentStereo</span></div>
   <aside class="notes"><p>Open two or three with the glasses: the spiral staircase and the subway have the deepest layered geometry; the spiderweb macro shows the shallow case.</p></aside>
+  </div>
 </section>
 
 <!-- ============================================================ 21 TAKEAWAYS -->
 <section class="slide" data-title="Takeaways">
+  <div class="stage">
   <div class="eyebrow">Takeaways <span class="n">20</span></div>
   <h2 class="enter"><b>One mechanism, four tasks, five backbones</b> — and disparity stays a knob.</h2>
   <div class="body cols c-7-5">
@@ -614,10 +655,12 @@
   </div>
   <div class="foot"><span class="src">Fig. 1 of the paper</span><span>LatentStereo</span></div>
   <aside class="notes"><p>Close on the two properties no trained converter has: the backbone is exchangeable, and the disparity is a dial.</p><p>Be upfront on the limitations; the cell quantisation one always comes up.</p></aside>
+  </div>
 </section>
 
 <!-- ============================================================ 22 END -->
 <section class="slide title-slide" data-title="Questions">
+  <div class="stage">
   <h1 style="font-size:clamp(40px,6vw,88px)">Questions?</h1>
   <p class="sub">LatentStereo — Latent Diffusion Warping for Text-to-Stereo Generation</p>
   <p class="who">this deck: <span class="mono">www.ibendavid.com/latentstereo</span> &nbsp;·&nbsp; <span class="kbd">G</span> for the contents overview</p>
@@ -625,6 +668,7 @@
     <img src="assets/gallery/spiral_anaglyph.jpg" alt=""><img src="assets/gallery/violin_anaglyph.jpg" alt=""><img src="assets/teaser/wf_viaduct.jpg" alt=""><img src="assets/gallery/marina_anaglyph.jpg" alt=""><img src="assets/gallery/web_anaglyph.jpg" alt="">
   </div>
   <aside class="notes"><p>Likely questions: (1) why not train — because you then inherit a disparity distribution and need stereo data; (2) StereoDiffusion — raw latent copy vs a noise-law-preserving warp, and it realises no depth; (3) few-step samplers — the window is the constraint.</p></aside>
+  </div>
 </section>
 
 </main>

@@ -108,6 +108,17 @@ function openStereo(it) {
   openOverlay(f, cap); buildViewer(f);
 }
 
+/* ------------------------------------------------------------ stage scaling */
+// Every slide is laid out on a fixed 1920x1080 stage (the geometry it was checked at) and
+// scaled uniformly to the viewport, so no screen size or browser chrome can make it overflow.
+function fitStage() {
+  const s = Math.min(window.innerWidth / 1920, window.innerHeight / 1080);
+  document.documentElement.style.setProperty('--s', s.toFixed(4));
+}
+fitStage();
+window.addEventListener('resize', fitStage);
+document.addEventListener('fullscreenchange', fitStage);
+
 /* ------------------------------------------------------------ slide engine */
 let current = 0;
 const rail = $('#rail'), counter = $('#counter'), progress = $('#progress');
