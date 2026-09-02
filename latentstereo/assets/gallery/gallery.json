@@ -1,0 +1,130 @@
+[
+ {
+  "name": "redwood",
+  "prompt": "A cinematic wide shot of a redwood forest at sunrise, three massive trunks filling the near foreground with deeply furrowed bark, shafts of golden light cutting through ground mist between the receding trunks behind them, ferns and fallen needles carpeting the forest floor.",
+  "prompt_idx": 0,
+  "warp_step": 20,
+  "max_disparity": 12.0,
+  "model": "black-forest-labs/FLUX.2-dev"
+ },
+ {
+  "name": "canyon",
+  "prompt": "A desert canyon at golden hour, a foreground boulder of layered red sandstone occupying the lower third, sheer striated walls narrowing into shadow, a bright sliver of sky far above.",
+  "prompt_idx": 4,
+  "warp_step": 20,
+  "max_disparity": 12.0,
+  "model": "black-forest-labs/FLUX.2-dev"
+ },
+ {
+  "name": "sunflower",
+  "prompt": "A field of sunflowers photographed at flower height, the nearest heads huge and out of the frame's top edge, rows converging toward a red barn and a line of poplars on the horizon.",
+  "prompt_idx": 7,
+  "warp_step": 20,
+  "max_disparity": 12.0,
+  "model": "black-forest-labs/FLUX.2-dev"
+ },
+ {
+  "name": "dock",
+  "prompt": "A rowboat tied to a weathered wooden dock on a glassy lake at dawn, the dock planks running away from the camera, reeds in the near foreground, mirror reflections of pine-covered hills across the water.",
+  "prompt_idx": 9,
+  "warp_step": 20,
+  "max_disparity": 12.0,
+  "model": "black-forest-labs/FLUX.2-dev"
+ },
+ {
+  "name": "coral",
+  "prompt": "An underwater view of a coral reef in clear shallow water, a brain coral close to the lens, a school of small silver fish suspended in the middle distance, sunbeams and blue haze fading into the far water.",
+  "prompt_idx": 13,
+  "warp_step": 20,
+  "max_disparity": 12.0,
+  "model": "black-forest-labs/FLUX.2-dev"
+ },
+ {
+  "name": "neon",
+  "prompt": "A rain-soaked city street at night, a wet asphalt foreground mirroring neon signs, a row of parked cars receding, blurred traffic lights and a tangle of overhead wires against dark buildings.",
+  "prompt_idx": 15,
+  "warp_step": 20,
+  "max_disparity": 12.0,
+  "model": "black-forest-labs/FLUX.2-dev"
+ },
+ {
+  "name": "subway",
+  "prompt": "A subway platform with tiled columns receding into the distance, a train emerging from the tunnel mouth at the far end with its headlights flaring, a yellow safety line running along the platform edge.",
+  "prompt_idx": 18,
+  "warp_step": 20,
+  "max_disparity": 12.0,
+  "model": "black-forest-labs/FLUX.2-dev"
+ },
+ {
+  "name": "library",
+  "prompt": "A grand library reading room, a long aisle of tall bookshelves receding into shadow, a wooden ladder in the foreground, dust motes in a shaft of afternoon light from a high arched window.",
+  "prompt_idx": 23,
+  "warp_step": 20,
+  "max_disparity": 12.0,
+  "model": "black-forest-labs/FLUX.2-dev"
+ },
+ {
+  "name": "spiral",
+  "prompt": "A staircase spiraling down a tall lightwell photographed from the top, the wrought-iron banister curving into the foreground, repeating steps and landings shrinking toward a small bright floor far below.",
+  "prompt_idx": 30,
+  "warp_step": 20,
+  "max_disparity": 12.0,
+  "model": "black-forest-labs/FLUX.2-dev"
+ },
+ {
+  "name": "train",
+  "prompt": "A steam locomotive standing at a rural platform, the smokebox and buffers close to the camera, steam drifting across the frame, a signal gantry and curved track receding into the distance.",
+  "prompt_idx": 33,
+  "warp_step": 20,
+  "max_disparity": 12.0,
+  "model": "black-forest-labs/FLUX.2-dev"
+ },
+ {
+  "name": "car",
+  "prompt": "A classic car at a roadside diner at night, chrome bumper and hood ornament reflecting neon in the foreground, the lit diner windows in the midground, a dark highway and telephone poles behind.",
+  "prompt_idx": 35,
+  "warp_step": 20,
+  "max_disparity": 12.0,
+  "model": "black-forest-labs/FLUX.2-dev"
+ },
+ {
+  "name": "marina",
+  "prompt": "A yacht marina at golden hour, a forest of thin masts and rigging lines against the sky, coiled ropes and a cleat on the dock in the immediate foreground, boat hulls receding along the pontoon.",
+  "prompt_idx": 37,
+  "warp_step": 20,
+  "max_disparity": 12.0,
+  "model": "black-forest-labs/FLUX.2-dev"
+ },
+ {
+  "name": "web",
+  "prompt": "A macro shot of a dew-covered spiderweb strung between two stems at dawn, individual droplets on the radial threads, the background a soft wash of out-of-focus meadow and rising sun.",
+  "prompt_idx": 42,
+  "warp_step": 20,
+  "max_disparity": 12.0,
+  "model": "black-forest-labs/FLUX.2-dev"
+ },
+ {
+  "name": "bread",
+  "prompt": "A rustic bakery counter, sourdough loaves and croissants in a glass display case, the glass reflecting overhead lights, a chalkboard menu and shelves of bread behind the counter.",
+  "prompt_idx": 39,
+  "warp_step": 20,
+  "max_disparity": 12.0,
+  "model": "black-forest-labs/FLUX.2-dev"
+ },
+ {
+  "name": "violin",
+  "prompt": "A violinist playing under a single warm spotlight on a dark stage, the scroll and bow angled toward the camera, an empty music stand in the midground, the auditorium falling off into blackness.",
+  "prompt_idx": 46,
+  "warp_step": 20,
+  "max_disparity": 12.0,
+  "model": "black-forest-labs/FLUX.2-dev"
+ },
+ {
+  "name": "campfire",
+  "prompt": "A campfire at night in a pine clearing, sparks and glowing embers close to the camera, two tents lit from within in the midground, silhouetted trees and a dense star field above.",
+  "prompt_idx": 47,
+  "warp_step": 20,
+  "max_disparity": 12.0,
+  "model": "black-forest-labs/FLUX.2-dev"
+ }
+]
