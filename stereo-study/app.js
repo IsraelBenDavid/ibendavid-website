@@ -291,7 +291,7 @@ class StereoViewer {
  *
  * A task may pin its comparisons explicitly (task.comparisons = [{sample, ours,
  * baseline}, ...]) — then every participant answers exactly that fixed set, which is
- * what the 20-comparison study uses, and `ours` may differ per comparison (each one
+ * what the fixed-comparison study uses, and `ours` may differ per comparison (each one
  * names the specific ours cell it was selected with). Otherwise the legacy path is
  * used: all (sample x baseline) pairs, balanced-subsampled down to the task's quota
  * (round-robin across baselines so every baseline keeps equal coverage).
@@ -303,6 +303,7 @@ class StereoViewer {
 function buildTrials(manifest) {
   seedRand("stereo-study|" + (manifest.version || ""));
   const trials = [];
+  let extraOnA = rand() < 0.5;
   for (const task of manifest.tasks) {
     if (!task.samples || task.samples.length === 0) continue;
 
@@ -311,7 +312,17 @@ function buildTrials(manifest) {
       const fixed = task.comparisons
         .map((c) => ({ sample: byId.get(c.sample), ours: c.ours || task.ours, baseline: c.baseline }))
         .filter((c) => c.sample && c.sample.cells[c.ours] && c.sample.cells[c.baseline]);
-      trials.push(...shuffle(fixed.map((c) => makeTrial(task, c.sample, c.ours, c.baseline))));
+      // balanced sides: per baseline, ours is on A in floor(n/2) trials, with the odd
+      // extra alternating across baselines/sections (seeded, same for every participant),
+      // so an A/B position bias cannot load onto one baseline's result
+      for (const b of new Set(fixed.map((c) => c.baseline))) {
+        const L = fixed.filter((c) => c.baseline === b);
+        const nA = (L.length >> 1) + (L.length % 2 && extraOnA ? 1 : 0);
+        if (L.length % 2) extraOnA = !extraOnA;
+        const sides = shuffle(L.map((_, i) => i < nA));
+        L.forEach((c, i) => (c.oursA = sides[i]));
+      }
+      trials.push(...shuffle(fixed.map((c) => makeTrial(task, c.sample, c.ours, c.baseline, c.oursA))));
       continue;
     }
 
@@ -350,8 +361,8 @@ function buildTrials(manifest) {
 }
 
 /** One blinded trial: ours vs one baseline on one sample, sides randomized. */
-function makeTrial(task, sample, ours, baseline) {
-  const oursIsA = rand() < 0.5;
+function makeTrial(task, sample, ours, baseline, oursA) {
+  const oursIsA = typeof oursA === "boolean" ? oursA : rand() < 0.5;
   return {
     task: task.id,
     kind: task.kind,
@@ -538,9 +549,12 @@ async function init() {
   }
 
   $("#study-title").textContent = manifest.title || "Stereo generation user study";
-  const nTasks = manifest.tasks.filter((t) => t.samples.length > 0).length;
+  const liveTasks = manifest.tasks.filter((t) => t.samples.length > 0);
+  const nTasks = liveTasks.length;
+  const kinds = new Set(liveTasks.map((t) => t.kind));
+  const media = kinds.size > 1 ? "stereo images and videos" : kinds.has("image") ? "stereo images" : "stereo videos";
   $("#intro-task-summary").textContent =
-    `${nTasks} short sections (images and videos), about ${manifest.est_minutes || 15} minutes in total.`;
+    `${nTasks} short section${nTasks === 1 ? "" : "s"} of ${media}, about ${manifest.est_minutes || 15} minutes in total.`;
 
   const saved = loadState();
   // a saved session is only resumable against the same manifest: a rebuild changes the
@@ -638,7 +652,7 @@ function updateGlassesNote() {
   const has = state && state.participant.glasses;
   $$(".glasses-note").forEach((el) => {
     el.textContent = has
-      ? "You have red-cyan glasses: Anaglyph 3D is the best way to judge depth. Use the other modes to inspect image quality."
+      ? "You have red-cyan glasses: Anaglyph 3D is the best way to judge depth. Use the other modes to inspect visual quality."
       : "Without red-cyan glasses, Wiggle is the best way to perceive the depth; Side-by-side and Right eye show the raw views.";
   });
 }
