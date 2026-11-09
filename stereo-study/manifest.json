@@ -1,6 +1,6 @@
 {
  "title": "Stereo video user study",
- "version": "2026-11-08 23:00",
+ "version": "2026-11-09 20:04",
  "est_minutes": 13,
  "practice": {
   "kind": "video",
@@ -27,7 +27,7 @@
      "id": "s_p011",
      "context": "A potter's wheel with wet clay turning, the potter's hands above it, shelves of bisque ware in the background. Static camera.",
      "cells": {
-      "ours_wan21_t2s@b20": "media/t2s/s_p011/cfb7e6ca7b47.mp4",
+      "ours_wan21_t2s@b16": "media/t2s/s_p011/ed1cb2498c37.mp4",
       "ds_wan": "media/t2s/s_p011/cb5d4fafc935.mp4"
      }
     },
@@ -35,7 +35,7 @@
      "id": "m_p035",
      "context": "The camera rises slowly above a koi pond. Koi rising and turning in the water close to the lens, a wooden bridge and garden behind. The camera keeps rising, revealing the garden.",
      "cells": {
-      "ours_wan21_t2s@b24": "media/t2s/m_p035/95c772e8f275.mp4",
+      "ours_wan21_t2s@b16": "media/t2s/m_p035/a17088e8f1c7.mp4",
       "ds_wan": "media/t2s/m_p035/bb248834f3bb.mp4"
      }
     },
@@ -43,7 +43,7 @@
      "id": "m_p031",
      "context": "The camera orbits around. A rope bridge's first planks filling the foreground, the span sagging away across a gorge, far cliffs in haze, the camera circles around.",
      "cells": {
-      "ours_wan21_t2s@b30": "media/t2s/m_p031/1d67e4958282.mp4",
+      "ours_wan21_t2s@b16": "media/t2s/m_p031/cb6f4fdf1a9d.mp4",
       "ds_wan": "media/t2s/m_p031/8d9c87efa554.mp4"
      }
     },
@@ -59,7 +59,7 @@
      "id": "m_p041",
      "context": "The camera slowly pans to the right. A rock pool with anemones filling the near frame, wet boulders behind, the sea and horizon far off. The camera keeps panning slowly to the right.",
      "cells": {
-      "ours_wan21_t2s@b20": "media/t2s/m_p041/bbca2ccea272.mp4",
+      "ours_wan21_t2s@b16": "media/t2s/m_p041/5a6183763744.mp4",
       "svg": "media/t2s/m_p041/e051a0780c7d.mp4"
      }
     },
@@ -67,7 +67,7 @@
      "id": "m_p013",
      "context": "The camera slowly orbits around the fern. A fern uncurling in the near foreground of a rainforest floor, layered trunks behind it, mist between them. The camera circles around the fern.",
      "cells": {
-      "ours_wan21_t2s@b24": "media/t2s/m_p013/d260f3aa5544.mp4",
+      "ours_wan21_t2s@b16": "media/t2s/m_p013/5ce6babbb5d2.mp4",
       "svg": "media/t2s/m_p013/0a750651b7da.mp4"
      }
     },
@@ -75,7 +75,7 @@
      "id": "s_p009",
      "context": "A harbour bollard with looped rope in the near frame, fishing boats rocking at their moorings behind, a breakwater on the horizon. Static camera.",
      "cells": {
-      "ours_wan21_t2s@b20": "media/t2s/s_p009/a94f82a5bbc0.mp4",
+      "ours_wan21_t2s@b16": "media/t2s/s_p009/a6d41d8762c2.mp4",
       "stereocrafter": "media/t2s/s_p009/6b97f5d62337.mp4"
      }
     },
@@ -83,7 +83,7 @@
      "id": "s_p010",
      "context": "A cat asleep on a windowsill in close view, lace curtain moving faintly, a snowy street two storeys below. Static camera.",
      "cells": {
-      "ours_wan21_t2s@b24": "media/t2s/s_p010/3775f8dca314.mp4",
+      "ours_wan21_t2s@b16": "media/t2s/s_p010/104bdd04cb6f.mp4",
       "stereocrafter": "media/t2s/s_p010/957475f6b7d0.mp4"
      }
     },
@@ -91,7 +91,7 @@
      "id": "m_p018",
      "context": "As the camera moves forward, a wooden rowboat drawn up on shingle in the foreground, gentle surf behind it, a rocky headland far off. The camera keeps moving forward.",
      "cells": {
-      "ours_wan21_t2s@b30": "media/t2s/m_p018/4ccd7110dd50.mp4",
+      "ours_wan21_t2s@b16": "media/t2s/m_p018/305d53da95a3.mp4",
       "stereocrafter": "media/t2s/m_p018/efdef2a8d306.mp4"
      }
     },
@@ -123,17 +123,17 @@
    "comparisons": [
     {
      "sample": "s_p011",
-     "ours": "ours_wan21_t2s@b20",
+     "ours": "ours_wan21_t2s@b16",
      "baseline": "ds_wan"
     },
     {
      "sample": "m_p035",
-     "ours": "ours_wan21_t2s@b24",
+     "ours": "ours_wan21_t2s@b16",
      "baseline": "ds_wan"
     },
     {
      "sample": "m_p031",
-     "ours": "ours_wan21_t2s@b30",
+     "ours": "ours_wan21_t2s@b16",
      "baseline": "ds_wan"
     },
     {
@@ -143,27 +143,27 @@
     },
     {
      "sample": "m_p041",
-     "ours": "ours_wan21_t2s@b20",
+     "ours": "ours_wan21_t2s@b16",
      "baseline": "svg"
     },
     {
      "sample": "m_p013",
-     "ours": "ours_wan21_t2s@b24",
+     "ours": "ours_wan21_t2s@b16",
      "baseline": "svg"
     },
     {
      "sample": "s_p009",
-     "ours": "ours_wan21_t2s@b20",
+     "ours": "ours_wan21_t2s@b16",
      "baseline": "stereocrafter"
     },
     {
      "sample": "s_p010",
-     "ours": "ours_wan21_t2s@b24",
+     "ours": "ours_wan21_t2s@b16",
      "baseline": "stereocrafter"
     },
     {
      "sample": "m_p018",
-     "ours": "ours_wan21_t2s@b30",
+     "ours": "ours_wan21_t2s@b16",
      "baseline": "stereocrafter"
     },
     {
@@ -203,7 +203,7 @@
      "id": "5468",
      "context": "A man in a red jacket on a floating reed island.",
      "cells": {
-      "ours_wan21_v2s@b20": "media/v2s/5468/5665ec71de4c.mp4",
+      "ours_wan21_v2s@b16": "media/v2s/5468/4334513a42cf.mp4",
       "ds_wan": "media/v2s/5468/228d3cb815ef.mp4"
      }
     },
@@ -211,7 +211,7 @@
      "id": "5258",
      "context": "A waterfront walkway with a glass railing over clear water.",
      "cells": {
-      "ours_wan21_v2s@b24": "media/v2s/5258/b91589029666.mp4",
+      "ours_wan21_v2s@b16": "media/v2s/5258/63f90977b5d3.mp4",
       "ds_wan": "media/v2s/5258/058b74057256.mp4"
      }
     },
@@ -219,7 +219,7 @@
      "id": "3970",
      "context": "A crowd around a lit Christmas tree at night.",
      "cells": {
-      "ours_wan21_v2s@b30": "media/v2s/3970/314f8e8247e8.mp4",
+      "ours_wan21_v2s@b16": "media/v2s/3970/f1d883ee95df.mp4",
       "ds_wan": "media/v2s/3970/df7d9dc71ac4.mp4"
      }
     },
@@ -227,7 +227,7 @@
      "id": "2768",
      "context": "People walking past a signpost in a garden, a large silver sphere behind.",
      "cells": {
-      "ours_wan21_v2s@b20": "media/v2s/2768/8511240c4251.mp4",
+      "ours_wan21_v2s@b16": "media/v2s/2768/1ff2b971fb96.mp4",
       "svg": "media/v2s/2768/96d488f360f4.mp4"
      }
     },
@@ -235,7 +235,7 @@
      "id": "6622",
      "context": "People walking down a busy city street.",
      "cells": {
-      "ours_wan21_v2s@b24": "media/v2s/6622/691d0af5fac3.mp4",
+      "ours_wan21_v2s@b16": "media/v2s/6622/22e83af46493.mp4",
       "svg": "media/v2s/6622/c528963ffa4e.mp4"
      }
     },
@@ -243,7 +243,7 @@
      "id": "6097",
      "context": "A night garden of light installations, people filming with their phones.",
      "cells": {
-      "ours_wan21_v2s@b30": "media/v2s/6097/a6882982f9ac.mp4",
+      "ours_wan21_v2s@b16": "media/v2s/6097/b2f8e2ba5238.mp4",
       "svg": "media/v2s/6097/c2c1892407dc.mp4"
      }
     },
@@ -259,7 +259,7 @@
      "id": "6530",
      "context": "Close-up of a rusty tugboat with a tyre fender.",
      "cells": {
-      "ours_wan21_v2s@b24": "media/v2s/6530/f5be2c66d957.mp4",
+      "ours_wan21_v2s@b16": "media/v2s/6530/581fcf488fae.mp4",
       "stereocrafter": "media/v2s/6530/a1aad35f8a44.mp4"
      }
     },
@@ -267,7 +267,7 @@
      "id": "5571",
      "context": "A waterfall pouring into a teal pool between boulders.",
      "cells": {
-      "ours_wan21_v2s@b30": "media/v2s/5571/5bff99a4b2e5.mp4",
+      "ours_wan21_v2s@b16": "media/v2s/5571/dbffdc4bf29f.mp4",
       "stereocrafter": "media/v2s/5571/d81cb8237b85.mp4"
      }
     },
@@ -299,32 +299,32 @@
    "comparisons": [
     {
      "sample": "5468",
-     "ours": "ours_wan21_v2s@b20",
+     "ours": "ours_wan21_v2s@b16",
      "baseline": "ds_wan"
     },
     {
      "sample": "5258",
-     "ours": "ours_wan21_v2s@b24",
+     "ours": "ours_wan21_v2s@b16",
      "baseline": "ds_wan"
     },
     {
      "sample": "3970",
-     "ours": "ours_wan21_v2s@b30",
+     "ours": "ours_wan21_v2s@b16",
      "baseline": "ds_wan"
     },
     {
      "sample": "2768",
-     "ours": "ours_wan21_v2s@b20",
+     "ours": "ours_wan21_v2s@b16",
      "baseline": "svg"
     },
     {
      "sample": "6622",
-     "ours": "ours_wan21_v2s@b24",
+     "ours": "ours_wan21_v2s@b16",
      "baseline": "svg"
     },
     {
      "sample": "6097",
-     "ours": "ours_wan21_v2s@b30",
+     "ours": "ours_wan21_v2s@b16",
      "baseline": "svg"
     },
     {
@@ -334,12 +334,12 @@
     },
     {
      "sample": "6530",
-     "ours": "ours_wan21_v2s@b24",
+     "ours": "ours_wan21_v2s@b16",
      "baseline": "stereocrafter"
     },
     {
      "sample": "5571",
-     "ours": "ours_wan21_v2s@b30",
+     "ours": "ours_wan21_v2s@b16",
      "baseline": "stereocrafter"
     },
     {
