@@ -1,0 +1,562 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- ======================================================================================================
+     PAGE CONFIG: everything an author fills in lives in this one block (see README.md).
+     Empty strings are placeholders. With draft: true the page shows them as dashed placeholders and names the
+     media file each empty video slot expects; set draft: false before publishing.
+     Media files go in media/<section>/ and are found by id (README.md lists every expected filename).
+     ====================================================================================================== -->
+<script>
+window.SG_CONFIG = {
+  draft: true,
+
+  authors: [
+    // { name: "First Last", url: "https://...", affil: [1, 2], mark: "*" }
+    { name: "", url: "", affil: [1] },
+    { name: "", url: "", affil: [1] },
+    { name: "", url: "", affil: [2] },
+    { name: "", url: "", affil: [1] }
+  ],
+  affiliations: ["", ""],            // index 0 is affiliation 1
+  authorNotes: "",                   // e.g. "* Equal contribution"
+  venue: "",                         // venue / date line, e.g. "arXiv 2026"; empty hides it once draft is false
+
+  links: {                           // empty url -> the button is shown disabled
+    paper: "",                       // PDF
+    arxiv: "",
+    code: "",                        // GitHub repository
+    supplementary: ""
+  },
+
+  bibtex:
+"@article{stereograft,\n" +
+"  title   = {StereoGraft: Training-Free Text-To-Stereo Video Generation Via Stereo Branching},\n" +
+"  author  = {Author, First and Author, Second and Author, Third and Author, Fourth},\n" +
+"  journal = {arXiv preprint arXiv:XXXX.XXXXX},\n" +
+"  year    = {XXXX}\n" +
+"}",
+
+  acknowledgements: "",
+
+  // ---- videos -------------------------------------------------------------------------------------
+  // Each slot plays media/<section>/<id>_anaglyph.mp4 or <id>_sbs.mp4 (posters <id>_anaglyph.jpg / <id>_sbs.jpg).
+  // ar = width / height of ONE view (the anaglyph); it is corrected automatically once a file loads.
+  posterExt: "jpg",
+  teaser: { id: "teaser", ar: 16 / 9, caption: "" },
+
+  t2s: [
+    { id: "wan21_720p_1",  backbone: "wan21", res: "720p",  ar: 16 / 9, prompt: "" },
+    { id: "wan21_720p_2",  backbone: "wan21", res: "720p",  ar: 16 / 9, prompt: "" },
+    { id: "wan21_720p_3",  backbone: "wan21", res: "720p",  ar: 16 / 9, prompt: "" },
+    { id: "wan21_720p_4",  backbone: "wan21", res: "720p",  ar: 16 / 9, prompt: "" },
+    { id: "wan21_1080p_1", backbone: "wan21", res: "1080p", ar: 16 / 9, prompt: "" },
+    { id: "wan21_1080p_2", backbone: "wan21", res: "1080p", ar: 16 / 9, prompt: "" },
+    { id: "wan21_1080p_3", backbone: "wan21", res: "1080p", ar: 16 / 9, prompt: "" },
+    { id: "wan21_1080p_4", backbone: "wan21", res: "1080p", ar: 16 / 9, prompt: "" },
+    { id: "ltx23_720p_1",  backbone: "ltx23", res: "720p",  ar: 16 / 9, prompt: "" },
+    { id: "ltx23_720p_2",  backbone: "ltx23", res: "720p",  ar: 16 / 9, prompt: "" },
+    { id: "ltx23_720p_3",  backbone: "ltx23", res: "720p",  ar: 16 / 9, prompt: "" },
+    { id: "ltx23_720p_4",  backbone: "ltx23", res: "720p",  ar: 16 / 9, prompt: "" },
+    { id: "ltx23_1080p_1", backbone: "ltx23", res: "1080p", ar: 16 / 9, prompt: "" },
+    { id: "ltx23_1080p_2", backbone: "ltx23", res: "1080p", ar: 16 / 9, prompt: "" },
+    { id: "ltx23_1080p_3", backbone: "ltx23", res: "1080p", ar: 16 / 9, prompt: "" },
+    { id: "ltx23_1080p_4", backbone: "ltx23", res: "1080p", ar: 16 / 9, prompt: "" }
+  ],
+
+  v2s: [
+    { id: "wan21_1", backbone: "wan21", res: "720p", ar: 16 / 9, source: "" },
+    { id: "wan21_2", backbone: "wan21", res: "720p", ar: 16 / 9, source: "" },
+    { id: "wan21_3", backbone: "wan21", res: "720p", ar: 16 / 9, source: "" },
+    { id: "wan21_4", backbone: "wan21", res: "720p", ar: 16 / 9, source: "" },
+    { id: "ltx23_1", backbone: "ltx23", res: "720p", ar: 16 / 9, source: "" },
+    { id: "ltx23_2", backbone: "ltx23", res: "720p", ar: 16 / 9, source: "" },
+    { id: "ltx23_3", backbone: "ltx23", res: "720p", ar: 16 / 9, source: "" },
+    { id: "ltx23_4", backbone: "ltx23", res: "720p", ar: 16 / 9, source: "" }
+  ],
+
+  // Comparisons: media/compare/<id>/<method>_anaglyph.mp4 and <method>_sbs.mp4 for every method listed.
+  comparisonMethods: [
+    { slug: "dissolvestereo", name: "DissolveStereo†" },
+    { slug: "svg",            name: "SVG" },
+    { slug: "stereocrafter",  name: "StereoCrafter" },
+    { slug: "stereoworld",    name: "StereoWorld" }
+  ],
+  comparisons: [
+    { id: "t2s_1", task: "Text-to-stereo", backbone: "wan21", ar: 16 / 9, text: "" },
+    { id: "v2s_1", task: "Video-to-stereo", backbone: "wan21", ar: 16 / 9, text: "" }
+  ]
+};
+</script>
+
+<script>
+(function () {
+  var r = document.documentElement, t = null, v = null;
+  try { t = window.localStorage.getItem("sg-theme"); v = window.localStorage.getItem("sg-view"); } catch (e) {}
+  r.setAttribute("data-theme", t === "dark" ? "dark" : "light");
+  r.setAttribute("data-view", v === "sbs" ? "sbs" : "ana");
+})();
+</script>
+
+<title>StereoGraft: Training-Free Text-To-Stereo Video Generation Via Stereo Branching</title>
+<meta name="description" content="StereoGraft turns a frozen text-to-video model into a stereo video generator by branching the right view from the left view's sampling trajectory, without training.">
+<meta name="keywords" content="StereoGraft, stereo video generation, text-to-stereo, video-to-stereo, training-free, video diffusion, flow matching, donor chain, Wan 2.1, LTX-2.3">
+<link rel="canonical" href="https://www.ibendavid.com/stereograft/">
+<link rel="icon" href="static/images/favicon.svg" type="image/svg+xml">
+
+<meta property="og:type" content="website">
+<meta property="og:title" content="StereoGraft: Training-Free Text-To-Stereo Video Generation Via Stereo Branching">
+<meta property="og:description" content="A frozen video generator samples the left view; the right view branches from its sampling trajectory, without training.">
+<meta property="og:url" content="https://www.ibendavid.com/stereograft/">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="StereoGraft: Training-Free Text-To-Stereo Video Generation Via Stereo Branching">
+<meta name="twitter:description" content="A frozen video generator samples the left view; the right view branches from its sampling trajectory, without training.">
+<!-- PLACEHOLDER (fill before publishing): a 1200x630 social card, then uncomment.
+<meta property="og:image" content="https://www.ibendavid.com/stereograft/static/images/social-card.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:image" content="https://www.ibendavid.com/stereograft/static/images/social-card.jpg">
+-->
+<!-- PLACEHOLDER (fill once the arXiv entry exists, then uncomment): Google Scholar / Highwire tags.
+<meta name="citation_title" content="StereoGraft: Training-Free Text-To-Stereo Video Generation Via Stereo Branching">
+<meta name="citation_author" content="Last, First">
+<meta name="citation_publication_date" content="YYYY/MM/DD">
+<meta name="citation_arxiv_id" content="XXXX.XXXXX">
+<meta name="citation_pdf_url" content="https://arxiv.org/pdf/XXXX.XXXXX">
+<meta name="citation_abstract_html_url" content="https://www.ibendavid.com/stereograft/">
+-->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@450;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="static/css/index.css?v=1">
+<script defer src="static/js/util.js?v=1"></script>
+<script defer src="static/js/site.js?v=1"></script>
+<script defer src="static/js/traj.js?v=1"></script>
+<script defer src="static/js/pipeline.js?v=1"></script>
+<script defer src="static/js/warp.js?v=1"></script>
+<script defer src="static/js/donor.js?v=1"></script>
+<script defer src="static/js/padding.js?v=1"></script>
+<script defer src="static/js/v2s.js?v=1"></script>
+</head>
+<body>
+
+<header class="topbar" id="topbar" aria-label="Page navigation">
+  <div class="topbar-in">
+    <a class="home" href="#top">StereoGraft</a>
+    <nav class="topnav" aria-label="Sections">
+      <a href="#method">Method</a>
+      <a href="#t2s">Text-to-stereo</a>
+      <a href="#v2s">Video-to-stereo</a>
+      <a href="#compare">Comparisons</a>
+      <a href="#bibtex">BibTeX</a>
+    </nav>
+    <div class="seg" role="group" aria-label="View of every video on the page">
+      <span class="seg-label">View</span>
+      <button type="button" data-view="ana">Anaglyph</button>
+      <button type="button" data-view="sbs">Side by side</button>
+    </div>
+    <button type="button" class="theme-btn" aria-label="Switch to dark mode">
+      <svg class="i-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4 8 8 0 1 0 20 14.5z"/></svg>
+      <svg class="i-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+    </button>
+  </div>
+</header>
+
+<div class="intro" id="top">
+  <header class="site-header">
+    <button type="button" class="theme-btn" aria-label="Switch to dark mode">
+      <svg class="i-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4 8 8 0 1 0 20 14.5z"/></svg>
+      <svg class="i-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+    </button>
+    <div class="wrap">
+      <h1>StereoGraft: Training-Free Text-To-Stereo Video Generation Via Stereo Branching</h1>
+      <p class="authors" id="authors"></p>
+      <p class="affiliations" id="affiliations"></p>
+      <p class="author-notes" id="author-notes" hidden></p>
+      <p class="venue" id="venue" hidden></p>
+      <div class="links" id="links">
+        <a class="btn" data-link="paper" href="#">
+          <svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 2h8l4 4v16H6zM14 2v5h5M9 13h6M9 17h6"/></svg>
+          Paper
+        </a>
+        <a class="btn" data-link="arxiv" href="#">
+          <svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 5h5v5M19 5l-8 8M10 5H6v14h14v-4"/></svg>
+          arXiv
+        </a>
+        <a class="btn" data-link="code" href="#">
+          <svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 7-5 5 5 5M15 7l5 5-5 5M13 4l-2 16"/></svg>
+          Code
+        </a>
+        <a class="btn" data-link="supplementary" href="#">
+          <svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7.5 12 3l9 4.5-9 4.5zM3 12l9 4.5 9-4.5M3 16.5 12 21l9-4.5"/></svg>
+          Supplementary
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <section class="hero-stage" aria-label="Teaser">
+    <div class="wrap">
+      <div class="hero-teaser" id="teaser-slot"></div>
+      <p class="tldr">We turn a frozen text-to-video model into a stereo video generator by branching the right view from the left view's sampling trajectory.</p>
+      <details class="hero-abstract">
+        <summary>Abstract</summary>
+        <p>
+          Stereoscopic video generation requires two views that agree on shared surfaces while coherently synthesizing regions visible
+          to only one eye. We present StereoGraft, a training-free method that turns frozen text-to-video models into controllable stereo
+          video generators. Our key observation is that depth estimated from intermediate video predictions stabilizes early in sampling,
+          before fine appearance details emerge. This enables us to branch a right view from the left view's ongoing sampling trajectory
+          through depth-guided latent warping, leaving most sampling steps available to synthesize newly visible regions. To maintain
+          agreement as both views develop, we introduce a donor chain: periodic refreshes align shared surfaces with the evolving left view
+          while preserving the right branch's own predictions in disoccluded regions. This mechanism supports concurrent sampling without
+          modifying the generator's weights or architecture. The same approach converts existing videos to stereo through inversion, with
+          direct control over stereo separation in both tasks. Experiments on Wan 2.1 and LTX-2.3 demonstrate the method's applicability
+          across video backbones. On Wan 2.1, StereoGraft achieves the best stereo-quality and right-view image-quality scores among the
+          evaluated methods at all four tested disparity settings in both tasks. Compared with the closest training-free baseline, it
+          reduces multi-view inconsistency by 18&ndash;22% in real-video conversion, and generates stereo videos from text in less than half
+          the time.
+        </p>
+      </details>
+    </div>
+  </section>
+</div>
+
+<main>
+
+<!-- 1. key observation ------------------------------------------------------------------------------ -->
+<section class="story split" id="observation">
+  <div class="wrap-wide">
+    <div class="story-head">
+      <p class="kicker">Key observation</p>
+      <h2>Depth settles long before appearance.</h2>
+      <p class="lead">At every step, the model also predicts the clean video. The depth of that prediction stabilizes after a small fraction of the steps.</p>
+      <p class="badge">Median correlation 0.88 after 10% of the steps</p>
+    </div>
+    <figure class="story-fig" id="traj">
+      <div class="traj-pair">
+        <figure class="pane">
+          <p class="vis-label">Clean prediction <span class="nt">D(<i class="m">L&#770;</i>)</span></p>
+          <div class="pane-img"><img id="traj-x0" alt="Decoded clean prediction of the left view at the selected step." width="624" height="360"><span class="tag" id="traj-tag"></span></div>
+        </figure>
+        <figure class="pane">
+          <p class="vis-label">Its depth <span class="nt">(bright = near)</span></p>
+          <div class="pane-img"><img id="traj-z" alt="Estimated inverse depth of the clean prediction at the selected step." width="624" height="360"></div>
+        </figure>
+      </div>
+      <div class="traj-plot">
+        <p class="vis-label">Correlation with the final depth <span class="nt">(median over 50 videos)</span></p>
+        <canvas id="traj-canvas" width="900" height="200" role="slider" tabindex="0" aria-valuemin="0" aria-valuemax="49" aria-valuenow="10"
+          aria-label="Sampling step. Drag or use the arrow keys to see the clean prediction and its depth at that step."></canvas>
+        <p class="readout" id="traj-readout" aria-live="polite"></p>
+      </div>
+      <figcaption>Wan 2.1, an artist's studio with a jar of brushes close to the camera. Depth by Depth Anything 3. Orange triangles mark the four warp steps. Drag along the curve.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- 2. pipeline explorer ---------------------------------------------------------------------------- -->
+<section class="story full" id="method">
+  <div class="wrap-wide">
+    <div class="story-head">
+      <p class="kicker">Method</p>
+      <h2>Branch the right view from the left view's trajectory.</h2>
+      <p class="lead">The left view is sampled as an ordinary video. After step <i class="m">r</i><sub>0</sub>, its noisy latent is warped by depth to start the right view, and after <i class="m">r</i><sub>1</sub>, &hellip;, <i class="m">r<sub>m</sub></i> the right view is refreshed. Both views are sampled side by side by the same frozen model.</p>
+    </div>
+    <figure class="story-fig anim-stage tall" id="pipe">
+      <button class="anim-replay" type="button" id="pipe-replay" aria-label="Replay the sampling walkthrough">&#8635; Replay</button>
+      <p class="anim-status" id="pipe-status" aria-live="polite">The left view starts from noise.</p>
+      <div class="pipe-time">
+        <canvas id="pipe-canvas" width="1200" height="170" role="slider" tabindex="0" aria-valuemin="0" aria-valuemax="49" aria-valuenow="0"
+          aria-label="Sampling step of the left and right views. Drag, or use the arrow keys; Page Up and Page Down jump between warp steps."></canvas>
+      </div>
+      <div class="pipe-grid">
+        <div class="pipe-rowlabel"><p class="vis-label">At this step</p></div>
+        <figure class="pane">
+          <p class="vis-label"><span class="l">Left view</span> <span class="nt">D(<i class="m">L&#770;</i>)</span></p>
+          <div class="pane-img"><img id="pipe-L" alt="Left view: decoded clean prediction at the selected step." width="624" height="360"></div>
+        </figure>
+        <figure class="pane" id="pipe-R-pane">
+          <p class="vis-label"><span class="r">Right view</span> <span class="nt" id="pipe-R-sym">D(<i class="m">R&#770;</i>)</span></p>
+          <div class="pane-img"><img id="pipe-R" alt="Right view: decoded clean prediction at the selected step." width="624" height="360"><div class="empty" id="pipe-R-empty">Not branched yet</div></div>
+        </figure>
+        <figure class="pane" id="pipe-A-pane">
+          <p class="vis-label">Anaglyph <span class="nt">(red = left, cyan = right)</span></p>
+          <div class="pane-img"><img id="pipe-A" alt="Red-cyan anaglyph of the two clean predictions." width="624" height="360"><div class="empty" id="pipe-A-empty">Not branched yet</div></div>
+        </figure>
+      </div>
+      <div class="pipe-grid" id="pipe-warp">
+        <div class="pipe-rowlabel"><p class="vis-label" id="pipe-warp-label">Depth-guided warp</p><span class="hint" id="pipe-warp-hint"></span></div>
+        <figure class="pane">
+          <p class="vis-label">Inverse depth <i class="m">z</i></p>
+          <div class="pane-img"><img id="pipe-z" alt="Inverse depth estimated from the left view's clean prediction at the latest warp." width="624" height="360"><div class="empty" id="pipe-z-empty">Estimated at each warp</div></div>
+        </figure>
+        <figure class="pane">
+          <p class="vis-label">Cell shifts <i class="m">w</i>(<i class="m">p</i>)</p>
+          <div class="pane-img"><img id="pipe-w" alt="Shift of every latent cell in whole cells, from 0 (far) to 4 (near)." width="624" height="360"><div class="empty" id="pipe-w-empty">0 to 4 cells</div></div>
+        </figure>
+        <figure class="pane">
+          <p class="vis-label"><i class="m">S</i>[<i class="m">L&#770;</i>] and holes <i class="m">H</i></p>
+          <div class="pane-img"><img id="pipe-S" alt="Left clean prediction shifted cell by cell, with the holes in yellow and the padding cells in cyan." width="624" height="360"><div class="empty" id="pipe-S-empty">Holes appear at the branch</div></div>
+        </figure>
+      </div>
+      <ul class="legend" aria-label="Legend">
+        <li><span class="sw sw-warp"></span>warp step</li>
+        <li><span class="sw sw-left"></span>left view <i class="m">L</i></li>
+        <li><span class="sw sw-right"></span>right view <i class="m">R</i></li>
+        <li><span class="sw sw-ramp"></span>far to near</li>
+        <li><span class="sw sw-hole"></span>hole <i class="m">H</i></li>
+        <li><span class="sw sw-pad"></span>padding, <i class="m">P</i> = 1</li>
+      </ul>
+      <div class="transport" role="group" aria-label="Walkthrough playback">
+        <button type="button" id="pipe-prev" aria-label="Previous step"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 4v12M16 4.5 7.5 10l8.5 5.5z"/></svg></button>
+        <button type="button" id="pipe-play" aria-label="Pause" data-state="playing">
+          <svg class="i-play" viewBox="0 0 20 20" aria-hidden="true"><path d="m6.5 4.5 9 5.5-9 5.5z"/></svg>
+          <svg class="i-pause" viewBox="0 0 20 20" aria-hidden="true"><path d="M6.5 4.5v11M13.5 4.5v11"/></svg>
+        </button>
+        <button type="button" id="pipe-next" aria-label="Next step"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M16 4v12M4 4.5l8.5 5.5L4 15.5z"/></svg></button>
+      </div>
+      <figcaption>Wan 2.1 text-to-stereo, frame 40 of 81. <i class="m">d</i><sub>max</sub> = 32 px, warps after steps 5, 10, 15 and 20 of 50, padding <i class="m">P</i> = 1. Drag the timeline; Page Up and Page Down jump between warps.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- 3. depth-guided warp (live) --------------------------------------------------------------------- -->
+<section class="story split" id="warp">
+  <div class="wrap-wide">
+    <div class="story-head">
+      <p class="kicker">Depth-guided warp</p>
+      <h2>Each latent cell moves by its disparity.</h2>
+      <p class="lead">The farthest surface gets zero disparity and the nearest gets <i class="m">d</i><sub>max</sub>. A cell moves round(<i class="m">&delta;</i>/<i class="m">s</i>) whole cells to the left, the nearest surface wins collisions, and cells nothing lands on are the holes.</p>
+      <p class="badge">Cells of 8 px on Wan 2.1, 32 px on LTX-2.3</p>
+    </div>
+    <figure class="story-fig warp-wrap">
+      <div class="picker" role="group" aria-label="Choose the map to show" id="warp-pills" style="margin:0 0 10px">
+        <button type="button" data-show="x0" aria-pressed="false">D(<i class="m">L&#770;</i>)</button>
+        <button type="button" data-show="z" aria-pressed="false">Inverse depth <i class="m">z</i></button>
+        <button type="button" data-show="w" aria-pressed="false">Shifts <i class="m">w</i>(<i class="m">p</i>)</button>
+        <button type="button" data-show="S" aria-pressed="true"><i class="m">S</i>[<i class="m">L&#770;</i>] and <i class="m">H</i></button>
+      </div>
+      <div class="pane"><div class="pane-img"><canvas id="warp-canvas" width="1248" height="720" aria-label="The left clean prediction at the branch step, warped live with the chosen maximum disparity and cell size."></canvas></div></div>
+      <div class="warp-controls">
+        <label class="range" for="warp-dmax"><span class="lab"><i class="m">d</i><sub>max</sub></span>
+          <input type="range" id="warp-dmax" min="0" max="96" step="1" value="32">
+          <output id="warp-dmax-out" for="warp-dmax">32 px</output></label>
+        <div class="picker" role="group" aria-label="Latent cell size" id="warp-cells" style="margin:0">
+          <span>Cell size <i class="m">s</i></span>
+          <button type="button" data-s="8" aria-pressed="true">8 px</button>
+          <button type="button" data-s="32" aria-pressed="false">32 px</button>
+        </div>
+      </div>
+      <p class="picker-status" id="warp-status" aria-live="polite"></p>
+      <figcaption>The branch step of the run above (step 5 of 50, frame 40). Shifts are recomputed in your browser from its depth map; 32 px cells show how an LTX-2.3-sized grid quantizes the same scene.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- 4. donor chain (schematic) ---------------------------------------------------------------------- -->
+<section class="story split" id="donor">
+  <div class="wrap-wide">
+    <div class="story-head">
+      <p class="kicker">Donor chain</p>
+      <h2>Refresh the shared surfaces. Keep the right view's own holes.</h2>
+      <p class="lead">At each refresh, depth is re-estimated and the warped left latent is copied again onto every covered cell. In the holes, the right view's own clean prediction <i class="m">R&#770;</i> is re-noised to the current level, so the right view donates what it has generated there.</p>
+    </div>
+    <figure class="story-fig anim-stage tall" id="donor-fig">
+      <button class="anim-replay" type="button" id="donor-replay" aria-label="Replay the donor chain animation">&#8635; Replay</button>
+      <p class="anim-status" id="donor-status" aria-live="polite">The left latent L is sampled as an ordinary video.</p>
+      <canvas class="cell-canvas" id="donor-canvas" width="860" height="612"
+        aria-label="Schematic latent grids. The left latent L, the right latent R, and the right view's clean prediction R-hat at the refresh steps."></canvas>
+      <div class="transport" role="group" aria-label="Donor chain playback">
+        <button type="button" id="donor-prev" aria-label="Previous stage"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 4v12M16 4.5 7.5 10l8.5 5.5z"/></svg></button>
+        <button type="button" id="donor-play" aria-label="Pause" data-state="playing">
+          <svg class="i-play" viewBox="0 0 20 20" aria-hidden="true"><path d="m6.5 4.5 9 5.5-9 5.5z"/></svg>
+          <svg class="i-pause" viewBox="0 0 20 20" aria-hidden="true"><path d="M6.5 4.5v11M13.5 4.5v11"/></svg>
+        </button>
+        <button type="button" id="donor-next" aria-label="Next stage"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M16 4v12M4 4.5l8.5 5.5L4 15.5z"/></svg></button>
+      </div>
+      <div class="picker" role="group" aria-label="Donor chain settings">
+        <span>Schedule</span>
+        <button type="button" data-ladder="wan" aria-pressed="true">Wan 2.1: 5&#8594;10&#8594;15&#8594;20</button>
+        <button type="button" data-ladder="ltx" aria-pressed="false">LTX-2.3: 10&#8594;15&#8594;&hellip;&#8594;35</button>
+        <span class="gap"></span>
+        <span>Padding <i class="m">P</i></span>
+        <button type="button" data-pad="0" aria-pressed="false">0</button>
+        <button type="button" data-pad="1" aria-pressed="true">1</button>
+      </div>
+      <figcaption>Schematic latent grids: digits are shifts <i class="m">w</i>(<i class="m">p</i>) in cells, hatching means re-noised with fresh noise.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- 5. boundary padding ----------------------------------------------------------------------------- -->
+<section class="story split" id="padding">
+  <div class="wrap-wide">
+    <div class="story-head">
+      <p class="kicker">Boundary padding</p>
+      <h2>Padding repaints foreground slivers.</h2>
+      <p class="lead">A cell centred on the background can still hold part of a foreground edge, which then moves with the background. Growing <i class="m">H</i> by <i class="m">P</i> cells to the right lets the donor repaint that sliver.</p>
+    </div>
+    <figure class="story-fig">
+      <div class="pad-ref">
+        <figure class="pane">
+          <p class="vis-label"><span style="color:var(--left-text)">Left view</span></p>
+          <div class="pane-img"><img src="static/images/padding/left.webp" alt="Left view: a bollard with a rope and leaves in front of the sea." width="512" height="512" loading="lazy"></div>
+        </figure>
+        <div>
+          <p class="vis-label"><span style="color:var(--right-text)">Right view</span> <span class="nt">drag the divider</span></p>
+          <div class="wipe" id="wipe" role="slider" tabindex="0" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50"
+            aria-label="Divider between the right view with P equal to 0 (left side) and P equal to 1 (right side).">
+            <img src="static/images/padding/p0.webp" alt="Right view with P = 0: a loop of rope floats beside the bollard." width="512" height="512" loading="lazy">
+            <img class="wipe-top" src="static/images/padding/p1.webp" alt="Right view with P = 1: the rope sliver is gone." width="512" height="512" loading="lazy">
+            <span class="wipe-bar"></span>
+            <span class="wipe-knob"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 7-5 5 5 5M15 7l5 5-5 5"/></svg></span>
+            <span class="wtag l"><i class="m">P</i> = 0</span><span class="wtag r"><i class="m">P</i> = 1</span>
+          </div>
+        </div>
+      </div>
+      <figcaption>LTX-2.3 text-to-stereo, <i class="m">d</i><sub>max</sub> = 3.7% of the width. With <i class="m">P</i> = 0 a loop of the rope is left floating beside the bollard; with <i class="m">P</i> = 1 the donor repaints it.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- 6. video-to-stereo ------------------------------------------------------------------------------ -->
+<section class="story split" id="inversion">
+  <div class="wrap-wide">
+    <div class="story-head">
+      <p class="kicker">Video-to-stereo</p>
+      <h2>Invert, then branch.</h2>
+      <p class="lead">An existing video becomes the left view. Inversion runs the sampler backward from its clean latent to the branching step <i class="m">r</i><sub>0</sub> and keeps the states at <i class="m">r</i><sub>1</sub>, &hellip;, <i class="m">r<sub>m</sub></i>. Depth is estimated once from the input, so the holes stay fixed.</p>
+      <p class="badge">Two (Wan 2.1) or three (LTX-2.3) fixed-point iterations per inverted step</p>
+    </div>
+    <figure class="story-fig anim-stage tall">
+      <button class="anim-replay" type="button" id="v2s-replay" aria-label="Replay the video-to-stereo animation">&#8635; Replay</button>
+      <p class="anim-status" id="v2s-status" aria-live="polite">The input video is the left view.</p>
+      <canvas class="cell-canvas" id="v2s-canvas" width="860" height="384"
+        aria-label="Timeline from noise to video. Inversion runs from the input video back to the branching step, then the right view is sampled forward with refreshes from the stored left states."></canvas>
+      <figcaption>Wan 2.1 video-to-stereo uses 100 steps and warps after steps 30, 40, &hellip;, 80.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- 7. parallel sampling ---------------------------------------------------------------------------- -->
+<section class="story split" id="efficiency">
+  <div class="wrap-wide">
+    <div class="story-head">
+      <p class="kicker">Parallel sampling</p>
+      <h2>Both views are sampled at the same time.</h2>
+      <p class="lead">Each refresh needs only the current state of the left view, so the right view runs alongside it, in one batch or on two GPUs.</p>
+      <p class="badge">2.4&times; fewer FLOPs than DissolveStereo&dagger;</p>
+    </div>
+    <figure class="story-fig">
+      <svg class="bars" id="bars" viewBox="0 0 760 250" role="img" aria-labelledby="bars-title">
+        <title id="bars-title">Seconds per stereo video, including the left view: StereoGraft 446.1, StereoWorld 825.4, DissolveStereo dagger 984.5.</title>
+      </svg>
+      <figcaption>Wan 2.1 text-to-stereo on one NVIDIA L40S, mean of 10 prompts. DissolveStereo&dagger; is DissolveStereo adapted to Wan 2.1 and run on the same left videos.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- galleries --------------------------------------------------------------------------------------- -->
+<section class="samples" id="t2s" data-gallery="t2s">
+  <div class="wrap-wide">
+    <div class="samples-head">
+      <p class="kicker">Results</p>
+      <h2>Text-to-stereo</h2>
+      <p class="lead">Stereo videos generated from a prompt by unchanged Wan 2.1 and LTX-2.3 models.</p>
+    </div>
+    <div class="gal-controls">
+      <div class="picker" role="group" aria-label="Video backbone" data-filter="backbone"></div>
+      <div class="picker" role="group" aria-label="Resolution" data-filter="res"></div>
+      <div class="seg" role="group" aria-label="View of this section only">
+        <button type="button" data-view="ana">Anaglyph</button>
+        <button type="button" data-view="sbs">Side by side</button>
+      </div>
+    </div>
+    <div class="sv-grid" data-grid></div>
+  </div>
+</section>
+
+<section class="samples" id="v2s" data-gallery="v2s">
+  <div class="wrap-wide">
+    <div class="samples-head">
+      <p class="kicker">Results</p>
+      <h2>Video-to-stereo</h2>
+      <p class="lead">Existing videos converted to stereo. Each input is kept as the left view.</p>
+    </div>
+    <div class="gal-controls">
+      <div class="picker" role="group" aria-label="Video backbone" data-filter="backbone"></div>
+      <div class="seg" role="group" aria-label="View of this section only">
+        <button type="button" data-view="ana">Anaglyph</button>
+        <button type="button" data-view="sbs">Side by side</button>
+      </div>
+    </div>
+    <div class="sv-grid" data-grid></div>
+  </div>
+</section>
+
+<section class="samples" id="compare" data-gallery="compare">
+  <div class="wrap-wide">
+    <div class="samples-head">
+      <p class="kicker">Comparisons</p>
+      <h2>Against prior methods</h2>
+      <p class="lead">Every method starts from the same left video. All but StereoWorld, which has no disparity control, run at the same disparity setting. DissolveStereo&dagger; is DissolveStereo adapted to the same backbone.</p>
+    </div>
+    <div class="gal-controls">
+      <div class="seg" role="group" aria-label="View of this section only">
+        <button type="button" data-view="ana">Anaglyph</button>
+        <button type="button" data-view="sbs">Side by side</button>
+      </div>
+    </div>
+    <div data-grid></div>
+  </div>
+</section>
+
+<section class="bib" id="bibtex">
+  <div class="wrap">
+    <div class="bib-head">
+      <h2>BibTeX</h2>
+      <button type="button" class="pill" id="bib-copy">Copy</button>
+    </div>
+    <pre><code id="bib-code"></code></pre>
+  </div>
+</section>
+
+<section class="ack" id="acknowledgements">
+  <div class="wrap">
+    <h2>Acknowledgements</h2>
+    <p id="ack-text"></p>
+  </div>
+</section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    This page was built using the
+    <a href="https://github.com/eliahuhorwitz/Academic-project-page-template" target="_blank" rel="noopener">Academic Project Page Template</a> adopted from
+    <a href="https://nerfies.github.io" target="_blank" rel="noopener">Nerfies</a>. Licensed under
+    <a href="http://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noopener">CC BY-SA 4.0</a>.
+    Page design after <a href="https://daviddinkevich.github.io/APEX/" target="_blank" rel="noopener">APEX</a>.
+  </div>
+</footer>
+
+<div class="lb" id="lb" hidden role="dialog" aria-modal="true" aria-label="Enlarged video">
+  <div class="lb-in">
+    <video muted loop playsinline controls disablepictureinpicture></video>
+    <div class="lb-cap">
+      <span class="lb-t"></span>
+      <span class="seg" role="group" aria-label="View">
+        <button type="button" data-view="ana">Anaglyph</button>
+        <button type="button" data-view="sbs">Side by side</button>
+      </span>
+      <button type="button" class="lb-x">Close</button>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
