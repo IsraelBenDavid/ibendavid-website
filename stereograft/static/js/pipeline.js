@@ -15,7 +15,8 @@
   var status = $("pipe-status"), warpLabel = $("pipe-warp-label"), warpHint = $("pipe-warp-hint"), warpRow = $("pipe-warp");
   var bPlay = $("pipe-play"), bPrev = $("pipe-prev"), bNext = $("pipe-next"), bReplay = $("pipe-replay");
   var D = null, N = 50, R0 = 5, RUNGS = [5, 10, 15, 20], step = 0, loaded = {}, started = false;
-  var playing = false, timer = null, everPlayed = false;
+  var playing = false, timer = null, everPlayed = false, byUser = false;
+  var winMark = $("pipe-win");
   var IMG = "static/images/pipeline/";
 
   function url(kind, s) {
@@ -70,6 +71,10 @@
     canvas.setAttribute("aria-valuenow", String(s));
     canvas.setAttribute("aria-valuetext", "Step " + s + " of 50");
     bPrev.disabled = s <= 0; bNext.disabled = s >= N - 1;
+    if (winMark) { winMark.hidden = s < R0; }
+    // the donor-chain section below shows a window of this run; it follows reader-driven steps while off screen
+    document.dispatchEvent(new CustomEvent("sg:step", { detail: { step: s, user: byUser } }));
+    byUser = false;
     draw();
   }
 
@@ -214,8 +219,8 @@
   }
   bPlay.addEventListener("click", function () { if (playing) { stop(); } else { play(false); } });
   bReplay.addEventListener("click", function () { play(true); });
-  bPrev.addEventListener("click", function () { stop(); step = Math.max(0, step - 1); update(); });
-  bNext.addEventListener("click", function () { stop(); step = Math.min(N - 1, step + 1); update(); });
+  bPrev.addEventListener("click", function () { stop(); byUser = true; step = Math.max(0, step - 1); update(); });
+  bNext.addEventListener("click", function () { stop(); byUser = true; step = Math.min(N - 1, step + 1); update(); });
 
   function fromPointer(e) {
     var r = canvas.getBoundingClientRect(), g = geom();
@@ -223,8 +228,8 @@
     return SG.clamp(Math.round((x - g.x0) / (g.x1 - g.x0) * (N - 1)), 0, N - 1);
   }
   var dragging = false;
-  canvas.addEventListener("pointerdown", function (e) { stop(); dragging = true; canvas.setPointerCapture(e.pointerId); step = fromPointer(e); update(); });
-  canvas.addEventListener("pointermove", function (e) { if (dragging) { var s = fromPointer(e); if (s !== step) { step = s; update(); } } });
+  canvas.addEventListener("pointerdown", function (e) { stop(); byUser = true; dragging = true; canvas.setPointerCapture(e.pointerId); step = fromPointer(e); update(); });
+  canvas.addEventListener("pointermove", function (e) { if (dragging) { var s = fromPointer(e); if (s !== step) { step = s; byUser = true; update(); } } });
   canvas.addEventListener("pointerup", function () { dragging = false; });
   canvas.addEventListener("pointercancel", function () { dragging = false; });
   canvas.addEventListener("keydown", function (e) {
@@ -235,7 +240,7 @@
     else if (k === "PageUp") { var lower = RUNGS.filter(function (r) { return r < step; }); s = lower.length ? lower[lower.length - 1] : 0; }
     else if (k === " ") { e.preventDefault(); if (playing) { stop(); } else { play(false); } return; }
     else { return; }
-    e.preventDefault(); stop(); step = SG.clamp(s, 0, N - 1); update();
+    e.preventDefault(); stop(); byUser = true; step = SG.clamp(s, 0, N - 1); update();
   });
 
   function preload() {

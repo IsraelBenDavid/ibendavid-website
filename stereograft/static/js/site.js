@@ -503,7 +503,7 @@
     var io = new IntersectionObserver(function (es) {
       es.forEach(function (e) {
         if (!e.isIntersecting) { return; }
-        var id = e.target.id === "observation" || e.target.id === "warp" || e.target.id === "donor" || e.target.id === "padding" ||
+        var id = e.target.id === "observation" || e.target.id === "warp" || e.target.id === "donor" || e.target.id === "why" || e.target.id === "padding" ||
           e.target.id === "inversion" || e.target.id === "efficiency" ? "method" : e.target.id;
         Object.keys(links).forEach(function (k) { links[k].classList.toggle("is-on", k === id); });
       });
