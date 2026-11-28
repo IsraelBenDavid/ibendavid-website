@@ -132,16 +132,11 @@ window.SG_CONFIG = {
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@450;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="static/css/index.css?v=2">
+<link rel="stylesheet" href="static/css/index.css?v=3">
 <script defer src="static/js/util.js?v=1"></script>
-<script defer src="static/js/site.js?v=2"></script>
+<script defer src="static/js/site.js?v=3"></script>
 <script defer src="static/js/traj.js?v=1"></script>
-<script defer src="static/js/pipeline.js?v=2"></script>
-<script defer src="static/js/warp.js?v=1"></script>
-<script defer src="static/js/donor.js?v=2"></script>
-<script defer src="static/js/why.js?v=2"></script>
-<script defer src="static/js/padding.js?v=1"></script>
-<script defer src="static/js/v2s.js?v=1"></script>
+<script defer src="static/js/method.js?v=3"></script>
 </head>
 <body>
 
@@ -149,6 +144,7 @@ window.SG_CONFIG = {
   <div class="topbar-in">
     <a class="home" href="#top">StereoGraft</a>
     <nav class="topnav" aria-label="Sections">
+      <a href="#observation">Observation</a>
       <a href="#method">Method</a>
       <a href="#t2s">Text-to-stereo</a>
       <a href="#v2s">Video-to-stereo</a>
@@ -259,329 +255,75 @@ window.SG_CONFIG = {
   </div>
 </section>
 
-<!-- 2. pipeline explorer ---------------------------------------------------------------------------- -->
-<section class="story full" id="method">
+<!-- 2. how StereoGraft works (the one method figure) ------------------------------------------------ -->
+<section class="story method" id="method">
   <div class="wrap-wide">
     <div class="story-head">
       <p class="kicker">Method</p>
-      <h2>Branch the right view from the left view's trajectory.</h2>
-      <p class="lead">The left view is sampled as an ordinary video. After step <i class="m">r</i><sub>0</sub>, its noisy latent is warped by depth to start the right view, and after <i class="m">r</i><sub>1</sub>, &hellip;, <i class="m">r<sub>m</sub></i> the right view is refreshed. Both views are sampled side by side by the same frozen model.</p>
+      <h2>Branch the right view early, then refresh it along a donor chain.</h2>
+      <p class="lead">Follow one real Wan 2.1 sample from noise to a stereo pair. Press Next to take the algorithm one step at a time.</p>
     </div>
-    <figure class="story-fig anim-stage tall" id="pipe">
-      <button class="anim-replay" type="button" id="pipe-replay" aria-label="Replay the sampling walkthrough">&#8635; Replay</button>
-      <p class="anim-status" id="pipe-status" aria-live="polite">The left view starts from noise.</p>
-      <div class="pipe-time">
-        <canvas id="pipe-canvas" width="1200" height="170" role="slider" tabindex="0" aria-valuemin="0" aria-valuemax="49" aria-valuenow="0"
-          aria-label="Sampling step of the left and right views. Drag, or use the arrow keys; Page Up and Page Down jump between warp steps."></canvas>
-      </div>
-      <div class="pipe-grid">
-        <div class="pipe-rowlabel"><p class="vis-label">At this step</p></div>
-        <figure class="pane">
-          <p class="vis-label"><span class="l">Left view</span> <span class="nt">D(<i class="m">L&#770;</i>)</span></p>
-          <div class="pane-img"><img id="pipe-L" alt="Left view: decoded clean prediction at the selected step." width="624" height="360"></div>
-        </figure>
-        <figure class="pane" id="pipe-R-pane">
-          <p class="vis-label"><span class="r">Right view</span> <span class="nt" id="pipe-R-sym">D(<i class="m">R&#770;</i>)</span></p>
-          <div class="pane-img"><img id="pipe-R" alt="Right view: decoded clean prediction at the selected step." width="624" height="360"><div class="empty" id="pipe-R-empty">Not branched yet</div><span class="pipe-win" id="pipe-win" hidden><em>zoomed below</em></span></div>
-        </figure>
-        <figure class="pane" id="pipe-A-pane">
-          <p class="vis-label">Anaglyph <span class="nt">(red = left, cyan = right)</span></p>
-          <div class="pane-img"><img id="pipe-A" alt="Red-cyan anaglyph of the two clean predictions." width="624" height="360"><div class="empty" id="pipe-A-empty">Not branched yet</div></div>
-        </figure>
-      </div>
-      <div class="pipe-grid" id="pipe-warp">
-        <div class="pipe-rowlabel"><p class="vis-label" id="pipe-warp-label">Depth-guided warp</p><span class="hint" id="pipe-warp-hint"></span></div>
-        <figure class="pane">
-          <p class="vis-label">Inverse depth <i class="m">z</i></p>
-          <div class="pane-img"><img id="pipe-z" alt="Inverse depth estimated from the left view's clean prediction at the latest warp." width="624" height="360"><div class="empty" id="pipe-z-empty">Estimated at each warp</div></div>
-        </figure>
-        <figure class="pane">
-          <p class="vis-label">Cell shifts <i class="m">w</i>(<i class="m">p</i>)</p>
-          <div class="pane-img"><img id="pipe-w" alt="Shift of every latent cell in whole cells, from 0 (far) to 4 (near)." width="624" height="360"><div class="empty" id="pipe-w-empty">0 to 4 cells</div></div>
-        </figure>
-        <figure class="pane">
-          <p class="vis-label"><i class="m">S</i>[<i class="m">L&#770;</i>] and holes <i class="m">H</i></p>
-          <div class="pane-img"><img id="pipe-S" alt="Left clean prediction shifted cell by cell, with the holes in yellow and the padding cells in cyan." width="624" height="360"><div class="empty" id="pipe-S-empty">Holes appear at the branch</div></div>
-        </figure>
-      </div>
-      <ul class="legend" aria-label="Legend">
-        <li><span class="sw sw-warp"></span>warp step</li>
-        <li><span class="sw sw-left"></span>left view <i class="m">L</i></li>
-        <li><span class="sw sw-right"></span>right view <i class="m">R</i></li>
-        <li><span class="sw sw-ramp"></span>far to near</li>
-        <li><span class="sw sw-hole"></span>hole <i class="m">H</i></li>
-        <li><span class="sw sw-pad"></span>padding, <i class="m">P</i> = 1</li>
-      </ul>
-      <div class="transport" role="group" aria-label="Walkthrough playback">
-        <button type="button" id="pipe-prev" aria-label="Previous step"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 4v12M16 4.5 7.5 10l8.5 5.5z"/></svg></button>
-        <button type="button" id="pipe-play" aria-label="Pause" data-state="playing">
-          <svg class="i-play" viewBox="0 0 20 20" aria-hidden="true"><path d="m6.5 4.5 9 5.5-9 5.5z"/></svg>
-          <svg class="i-pause" viewBox="0 0 20 20" aria-hidden="true"><path d="M6.5 4.5v11M13.5 4.5v11"/></svg>
-        </button>
-        <button type="button" id="pipe-next" aria-label="Next step"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M16 4v12M4 4.5l8.5 5.5L4 15.5z"/></svg></button>
-      </div>
-      <figcaption>Wan 2.1 text-to-stereo, frame 40 of 81. <i class="m">d</i><sub>max</sub> = 32 px, warps after steps 5, 10, 15 and 20 of 50, padding <i class="m">P</i> = 1. Drag the timeline; Page Up and Page Down jump between warps.</figcaption>
-    </figure>
   </div>
-</section>
 
-<!-- 3. depth-guided warp (live) --------------------------------------------------------------------- -->
-<section class="story split" id="warp">
-  <div class="wrap-wide">
-    <div class="story-head">
-      <p class="kicker">Depth-guided warp</p>
-      <h2>Each latent cell moves by its disparity.</h2>
-      <p class="lead">The farthest surface gets zero disparity and the nearest gets <i class="m">d</i><sub>max</sub>. A cell moves round(<i class="m">&delta;</i>/<i class="m">s</i>) whole cells to the left, the nearest surface wins collisions, and cells nothing lands on are the holes.</p>
-      <p class="badge">Cells of 8 px on Wan 2.1, 32 px on LTX-2.3</p>
+  <figure class="hw" id="hw" tabindex="0" aria-label="How StereoGraft works, step by step. Left and right arrow keys change the step, space plays or pauses.">
+    <div class="hw-top">
+      <p class="vis-label">50 sampling steps, from noise to video</p>
+      <div class="hw-tools">
+        <div class="seg hw-pad" role="group" aria-label="Boundary padding P, used at the refreshes">
+          <span class="seg-label">Padding <i class="m">P</i></span>
+          <button type="button" data-p="0" aria-pressed="false">0</button>
+          <button type="button" data-p="1" aria-pressed="true">1</button>
+        </div>
+        <button class="pill" type="button" id="hw-replay" aria-label="Replay the walkthrough from the first step">&#8635; Replay</button>
+      </div>
     </div>
-    <figure class="story-fig warp-wrap">
-      <div class="picker" role="group" aria-label="Choose the map to show" id="warp-pills" style="margin:0 0 10px">
-        <button type="button" data-show="x0" aria-pressed="false">D(<i class="m">L&#770;</i>)</button>
-        <button type="button" data-show="z" aria-pressed="false">Inverse depth <i class="m">z</i></button>
-        <button type="button" data-show="w" aria-pressed="false">Shifts <i class="m">w</i>(<i class="m">p</i>)</button>
-        <button type="button" data-show="S" aria-pressed="true"><i class="m">S</i>[<i class="m">L&#770;</i>] and <i class="m">H</i></button>
-      </div>
-      <div class="pane"><div class="pane-img"><canvas id="warp-canvas" width="1248" height="720" aria-label="The left clean prediction at the branch step, warped live with the chosen maximum disparity and cell size."></canvas></div></div>
-      <div class="warp-controls">
-        <label class="range" for="warp-dmax"><span class="lab"><i class="m">d</i><sub>max</sub></span>
-          <input type="range" id="warp-dmax" min="0" max="96" step="1" value="32">
-          <output id="warp-dmax-out" for="warp-dmax">32 px</output></label>
-        <div class="picker" role="group" aria-label="Latent cell size" id="warp-cells" style="margin:0">
-          <span>Cell size <i class="m">s</i></span>
-          <button type="button" data-s="8" aria-pressed="true">8 px</button>
-          <button type="button" data-s="32" aria-pressed="false">32 px</button>
-        </div>
-      </div>
-      <p class="picker-status" id="warp-status" aria-live="polite"></p>
-      <figcaption>The branch step of the run above (step 5 of 50, frame 40). Shifts are recomputed in your browser from its depth map; 32 px cells show how an LTX-2.3-sized grid quantizes the same scene.</figcaption>
-    </figure>
-  </div>
-</section>
+    <canvas class="hw-time" id="hw-time" aria-hidden="true"></canvas>
 
-<!-- 4. donor chain (real run) ----------------------------------------------------------------------- -->
-<section class="story full" id="donor">
-  <div class="wrap-wide">
-    <div class="story-head">
-      <p class="kicker">Donor chain</p>
-      <h2>Refresh the shared surfaces. Keep the right view's own holes.</h2>
-      <p class="lead">At each refresh, depth is re-estimated and the warped left latent is copied again onto every covered cell. In the holes, the right view's own clean prediction <i class="m">R&#770;</i> is re-noised to the current level, so the right view donates what it has generated there.</p>
-      <p class="badge">Refreshes after steps 10, 15 and 20 of 50</p>
-    </div>
-    <figure class="story-fig dn" id="dn-fig">
-      <div class="dn-head" id="dn-head">
-        <p class="anim-status" id="dn-status" aria-live="polite">Refresh: shared cells copy the left again; holes keep <i class="m">R&#770;</i>.</p>
-        <div class="picker dn-scene" id="dn-scene" role="group" aria-label="Scene">
-          <span class="nowrap-group"><span class="plab">Scene</span>
-          <button type="button" data-scene="penguin" aria-pressed="true">Penguin</button>
-          <button type="button" data-scene="basket" aria-pressed="false">Wicker basket</button></span>
-        </div>
-        <button class="anim-replay" type="button" id="dn-replay" aria-label="Replay the donor chain tour">&#8635; Replay</button>
-      </div>
+    <div class="hw-main">
+      <ol class="hw-list" id="hw-list" aria-label="The algorithm">
+        <li data-stop="0"><button type="button"><span class="n">1</span><span class="t">Sample the left view up to step <i class="m">r</i><sub>0</sub>.</span></button></li>
+        <li data-stop="1"><button type="button"><span class="n">2</span><span class="t">Estimate depth from its clean prediction <i class="m">L&#770;</i>.</span></button></li>
+        <li data-stop="2"><button type="button"><span class="n">3</span><span class="t">Turn depth into a shift per latent cell.</span></button></li>
+        <li data-stop="3"><button type="button"><span class="n">4</span><span class="t">Branch: shift the left latent <i class="m">L</i> to start the right view <i class="m">R</i>. Empty cells are holes <i class="m">H</i>.</span></button></li>
+        <li data-stop="4"><button type="button"><span class="n">5</span><span class="t">Fill the holes with a background guess and fresh noise.</span></button></li>
+        <li data-stop="5" class="in-loop"><button type="button"><span class="n">6</span><span class="t">Denoise both views until the next refresh step.</span></button></li>
+        <li data-stop="6" class="in-loop"><button type="button"><span class="n">7</span><span class="t">Refresh: new depth, new shift, new holes, grown by <i class="m">P</i> cells.</span></button></li>
+        <li data-stop="7" class="in-loop"><button type="button"><span class="n">8</span><span class="t">Outside the holes, copy the shifted <i class="m">L</i> again. Inside, keep the right view's own <i class="m">R&#770;</i>.</span></button></li>
+        <li data-stop="8"><button type="button"><span class="n">9</span><span class="t">Repeat 6 to 8 at <i class="m">r</i><sub>2</sub>, &hellip;, <i class="m">r<sub>m</sub></i>.
+          <span class="hw-pips" id="hw-pips"><i></i><i></i><i></i><em id="hw-pips-t">3 refreshes</em></span></span></button></li>
+        <li data-stop="10"><button type="button"><span class="n">10</span><span class="t">Finish both views and decode.</span></button></li>
+      </ol>
 
-      <div class="dn-rail">
-        <canvas id="dn-rail" role="slider" tabindex="0" aria-valuemin="0" aria-valuemax="54" aria-valuenow="12"
-          aria-label="Sampling position of the left and right views. Arrow keys step, Page Up and Page Down jump between warps."></canvas>
-        <div class="dn-thumbs" id="dn-thumbs" role="group" aria-label="Warp stops"></div>
-      </div>
-
-      <div class="dn-tools" id="dn-tools">
-        <div class="picker" role="group" aria-label="Show clean predictions or the noisy latents">
-          <span class="nowrap-group"><span class="plab">Show</span>
-          <button type="button" data-mode="clean" aria-pressed="true">Clean</button>
-          <button type="button" data-mode="noisy" aria-pressed="false">Noisy</button></span>
-          <span class="gap"></span>
-          <button type="button" id="dn-grid" aria-pressed="true">Grid</button>
+      <div class="hw-right">
+        <p class="hw-now" id="hw-now"><span class="hw-now-pill" id="hw-now-pill">Step 1 / 10</span><span class="hw-now-t" id="hw-now-t"></span></p>
+        <div class="hw-stage" id="hw-stage-box">
+          <p class="hw-pt" id="hw-pt-l"><span class="l">Left view</span> <span class="nt" id="hw-note-l"></span></p>
+          <p class="hw-pt" id="hw-pt-r"><span class="r">Right view</span> <span class="nt" id="hw-note-r"></span></p>
+          <p class="hw-pt" id="hw-pt-a" hidden><span>Anaglyph</span> <span class="nt">red = left view, cyan = right view</span></p>
+          <canvas id="hw-stage" role="img" aria-label="Left view and right view at the current step of the algorithm."></canvas>
         </div>
-      </div>
-
-      <div class="dn-lens" id="dn-lens" tabindex="0" role="group" aria-roledescription="cell window"
-        aria-label="Cell window. Arrow keys move the cell under the cursor, Enter pins it, Escape resets it, brackets go to the previous or next warp.">
-        <div class="dn-pane" data-i="0">
-          <p class="vis-label dn-lab"></p>
-          <div class="dn-box"><canvas class="dn-img" role="img"></canvas><canvas class="dn-ov" aria-hidden="true"></canvas><span class="dn-ph"></span><span class="dn-load">loading</span></div>
-          <p class="dn-short"><i class="m">S</i>[<i class="m">L&#770;</i>]</p>
-        </div>
-        <span class="dn-glyph" aria-hidden="true">+</span>
-        <div class="dn-pane" data-i="1">
-          <p class="vis-label dn-lab"></p>
-          <div class="dn-box"><canvas class="dn-img" role="img"></canvas><canvas class="dn-ov" aria-hidden="true"></canvas><span class="dn-ph"></span><span class="dn-load">loading</span></div>
-          <p class="dn-short"><i class="m">R&#770;</i></p>
-        </div>
-        <span class="dn-glyph" aria-hidden="true">=</span>
-        <div class="dn-pane" data-i="2">
-          <p class="vis-label dn-lab"></p>
-          <div class="dn-box"><canvas class="dn-img" role="img"></canvas><canvas class="dn-ov" aria-hidden="true"></canvas><span class="dn-ph"></span><span class="dn-load">loading</span></div>
-          <p class="dn-short">written</p>
-        </div>
-        <div class="dn-loc" id="dn-loc"><p class="vis-label">Window in the frame</p><canvas width="120" height="69" aria-hidden="true"></canvas></div>
-      </div>
-      <div class="dn-big" id="dn-big">
-        <p class="vis-label dn-lab"></p>
-        <div class="dn-box"><canvas class="dn-img" role="img"></canvas><canvas class="dn-ov" aria-hidden="true"></canvas><span class="dn-ph"></span><span class="dn-load">loading</span></div>
-      </div>
-
-      <div class="dn-info" id="dn-info">
-        <p class="dn-eq" id="dn-eq"></p>
-        <p class="dn-readout" id="dn-readout"></p>
-        <div class="dn-chips" id="dn-chips" aria-hidden="true"></div>
-        <div class="dn-counts" id="dn-counts"><p id="dn-count-win"></p><p id="dn-count-frame"></p></div>
-      </div>
-      <p class="sr-only" id="dn-live" aria-live="polite"></p>
-
-      <details class="dn-more" id="dn-more" open>
-        <summary><span id="dn-more-t">Cell by cell</span></summary>
-        <div class="dn-strip-head">
-          <span class="dn-row" id="dn-row" role="slider" tabindex="0" aria-label="Row of the cell strip" aria-valuemin="0" aria-valuemax="59" aria-valuenow="32">row 32</span>
-          <button type="button" class="dn-rowbtn" data-d="-1" aria-label="Row above">&#9650;</button>
-          <button type="button" class="dn-rowbtn" data-d="1" aria-label="Row below">&#9660;</button>
-          <span class="dn-strip-note" id="dn-strip-note"></span>
-        </div>
-        <canvas id="dn-strip" aria-hidden="true"></canvas>
-      </details>
-
-      <ul class="legend" aria-label="Legend">
-        <li><span class="sw sw-warp"></span>warp step</li>
-        <li><span class="sw sw-left"></span>left view <i class="m">L</i></li>
-        <li><span class="sw sw-right"></span>right view <i class="m">R</i></li>
-        <li><span class="sw sw-hole-line"></span>hole <i class="m">H</i></li>
-        <li><span class="sw sw-pad-line"></span>padding, <i class="m">P</i> = 1</li>
-        <li><span class="sw sw-dim"></span>dimmed: not used by this write</li>
-        <li><span class="sw sw-cursor"></span>cell under the cursor</li>
-        <li><span class="sw sw-wedge"></span>noise level <i class="m">t</i></li>
-      </ul>
-      <div class="transport" role="group" aria-label="Donor chain playback">
-        <button type="button" id="dn-prev" aria-label="Previous warp"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 4v12M16 4.5 7.5 10l8.5 5.5z"/></svg></button>
-        <button type="button" id="dn-play" aria-label="Play" data-state="paused">
-          <svg class="i-play" viewBox="0 0 20 20" aria-hidden="true"><path d="m6.5 4.5 9 5.5-9 5.5z"/></svg>
-          <svg class="i-pause" viewBox="0 0 20 20" aria-hidden="true"><path d="M6.5 4.5v11M13.5 4.5v11"/></svg>
-        </button>
-        <button type="button" id="dn-next" aria-label="Next warp"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M16 4v12M4 4.5l8.5 5.5L4 15.5z"/></svg></button>
-      </div>
-      <figcaption>Wan 2.1 text-to-stereo, a 24&nbsp;&times;&nbsp;32-cell window of the penguin above (frame 40 of 81) and of a wicker basket, a second prompt from the same study (frame 80). 8-px latent cells, <i class="m">d</i><sub>max</sub> = 32 px, warps after steps 5, 10, 15 and 20 of 50, <i class="m">P</i> = 1. Images are decoded clean predictions unless Noisy is chosen. LTX-2.3 refreshes after steps 10, 15, &hellip;, 35 with 32-px cells; at the padding example's disparity every shift is 0 or 1 cell. Drag the timeline or press Page Up and Page Down; point at a cell to trace it.</figcaption>
-      <details class="donor-text">
-        <summary>Read the donor chain as text</summary>
-        <div id="dn-text"><p>The text version needs the page's data file.</p></div>
-      </details>
-    </figure>
-  </div>
-</section>
-
-<!-- 4b. why a chain (supplementary warp-schedule ablation) -------------------------------------------- -->
-<section class="story split" id="why">
-  <div class="wrap-wide">
-    <div class="story-head">
-      <p class="kicker">Why a chain</p>
-      <h2>Without refreshes, the views drift apart.</h2>
-      <p class="lead">Branching at step 5 and never refreshing raises MEt3R from 8.295 to 14.896 over 50 Wan 2.1 prompts (lower is better). A single warp at step 20 scores lower still, 7.995, but the background it exposes starts from a guess late in sampling.</p>
-      <p class="badge">MEt3R &times; 100 &middot; no refresh 14.896 &middot; default 8.295 &middot; single warp at 20 7.995</p>
-    </div>
-    <figure class="story-fig why" id="why-fig" tabindex="0" aria-label="Warp schedules compared on two prompts. Keys 1 to 4 choose the schedule.">
-      <div class="why-pick">
-        <div class="picker" role="group" aria-label="Scene">
-          <span class="nowrap-group"><span class="plab">Scene</span>
-          <button type="button" data-why-scene="potter" aria-pressed="true">Potter</button>
-          <button type="button" data-why-scene="well" aria-pressed="false">Stone well</button></span>
-        </div>
-        <div class="picker" role="group" aria-label="Warp schedule">
-          <span class="plab">Schedule</span>
-          <button type="button" data-arm="default" aria-pressed="true">5&#8594;10&#8594;15&#8594;20</button>
-          <button type="button" data-arm="m05" aria-pressed="false">No refresh</button>
-          <button type="button" data-arm="a20" aria-pressed="false">Single warp at 20</button>
-          <button type="button" data-arm="m40" aria-pressed="false">Refresh through 40</button>
-        </div>
-      </div>
-      <p class="picker-status why-status" id="why-status" aria-live="polite"></p>
-      <div class="why-grid" id="why-grid">
-        <figure class="pane why-left">
-          <p class="vis-label"><span class="l">Left view</span></p>
-          <div class="pane-img why-img"><img id="why-L" alt="" width="512" height="384"><span class="why-box"></span></div>
-          <div class="pane-img why-zoom"><img id="why-LZ" alt="" width="512" height="307"></div>
-        </figure>
-        <figure class="pane why-right">
-          <p class="vis-label"><span class="r">Right view</span> <span class="nt" id="why-arm-label">5&#8594;10&#8594;15&#8594;20</span></p>
-          <div class="pane-img why-img"><img id="why-R" alt="" width="512" height="384"><span class="why-box"></span></div>
-          <div class="pane-img why-zoom"><img id="why-RZ" alt="" width="512" height="307"></div>
-        </figure>
-      </div>
-      <div class="picker why-showleft"><button type="button" id="why-showleft" aria-pressed="false">Show left view</button></div>
-      <div class="why-chart">
-        <p class="vis-label">MEt3R &times; 100 by last refresh, branch at 5 <span class="nt">(lower is better)</span></p>
-        <svg id="why-svg" viewBox="0 0 640 190" role="img" aria-labelledby="why-svg-title">
-          <title id="why-svg-title">MEt3R times 100 by the step of the last refresh, branch at step 5: 5 (no refresh) 14.896, 10 11.169, 15 9.299, 20 (default) 8.295, 30 7.620, 40 7.198. A single warp at step 20 with no donor scores 7.995.</title>
-        </svg>
-        <div class="why-tip" id="why-tip" hidden></div>
-        <p class="why-note">Refreshing past step 20 lowers MEt3R further, but iSQoE rises from 0.6674 to 0.6741 to 0.6790 and AQ falls from 0.553 to 0.543 to 0.539.</p>
-      </div>
-      <figcaption>Wan 2.1 text-to-stereo, frame 40, the setting of the supplementary's warp-schedule table (50 prompts, the same left videos, <i class="m">P</i> = 1). The potter and the well are two of its 50 prompts. Right-view crops are fixed across schedules; the left crop is offset by 40 px (pot) and 34 px (well) to align the surfaces. Scores are 50-prompt means.</figcaption>
-    </figure>
-  </div>
-</section>
-
-<!-- 5. boundary padding ----------------------------------------------------------------------------- -->
-<section class="story split" id="padding">
-  <div class="wrap-wide">
-    <div class="story-head">
-      <p class="kicker">Boundary padding</p>
-      <h2>Padding repaints foreground slivers.</h2>
-      <p class="lead">A cell centred on the background can still hold part of a foreground edge, which then moves with the background. Growing <i class="m">H</i> by <i class="m">P</i> cells to the right lets the donor repaint that sliver.</p>
-    </div>
-    <figure class="story-fig">
-      <div class="pad-ref">
-        <figure class="pane">
-          <p class="vis-label"><span style="color:var(--left-text)">Left view</span></p>
-          <div class="pane-img"><img src="static/images/padding/left.webp" alt="Left view: a bollard with a rope and leaves in front of the sea." width="512" height="512" loading="lazy"></div>
-        </figure>
-        <div>
-          <p class="vis-label"><span style="color:var(--right-text)">Right view</span> <span class="nt">drag the divider</span></p>
-          <div class="wipe" id="wipe" role="slider" tabindex="0" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50"
-            aria-label="Divider between the right view with P equal to 0 (left side) and P equal to 1 (right side).">
-            <img src="static/images/padding/p0.webp" alt="Right view with P = 0: a loop of rope floats beside the bollard." width="512" height="512" loading="lazy">
-            <img class="wipe-top" src="static/images/padding/p1.webp" alt="Right view with P = 1: the rope sliver is gone." width="512" height="512" loading="lazy">
-            <span class="wipe-bar"></span>
-            <span class="wipe-knob"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 7-5 5 5 5M15 7l5 5-5 5"/></svg></span>
-            <span class="wtag l"><i class="m">P</i> = 0</span><span class="wtag r"><i class="m">P</i> = 1</span>
+        <div class="hw-key" id="hw-key"></div>
+        <div class="hw-bar">
+          <p class="hw-cap" id="hw-cap" aria-live="polite"></p>
+          <div class="hw-nav">
+            <div class="transport" role="group" aria-label="Walkthrough">
+              <button type="button" id="hw-prev" aria-label="Previous step"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 4v12M16 4.5 7.5 10l8.5 5.5z"/></svg></button>
+              <button type="button" id="hw-play" aria-label="Play" data-state="paused">
+                <svg class="i-play" viewBox="0 0 20 20" aria-hidden="true"><path d="m6.5 4.5 9 5.5-9 5.5z"/></svg>
+                <svg class="i-pause" viewBox="0 0 20 20" aria-hidden="true"><path d="M6.5 4.5v11M13.5 4.5v11"/></svg>
+              </button>
+              <button type="button" id="hw-next" aria-label="Next step"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M16 4v12M4 4.5l8.5 5.5L4 15.5z"/></svg></button>
+            </div>
+            <span class="hw-count" id="hw-count">1 / 10</span>
           </div>
         </div>
       </div>
-      <figcaption>LTX-2.3 text-to-stereo, <i class="m">d</i><sub>max</sub> = 3.7% of the width. With <i class="m">P</i> = 0 a loop of the rope is left floating beside the bollard; with <i class="m">P</i> = 1 the donor repaints it.</figcaption>
-    </figure>
-  </div>
-</section>
-
-<!-- 6. video-to-stereo ------------------------------------------------------------------------------ -->
-<section class="story split" id="inversion">
-  <div class="wrap-wide">
-    <div class="story-head">
-      <p class="kicker">Video-to-stereo</p>
-      <h2>Invert, then branch.</h2>
-      <p class="lead">An existing video becomes the left view. Inversion runs the sampler backward from its clean latent to the branching step <i class="m">r</i><sub>0</sub> and keeps the states at <i class="m">r</i><sub>1</sub>, &hellip;, <i class="m">r<sub>m</sub></i>. Depth is estimated once from the input, so the holes stay fixed.</p>
-      <p class="badge">Two (Wan 2.1) or three (LTX-2.3) fixed-point iterations per inverted step</p>
     </div>
-    <figure class="story-fig anim-stage tall">
-      <button class="anim-replay" type="button" id="v2s-replay" aria-label="Replay the video-to-stereo animation">&#8635; Replay</button>
-      <p class="anim-status" id="v2s-status" aria-live="polite">The input video is the left view.</p>
-      <canvas class="cell-canvas" id="v2s-canvas" width="860" height="384"
-        aria-label="Timeline from noise to video. Inversion runs from the input video back to the branching step, then the right view is sampled forward with refreshes from the stored left states."></canvas>
-      <figcaption>Wan 2.1 video-to-stereo uses 100 steps and warps after steps 30, 40, &hellip;, 80.</figcaption>
-    </figure>
-  </div>
-</section>
+  </figure>
 
-<!-- 7. parallel sampling ---------------------------------------------------------------------------- -->
-<section class="story split" id="efficiency">
-  <div class="wrap-wide">
-    <div class="story-head">
-      <p class="kicker">Parallel sampling</p>
-      <h2>Both views are sampled at the same time.</h2>
-      <p class="lead">Each refresh needs only the current state of the left view, so the right view runs alongside it, in one batch or on two GPUs.</p>
-      <p class="badge">2.4&times; fewer FLOPs than DissolveStereo&dagger;</p>
-    </div>
-    <figure class="story-fig">
-      <svg class="bars" id="bars" viewBox="0 0 760 250" role="img" aria-labelledby="bars-title">
-        <title id="bars-title">Seconds per stereo video, including the left view: StereoGraft 446.1, StereoWorld 825.4, DissolveStereo dagger 984.5.</title>
-      </svg>
-      <figcaption>Wan 2.1 text-to-stereo on one NVIDIA L40S, mean of 10 prompts. DissolveStereo&dagger; is DissolveStereo adapted to Wan 2.1 and run on the same left videos.</figcaption>
-    </figure>
+  <div class="wrap-wide hw-after">
+    <p class="hw-credit">Wan 2.1 text-to-stereo, frame 40 of 81, shown as decoded clean predictions. 8-px latent cells, <i class="m">d</i><sub>max</sub> = 32 px, warps after steps 5, 10, 15 and 20 of 50. The frames come from a run with <i class="m">P</i> = 1.</p>
+    <p class="hw-v2s"><b>Video-to-stereo.</b> The input video is the left view, so step 1 is replaced by inverting it back to step <i class="m">r</i><sub>0</sub>, keeping the states at <i class="m">r</i><sub>1</sub>, &hellip;, <i class="m">r<sub>m</sub></i> for the refreshes. Depth is estimated once, from the input, so the shift and the holes stay fixed.</p>
   </div>
 </section>
 

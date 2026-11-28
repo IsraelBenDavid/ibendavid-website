@@ -1,5 +1,5 @@
 /* StereoGraft page: config rendering, theme, the anaglyph / side-by-side switch, stereo video slots, galleries,
-   comparisons, lightbox, top bar, scroll reveal, BibTeX copy, runtime chart. */
+   comparisons, lightbox, top bar, scroll reveal, BibTeX copy. */
 (function () {
   "use strict";
   var SG = window.SG;
@@ -503,8 +503,7 @@
     var io = new IntersectionObserver(function (es) {
       es.forEach(function (e) {
         if (!e.isIntersecting) { return; }
-        var id = e.target.id === "observation" || e.target.id === "warp" || e.target.id === "donor" || e.target.id === "why" || e.target.id === "padding" ||
-          e.target.id === "inversion" || e.target.id === "efficiency" ? "method" : e.target.id;
+        var id = e.target.id;
         Object.keys(links).forEach(function (k) { links[k].classList.toggle("is-on", k === id); });
       });
     }, { rootMargin: "-45% 0px -54% 0px" });
@@ -536,54 +535,6 @@
         try { document.execCommand("copy"); done(); } catch (e) { /* selection left for manual copy */ }
       }
     });
-  })();
-
-  /* ------------------------------------------------------------------ runtime chart (paper Table 3) */
-  (function bars() {
-    var svg = $("#bars");
-    if (!svg) { return; }
-    var NS = "http://www.w3.org/2000/svg";
-    var rows = [
-      { name: "StereoGraft", left: 211.3, stereo: 234.8, total: "446.1", ours: true },
-      { name: "StereoWorld", left: 211.3, stereo: 614.1, total: "825.4" },
-      { name: "DissolveStereo\u2020", left: 211.3, stereo: 773.3, total: "984.5" }
-    ];
-    var compact = null;
-    function render() {
-      var c = svg.getBoundingClientRect().width < 600;
-      if (c === compact) { return; }
-      compact = c;
-      Array.prototype.slice.call(svg.querySelectorAll(":scope > :not(title)")).forEach(function (n) { n.remove(); });
-      var W = c ? 400 : 760, x0 = c ? 130 : 150, x1 = c ? 336 : 690, max = 1000, y0 = c ? 40 : 30, bh = c ? 30 : 34, gap = c ? 26 : 30;
-      var fs = c ? 14 : 15, fsm = c ? 12.5 : 12;
-      svg.setAttribute("viewBox", "0 0 " + W + " 250");
-      function el(tag, attrs, text) {
-        var e = document.createElementNS(NS, tag);
-        Object.keys(attrs).forEach(function (k) { e.setAttribute(k, attrs[k]); });
-        if (text != null) { e.textContent = text; }
-        svg.appendChild(e); return e;
-      }
-      var sx = function (v) { return x0 + (x1 - x0) * v / max; };
-      var yEnd = y0 + rows.length * (bh + gap) - gap;
-      (c ? [0, 500, 1000] : [0, 250, 500, 750, 1000]).forEach(function (v) {
-        el("line", { x1: sx(v), x2: sx(v), y1: y0 - 10, y2: yEnd + 6, style: "stroke:var(--hair);stroke-width:1" });
-        el("text", { x: sx(v), y: yEnd + 24, "text-anchor": "middle", style: "fill:var(--muted);font-size:" + fsm + "px;font-weight:500" }, v + (v === 1000 ? " s" : ""));
-      });
-      rows.forEach(function (r, i) {
-        var y = y0 + i * (bh + gap);
-        el("text", { x: x0 - 12, y: y + bh / 2 + 5, "text-anchor": "end", style: "fill:var(--ink);font-size:" + fs + "px;font-weight:" + (r.ours ? 650 : 500) }, r.name);
-        el("rect", { x: sx(0), y: y, width: sx(r.left) - sx(0), height: bh, rx: 3, style: "fill:var(--line)" });
-        el("rect", { x: sx(r.left), y: y, width: sx(r.left + r.stereo) - sx(r.left), height: bh, rx: 3, style: "fill:" + (r.ours ? "var(--ink)" : "var(--muted)") });
-        el("text", { x: sx(r.left + r.stereo) + 7, y: y + bh / 2 + 5, style: "fill:var(--ink);font-size:" + fs + "px;font-weight:600;font-variant-numeric:tabular-nums" }, r.total + " s");
-      });
-      var ly = c ? 14 : 12;
-      el("rect", { x: x0, y: ly - 9, width: 12, height: 10, rx: 2, style: "fill:var(--line)" });
-      el("text", { x: x0 + 18, y: ly, style: "fill:var(--muted);font-size:" + fsm + "px;font-weight:500" }, "left view, 211.3 s");
-      el("rect", { x: x0 + (c ? 132 : 150), y: ly - 9, width: 12, height: 10, rx: 2, style: "fill:var(--muted)" });
-      el("text", { x: x0 + (c ? 150 : 168), y: ly, style: "fill:var(--muted);font-size:" + fsm + "px;font-weight:500" }, "stereo stage");
-    }
-    render();
-    SG.onResize(render);
   })();
 
   window.SG.view = function () { return view; };

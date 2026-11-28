@@ -82,26 +82,27 @@ ffmpeg -ss 2 -i ID_sbs.mp4 -frames:v 1 -q:v 3 ID_sbs.jpg
 
 ## Interactive figures
 
-They use real data from the paper's runs, precomputed into `static/images/` and `static/data/` by the asset script
-kept with the paper sources (`build_assets.py`, not part of this site). Re-run that script to regenerate them.
+The page has two. Both use real data from the paper's runs, precomputed into `static/images/` and `static/data/` by
+asset scripts kept with the paper sources (not part of this site). Re-run those scripts to regenerate them.
 
 | section | script | data |
 |---|---|---|
-| Key observation (depth settles early) | `static/js/traj.js` | `images/traj/`, `data/traj.json` (the Fig. 3 run: artist's studio, Wan 2.1, 50 steps; median Pearson over 50 videos) |
-| Method (pipeline explorer) | `static/js/pipeline.js` | `images/pipeline/`, `data/pipeline.json` (the Fig. 2 run: penguin, Wan 2.1, d_max 32 px, warps 5/10/15/20, P = 1, frame 40) |
-| Depth-guided warp (live) | `static/js/warp.js` | `images/warp/`, `data/warp.json` (same run, branch step; 8-px cells reproduce the run's 231 holes at d_max 32 px) |
-| Donor chain (schematic) | `static/js/donor.js` | none (schematic grid, not from a run) |
-| Boundary padding | `static/js/padding.js` | `images/padding/` (the supplementary's boundary-padding figure, row (a): LTX-2.3 bollard, P = 0 vs P = 1) |
-| Video-to-stereo | `static/js/v2s.js` | none (schematic) |
-| Parallel sampling chart | in `static/js/site.js` | numbers from the paper's runtime table |
+| Key observation (depth settles early) | `static/js/traj.js` | `images/traj/`, `data/traj.json` (the artist's-studio run: Wan 2.1, 50 steps; median Pearson correlation over 50 videos) |
+| Method (how StereoGraft works, a step-by-step walkthrough) | `static/js/method.js` | `images/method/`, `data/method.json` (the penguin run of the overview figure: Wan 2.1, d_max 32 px, warps after steps 5/10/15/20, P = 1, frame 40; shifts, holes and padding cells of the whole latent frame at each warp) |
+
+The method figure walks through the ten steps of the algorithm on that run. Its frames load per step, and the next
+step is preloaded. `static/js/method.js` holds the step list, the captions and the drawing code; the masks and noise
+levels come from `method.json`.
 
 Keyboard:
-- The sliders take the arrow keys, and Page Up / Page Down jump between warp steps.
+- Depth figure: the arrow keys move along the steps, and Page Up / Page Down jump by five.
+- Method figure (when focused): left and right arrows change the step, space plays or pauses, Home and End jump.
 - `A` and `S` switch every video to anaglyph or side by side.
 - `Esc` closes the video viewer.
 
-With reduced motion, every animation shows a static frame. Light is the default theme; the moon button switches to dark,
-and the choice is remembered in the browser (`sg-theme`, like the view choice `sg-view`).
+With reduced motion, every animation shows its end state and nothing plays on its own. Light is the default theme;
+the moon button switches to dark, and the choice is remembered in the browser (`sg-theme`, like the view choice
+`sg-view`).
 
 ## Notes
 

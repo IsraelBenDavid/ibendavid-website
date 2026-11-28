@@ -12,7 +12,7 @@
   SG.colors = function () {
     var c = {};
     ["ink", "muted", "line", "hair", "bg", "panel", "hover", "left", "left-text", "right", "right-text", "left-tint",
-      "right-tint", "donor-band", "hole", "hole-case", "warp-mark", "arrow", "cell-near", "cell-wall", "cell-floor"].forEach(function (k) {
+      "right-tint", "hole", "hole-case", "warp-mark", "arrow", "card"].forEach(function (k) {
       c[k.replace(/-([a-z])/g, function (m, x) { return x.toUpperCase(); })] = SG.css("--" + k);
     });
     c.dark = root.getAttribute("data-theme") === "dark";
