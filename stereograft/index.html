@@ -82,6 +82,10 @@ window.SG_CONFIG = {
   r.setAttribute("data-view", v === "sbs" ? "sbs" : "ana");
 })();
 </script>
+<script>
+/* scroll-driven intro (static/js/intro.js): hide the intro until intro.js has placed the hero; intro.css shows it after 2.5 s regardless */
+try { if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) { document.documentElement.classList.add("sg-intro-pre"); } } catch (e) {}
+</script>
 
 <title>StereoGraft: Training-Free Text-To-Stereo Video Generation Via Stereo Branching</title>
 <meta name="description" content="StereoGraft turns a frozen text-to-video model into a stereo video generator by branching the right view from the left view's sampling trajectory, without training.">
@@ -114,14 +118,16 @@ window.SG_CONFIG = {
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@450;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="static/css/index.css?v=6">
+<link rel="stylesheet" href="static/css/index.css?v=7">
+<link rel="stylesheet" href="static/css/intro.css?v=1">
 <script defer src="static/js/util.js?v=1"></script>
 <script defer src="static/js/site.js?v=6"></script>
 <script defer src="static/js/traj.js?v=1"></script>
-<script defer src="static/js/stepper.js?v=4"></script>
+<script defer src="static/js/stepper.js?v=5"></script>
 <script defer src="static/js/method.js?v=4"></script>
-<script defer src="static/js/v2s.js?v=4"></script>
+<script defer src="static/js/v2s.js?v=5"></script>
 <script defer src="static/js/compare.js?v=5"></script>
+<script defer src="static/js/intro.js?v=1"></script>
 </head>
 <body>
 
@@ -350,7 +356,7 @@ window.SG_CONFIG = {
         <div class="hw-stage" data-hw="stage-box">
           <p class="hw-pt" data-hw="pt-l"><span class="l">Left view</span> <span class="nt" data-hw="note-l"></span></p>
           <p class="hw-pt" data-hw="pt-r"><span class="r">Right view</span> <span class="nt" data-hw="note-r"></span></p>
-          <p class="hw-pt" data-hw="pt-a" hidden><span>Anaglyph</span> <span class="nt">red = left view, cyan = right view</span></p>
+          <p class="hw-pt" data-hw="pt-a" hidden><span>Anaglyph</span> <span class="nt" data-short="red = left, cyan = right">red = left view, cyan = right view</span></p>
           <canvas data-hw="stage" role="img" aria-label="Left view and right view at the current step of the algorithm."></canvas>
         </div>
         <div class="hw-key" data-hw="key"></div>

@@ -9,7 +9,7 @@
 
   window.SGV2S = SG.Stepper(document.getElementById("hw2"), {
     data: "static/data/v2s.json", img: "static/images/v2s/", media: "media/method/", cols: 64, rows: 37, cell: 8,
-    tileImg: "V", fin: ["V", "R_fin"],
+    tileImg: "V", fin: ["V", "R_fin"], reserve: true, followView: true,
     define: function (A) {
   var D = A.D, WP = A.WP, WARPS = A.WARPS, WIN = A.WIN, sctx = A.sctx, timeCv = A.timeCv, COLS = A.COLS, CELL = A.CELL;
   var HOLE = A.HOLE, CASE = A.CASE, RED = A.RED, CYAN = A.CYAN, RAMP = A.RAMP;
@@ -53,9 +53,9 @@
       case "fill": return "The holes take a background guess, read from the clean latent of the input, under fresh noise at the current level (" + M("t") + " = " + tOf(0) + "). The model repaints them in the steps that follow.";
       case "denoise": return "Only the right view is sampled from here: the left view is the input and needs no steps. The frozen model denoises the right view to the next refresh step and grows its own content in the holes.";
       case "graft":
-        if (k === 1) { return "At the refresh step " + rk(1) + " = " + WARPS[1] + ", the kept state of that step is shifted and copied outside the holes, which ties shared surfaces to the input again. Inside the holes" + (A.P ? " and their padding" : "") + ", the right view keeps its own prediction " + RH + ", re-noised to " + M("t") + " = " + tOf(1) + "."; }
-        if (k === NW) { return "The last refresh, at " + rk(k) + " = " + WARPS[k] + " (" + M("t") + " = " + tOf(k) + "). Every refresh used a state kept during the inversion, and the holes never moved, because the depth of the input never changes."; }
-        return "The same refresh at " + rk(k) + " = " + WARPS[k] + " (" + M("t") + " = " + tOf(k) + "): the kept state of step " + WARPS[k] + " outside the holes, the right view's own content inside them.";
+        if (k === 1) { return "At the refresh step " + rk(1) + " = " + WARPS[1] + ", the kept state of that step is shifted and copied outside the holes" + (A.P ? " and their padding" : "") + ", which ties shared surfaces to the input again. Inside them, the right view keeps its own prediction " + RH + ", re-noised to " + M("t") + " = " + tOf(1) + "."; }
+        if (k === NW) { return "Once more, for the last refresh at " + rk(k) + " = " + WARPS[k] + " (" + M("t") + " = " + tOf(k) + "). Every refresh used a state kept during the inversion, and the holes never moved, because the depth of the input never changes."; }
+        return "The same again: the right view is denoised to " + rk(k) + " = " + WARPS[k] + " and refreshed there (" + M("t") + " = " + tOf(k) + "), with the kept state of step " + WARPS[k] + " outside the holes" + (A.P ? " and their padding" : "") + " and its own content inside them.";
       default: return "After the last refresh the right view finishes sampling and is decoded. The left view is the input video itself, untouched; together they are the stereo pair.";
     }
   }
@@ -68,12 +68,13 @@
       case "depth": return { l: "depth of " + V, r: "", key: K("k-ramp", "far to near") };
       case "shift":
         wk = [0, 1, 2, 3, 4].map(function (v) { return "<i class=\"k k-w\" style=\"background:" + RAMP[v] + (v === 4 ? ";color:#1d1d1f" : "") + "\">" + v + "</i>"; }).join("");
-        return { l: "shift per latent cell &middot; zoom &times;" + (COLS / WIN.cols).toFixed(1), r: "holes, fixed for the whole run",
+        return { l: "shift per latent cell &middot; zoom &times;" + (COLS / WIN.cols).toFixed(1), ls: "shift per cell &middot; zoom &times;" + (COLS / WIN.cols).toFixed(1),
+          r: "holes, fixed for the whole run", rs: "holes, fixed for the run",
           key: "<span>" + wk + "<span>cells moved to the left</span></span>" + K("k-hole", "holes " + M("H")) + (A.P ? K("k-pad", "padding, " + M("P") + " = 1") : "") };
-      case "branch": return { l: "kept state at step " + R0 + ", shown clean", r: "the shifted state", key: K("k-hole", "hole " + M("H") + ": no cell landed here") };
-      case "fill": return { l: "kept state at step " + R0 + ", shown clean", r: "holes filled", key: K("k-holeline", "hole " + M("H")) + K("k-noise", "background guess under fresh noise") };
-      case "denoise": return { l: "the input video " + V, r: "clean prediction " + RH + " at step " + r, key: K("k-holeline", "holes " + M("H")) };
-      case "graft": return { l: "kept state at step " + r + ", shown clean", r: "what the refresh writes",
+      case "branch": return { l: "kept state at step " + R0 + ", shown clean", ls: "kept state at step " + R0 + ", clean", r: "the shifted state", key: K("k-hole", "hole " + M("H") + ": no cell landed here") };
+      case "fill": return { l: "kept state at step " + R0 + ", shown clean", ls: "kept state at step " + R0 + ", clean", r: "holes filled", key: K("k-holeline", "hole " + M("H")) + K("k-noise", "background guess under fresh noise") };
+      case "denoise": return { l: "the input video " + V, r: "clean prediction " + RH + " at step " + r, rs: "prediction " + RH + " at step " + r, key: K("k-holeline", "holes " + M("H")) };
+      case "graft": return { l: "kept state at step " + r + ", shown clean", ls: "kept state at step " + r + ", clean", r: "what the refresh writes",
         key: K("k-left", "copied from the shifted kept state") + K("k-right", "kept from its own prediction " + RH + ", re-noised") };
       default: return { l: "the input video " + V, r: "the generated right view", key: "__switch__" };
     }
@@ -92,7 +93,7 @@
       case "fill": a.push("S"); break;
       case "denoise": r0 = WARPS[k - 1]; a.push("S"); if (k > 1) { a.push(Cn(r0)); } a = a.concat(between(r0, r)); break;
       case "graft": a.push(Rn(r), Cn(r), "S"); break;
-      default: a.push(Cn(WARPS[NW]), "S", "R_fin", "A_fin"); a = a.concat(between(WARPS[NW], N));
+      default: a.push(Cn(WARPS[NW]), "S", "R_fin"); a = a.concat(between(WARPS[NW], N));
     }
     return a;
   }
@@ -140,25 +141,35 @@
     outline(p, v, isH(0), { color: CASE, a: a, cased: false, lw: 1.5 });
     outline(p, v, isP(1), { color: CYAN, a: a * padA, dash: [2.5, 3.5], lw: 2.4 });
   }
-  /* the clip itself (left half of the side-by-side file, or its right half), cropped like the stills */
-  function clip(p, v, a, right) {
-    var el = SG.reduced ? null : A.video(D.media.sbs);
-    if (!el) { return false; }
-    var k = el.videoWidth / 2 / (COLS * CELL);
-    drawSrc(p, el, v, a, k, right ? el.videoWidth / 2 : 0, D.crop_y * k);
-    return true;
+  /* The clip itself: one side-by-side file, the input in its left half and the generated view in its right half, so
+     the two panes (and the anaglyph made from them) always show the same moment. It is cropped like the stills and
+     starts at the frame the stills show (D.media.t0), so a still turns into the clip without a jump. */
+  function clipSrc() {
+    var el = A.video(D.media.sbs, D.media.t0);
+    return el ? half(el) : null;
+  }
+  function half(el) {
+    var k = el.videoWidth / 2 / (COLS * CELL), F = A.FULLV;
+    return { el: el, k: k, x: [F.x * k, el.videoWidth / 2 + F.x * k], y: (D.crop_y + F.y) * k, w: F.w * k, h: F.h * k };
+  }
+  function drawHalf(p, v, src, i, a) {
+    drawSrc(p, src.el, v, a, src.k, i ? src.el.videoWidth / 2 : 0, D.crop_y * src.k);
   }
 
   var INV = ["V"].concat(D.inv.map(function (s) { return "I_" + SG.pad2(s); }));
   var DRAW = {
     encode: function () {
-      var L = A.lay.L, R = A.lay.R, v = viewAt(0);
-      inPane(L, function () { drawImg(L, "V", v, 1); clip(L, v, 1, false); });
+      var L = A.lay.L, R = A.lay.R, v = viewAt(0), src = clipSrc();
+      inPane(L, function () { drawImg(L, "V", v, 1); if (src) { drawHalf(L, v, src, 0, 1); } });
       emptyPane(R, 1, "not started");
     },
     invert: function (lu) {
       var L = A.lay.L, R = A.lay.R, v = viewAt(0), f = seg(lu, 200, PH.invert - 300) * (INV.length - 1);
-      inPane(L, function () { drawSeq(L, INV, f, v); });
+      /* the inversion starts from the frame the clip stopped on, so leaving the first step does not jump */
+      var held = A.videoFrame(D.media.sbs);
+      inPane(L, function () {
+        drawSeq(L, INV, f, v, function (a) { drawImg(L, "V", v, a); if (held) { drawHalf(L, v, half(held), 0, a); } });
+      });
       emptyPane(R, 1, "not started");
     },
     depth: function (lu) {
@@ -244,30 +255,18 @@
       gutterLoop(seg(u, 900, 1350), "keep", A.col.rightText);
     },
     finish: function (lu) {
-      var L = A.lay.L, R = A.lay.R, C = A.lay.C, v = viewAt(1 - ez(lu, 0, 700)), last = WARPS[NW];
+      var L = A.lay.L, R = A.lay.R, v = viewAt(1 - ez(lu, 0, 700)), last = WARPS[NW];
       var fr = [null].concat(between(last, N)).concat(["R_fin"]), f = seg(lu, 700, PH.finish - 150) * (fr.length - 1), ov = 1 - seg(lu, 0, 450);
-      var rest = lu >= PH.finish, a = rest ? SG.ease(A.ana) : 0, el;
-      if (a < 1) {
-        sctx.save(); sctx.globalAlpha = 1 - a;
-        inPane(L, function () { drawImg(L, "V", v, 1); if (rest) { clip(L, v, 1, false); } grid(L, v, ov); });
-        inPane(R, function () {
-          drawSeq(R, fr, f, v, function (al) { drawPost(R, v, NW, al); });
-          if (rest) { clip(R, v, 1, true); }
-          postOverlays(R, v, NW, ov, ov);
-        });
-        sctx.restore();
-        graftGlyphs(ov);
-      }
-      if (a > 0) {
-        /* the same pair as a red-cyan anaglyph (a file of its own; the still is composed from the two frames) */
-        sctx.save(); sctx.globalAlpha = a;
-        inPane(C, function () {
-          el = SG.reduced ? null : A.video(D.media.ana);
-          if (el) { drawSrc(C, el, v, 1, el.videoWidth / (COLS * CELL), 0, D.crop_y * el.videoWidth / (COLS * CELL)); }
-          else { drawImg(C, "A_fin", v, 1); }
-        });
-        sctx.restore();
-      }
+      var src = lu >= PH.finish ? clipSrc() : null;            /* at rest the two panes play the pair */
+      /* the pair merges into a red-cyan anaglyph exactly as in the text-to-stereo figure, here from the playing clip */
+      if (lu >= PH.finish && A.ana > 0) { A.drawAnaglyph(src ? { el: src.el, x: src.x, y: src.y, w: src.w, h: src.h } : null); return; }
+      inPane(L, function () { drawImg(L, "V", v, 1); if (src) { drawHalf(L, v, src, 0, 1); } grid(L, v, ov); });
+      inPane(R, function () {
+        drawSeq(R, fr, f, v, function (al) { drawPost(R, v, NW, al); });
+        if (src) { drawHalf(R, v, src, 1, 1); }
+        postOverlays(R, v, NW, ov, ov);
+      });
+      graftGlyphs(ov);
     }
   };
 
@@ -358,12 +357,15 @@
     });
     if (!small) { ctx.textAlign = "left"; ctx.fillText("step", 8, yT); }
     /* which way each lane runs, in the stretch of steps that is never visited */
-    if (w >= 900) {
-      var lx = X(R0) - 20;
+    if (!small) {
+      var lx = X(R0) - 20, t1 = "inversion runs backward, from the video", t2 = "only the right view is sampled forward";
       ctx.textAlign = "right"; ctx.textBaseline = "middle"; ctx.font = SG.font(12.5, 500); ctx.fillStyle = c.muted;
-      ctx.fillText("inversion runs backward, from the video", lx, yL - 16);
-      ctx.fillText("only the right view is sampled forward", lx, yR + 1);
-      ctx.textAlign = "right"; ctx.fillText("input video", x1 + 4, yL - 16);
+      /* they sit left of the first warp step; they are left out where they would touch the lane names (which end at 52) */
+      if (lx - Math.max(ctx.measureText(t1).width, ctx.measureText(t2).width) >= 58) {
+        ctx.fillText(t1, lx, yL - 16);
+        ctx.fillText(t2, lx, yR + 1);
+      }
+      ctx.fillText("input video", x1 + 4, yL - 16);
     }
   }
 

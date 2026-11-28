@@ -34,6 +34,9 @@
   var shownPhase = "", shownKey = "", dirty = true;
   var PH = null, STOPS = null, TITLES = null, W = null;     /* the figure's walkthrough, from def.define */
   var vids = {}, vidUsed = {}, wantLive = false;
+  var want = null, wantT = 0;                               /* a stop whose pictures are still loading */
+  var anaLive = [];
+  var SWITCH = "<div class=\"seg\" role=\"group\" aria-label=\"Show the stereo pair\"><button type=\"button\" data-mode=\"sbs\">Side by side</button><button type=\"button\" data-mode=\"ana\">Anaglyph</button></div>";
 
   /* ------------------------------------------------------------------ the walkthrough */
   function stopDur(i) { return STOPS[i].ph.reduce(function (acc, p) { return acc + PH[p[0]] / p[1]; }, 0); }
@@ -57,32 +60,65 @@
   function img(name) {
     var e = cache[name];
     if (!e) {
-      e = cache[name] = { im: new Image(), ok: false };
+      e = cache[name] = { im: new Image(), ok: false, done: false, tries: 0 };
       e.im.decoding = "async";
-      e.im.onload = function () { e.ok = true; kick(); };
+      e.im.onload = function () { e.ok = e.done = true; loaded(); };
+      /* a picture that fails is asked for once more; after that its step is shown without it rather than never */
+      e.im.onerror = function () {
+        if (e.tries++ < 1) { setTimeout(function () { e.im.src = IMG + name + ".webp?retry=1"; }, 600); }
+        else { e.done = true; loaded(); }
+      };
       e.im.src = IMG + name + ".webp";
     }
     return e.ok ? e.im : null;
   }
-  function ready(names) { var ok = true; names.forEach(function (n) { if (!img(n)) { ok = false; } }); return ok; }
-  /* a muted looping video, for the phases that play one; it runs only while a frame draws it */
-  function video(name) {
+  function ready(names) { var ok = true; names.forEach(function (n) { img(n); if (!cache[n].done) { ok = false; } }); return ok; }
+  function loaded() {
+    if (want != null && ready(stopImgs(want))) { var w = want; want = null; busy(false); commit(w); }
+    kick();
+  }
+  /* while a step's pictures load, the figure says so: the counter waits and the step that was asked for is marked */
+  function busy(on) {
+    fig.classList.toggle("is-loading", on);
+    stageEl.setAttribute("aria-busy", on ? "true" : "false");
+    items.forEach(function (li) { li.classList.toggle("is-wait", on && want != null && STOPS[+li.getAttribute("data-stop")].item === STOPS[want].item); });
+  }
+  /* A muted looping clip for the phases that play one. It runs only while a frame draws it, and it is handed out
+     only while it really plays, so the still it replaces stays up until then. from = the clip time of that still:
+     a stop that has just been entered starts the clip there, and the still turns into the clip without a jump. */
+  function video(name, from) {
+    /* stills only with reduced motion, and nothing is fetched before the figure is near the viewport */
+    if (SG.reduced || !visible) { return null; }
     var e = vids[name];
     if (!e) {
-      e = vids[name] = { v: document.createElement("video") };
+      e = vids[name] = { v: document.createElement("video"), fresh: true, starting: false, blocked: false };
       e.v.muted = true; e.v.loop = true; e.v.playsInline = true; e.v.preload = "auto";
       e.v.setAttribute("muted", ""); e.v.setAttribute("playsinline", "");
-      e.v.addEventListener("loadeddata", function () { kick(); });
+      ["loadeddata", "seeked", "playing"].forEach(function (t) { e.v.addEventListener(t, function () { kick(); }); });
       e.v.src = MEDIA + name;
     }
     vidUsed[name] = true;
-    if (e.v.readyState < 2) { return null; }
-    if (!SG.reduced) {
-      wantLive = true;
-      if (e.v.paused && visible) { var p = e.v.play(); if (p && p.catch) { p.catch(function () {}); } }
+    var v = e.v;
+    if (e.blocked || v.readyState < 2) { return null; }
+    wantLive = true;
+    if (v.paused && !e.starting) {
+      e.starting = true;
+      /* only where the clip can be sought (a server without byte ranges would send it back to its start) */
+      if (e.fresh && from != null && v.seekable && v.seekable.length && v.seekable.end(v.seekable.length - 1) >= from) {
+        try { v.currentTime = from; } catch (x) { /* stays where it is */ }
+      }
+      e.fresh = false;
+      var p = v.play(), end = function (err) {
+        e.starting = false;
+        if (err && err.name === "NotAllowedError") { e.blocked = true; }     /* no autoplay here: the still stays */
+        kick();
+      };
+      if (p && p.then) { p.then(function () { end(null); }, end); } else { e.starting = false; }
     }
-    return e.v;
+    return v.paused || v.seeking || e.starting ? null : v;
   }
+  /* the frame a clip is holding (it may be paused); nothing is started */
+  function videoFrame(name) { var e = vids[name]; return e && e.v.readyState >= 2 && !e.v.seeking ? e.v : null; }
   function pauseVideos(all) { Object.keys(vids).forEach(function (n) { if ((all || !vidUsed[n]) && !vids[n].v.paused) { vids[n].v.pause(); } }); }
 
   /* ------------------------------------------------------------------ helpers */
@@ -426,16 +462,22 @@
   function graftGlyphs(a) {
     faded(a, function () { gutterArrow(1, "copy", RED, col.leftText, 0.36); gutterLoop(1, "keep", col.rightText); });
   }
-  /* final frames merging into a red-cyan anaglyph (red = left view, green and blue = right view) */
-  function anaLayers() {
+  /* final frames merging into a red-cyan anaglyph (red = left view, green and blue = right view). live, when given,
+     is a playing side-by-side clip: { el, x: [left, right], y, w, h } in its own pixels; the two layers are then
+     re-made from its current frame, so both eyes always show the same moment. */
+  function anaLayers(live) {
     var a = img(def.fin[0]), b = img(def.fin[1]);
-    if (!a || !b || !lay) { return null; }
-    var key = lay.L.w + "x" + lay.L.h + "@" + lay.dpr;
-    if (anaKey !== key) {
+    if (!lay || (!live && (!a || !b))) { return null; }
+    var key = live ? "" : lay.L.w + "x" + lay.L.h + "@" + lay.dpr;
+    if (live || anaKey !== key) {
       anaCv = [a, b].map(function (im, i) {
-        var c = document.createElement("canvas"); c.width = Math.round(lay.L.w * lay.dpr); c.height = Math.round(lay.L.h * lay.dpr);
-        var x = c.getContext("2d"); x.imageSmoothingQuality = "high";
-        x.drawImage(im, FULLV.x, FULLV.y, FULLV.w, FULLV.h, 0, 0, c.width, c.height);
+        /* the layers of a clip are drawn again for every frame, on the same two canvases */
+        var c = (live && anaLive[i]) || document.createElement("canvas"), cw = Math.round(lay.L.w * lay.dpr), ch = Math.round(lay.L.h * lay.dpr);
+        if (c.width !== cw || c.height !== ch) { c.width = cw; c.height = ch; }
+        if (live) { anaLive[i] = c; }
+        var x = c.getContext("2d"); x.globalCompositeOperation = "source-over"; x.imageSmoothingQuality = "high";
+        if (live) { x.drawImage(live.el, live.x[i], live.y, live.w, live.h, 0, 0, c.width, c.height); }
+        else { x.drawImage(im, FULLV.x, FULLV.y, FULLV.w, FULLV.h, 0, 0, c.width, c.height); }
         x.globalCompositeOperation = "multiply"; x.fillStyle = i ? "#00ffff" : "#ff0000"; x.fillRect(0, 0, c.width, c.height);
         return c;
       });
@@ -443,13 +485,17 @@
     }
     return anaCv;
   }
-  function drawAnaglyph() {
-    var L = lay.L, R = lay.R, C = lay.C, v = viewAt(0), ly = anaLayers(), a1 = seg(ana, 0, 0.35), s = SG.ease(seg(ana, 0.35, 1));
-    if (!ly) { inPane(L, function () { drawImg(L, def.fin[0], v, 1); }); inPane(R, function () { drawImg(R, def.fin[1], v, 1); }); return; }
+  function drawAnaglyph(live) {
+    var L = lay.L, R = lay.R, C = lay.C, v = viewAt(0), ly = anaLayers(live), a1 = seg(ana, 0, 0.35), s = SG.ease(seg(ana, 0.35, 1));
+    var base = function (p, i) {
+      if (live) { sctx.imageSmoothingQuality = "high"; sctx.drawImage(live.el, live.x[i], live.y, live.w, live.h, p.x, p.y, p.w, p.h); }
+      else { drawImg(p, def.fin[i], v, 1); }
+    };
+    if (!ly) { inPane(L, function () { base(L, 0); }); inPane(R, function () { base(R, 1); }); return; }
     var pl = { x: SG.lerp(L.x, C.x, s), y: SG.lerp(L.y, C.y, s), w: L.w, h: L.h }, pr = { x: SG.lerp(R.x, C.x, s), y: SG.lerp(R.y, C.y, s), w: R.w, h: R.h };
     if (s <= 0) {
-      inPane(pl, function () { drawImg(pl, def.fin[0], v, 1); sctx.globalAlpha = a1; sctx.drawImage(ly[0], pl.x, pl.y, pl.w, pl.h); sctx.globalAlpha = 1; });
-      inPane(pr, function () { drawImg(pr, def.fin[1], v, 1); sctx.globalAlpha = a1; sctx.drawImage(ly[1], pr.x, pr.y, pr.w, pr.h); sctx.globalAlpha = 1; });
+      inPane(pl, function () { base(pl, 0); sctx.globalAlpha = a1; sctx.drawImage(ly[0], pl.x, pl.y, pl.w, pl.h); sctx.globalAlpha = 1; });
+      inPane(pr, function () { base(pr, 1); sctx.globalAlpha = a1; sctx.drawImage(ly[1], pr.x, pr.y, pr.w, pr.h); sctx.globalAlpha = 1; });
       return;
     }
     sctx.save();
@@ -477,19 +523,36 @@
     if (id !== shownPhase) {
       shownPhase = id;
       var t = W.phaseText(loc.name, loc.k);
-      noteL.innerHTML = t.l; noteR.innerHTML = t.r;
+      setNotes(t);
       setKey(t.key);
     }
     var merged = cur === STOPS.length - 1 && u >= stopDur(cur) ? ana : 0;
     ptL.style.opacity = ptR.style.opacity = String(1 - seg(merged, 0.15, 0.45));
-    ptA.hidden = merged < 0.75; ptA.style.opacity = String(seg(merged, 0.75, 1));
+    var hid = merged < 0.75;
+    if (ptA.hidden !== hid) { ptA.hidden = hid; if (!hid) { fitAna(); } }
+    ptA.style.opacity = String(seg(merged, 0.75, 1));
+  }
+  /* the note of the anaglyph title, like the pane notes: its short form (data-short) where the full one would be cut off */
+  function fitAna() {
+    var n = ptA.querySelector(".nt"), sh = n && n.getAttribute("data-short");
+    if (!sh) { return; }
+    if (!n.hasAttribute("data-full")) { n.setAttribute("data-full", n.textContent); }
+    n.textContent = n.getAttribute("data-full");
+    if (ptA.scrollWidth > ptA.clientWidth + 1) { n.textContent = sh; }
+  }
+  /* the note after each pane title; where the full text would be cut off, the phase's short form (ls / rs) is used */
+  function setNotes(t) {
+    [[noteL, ptL, t.l, t.ls], [noteR, ptR, t.r, t.rs]].forEach(function (a) {
+      a[0].innerHTML = a[2];
+      if (a[3] != null && a[1].scrollWidth > a[1].clientWidth + 1) { a[0].innerHTML = a[3]; }
+    });
   }
   function setKey(html) {
     var key = html + "|" + P;
     if (key === shownKey) { return; }
     shownKey = key;
     if (html !== "__switch__") { keyEl.innerHTML = html; return; }
-    keyEl.innerHTML = "<div class=\"seg\" role=\"group\" aria-label=\"Show the stereo pair\"><button type=\"button\" data-mode=\"sbs\">Side by side</button><button type=\"button\" data-mode=\"ana\">Anaglyph</button></div>";
+    keyEl.innerHTML = SWITCH;
     paintSwitch();
   }
   function paintSwitch() {
@@ -507,17 +570,20 @@
 
   function tick(ts) {
     raf = null;
+    if (!W) { return; }                                      /* nothing to draw before the data is here */
     if (lastTs == null) { lastTs = ts; }
     var dt = Math.min(64, ts - lastTs), dur = stopDur(cur), active = false, u0 = u, a0 = ana, c0 = cur;
     lastTs = ts;
     if (u < dur) {
       if (ready(stopImgs(cur))) { u = Math.min(dur, u + dt); }
       active = true;
-    } else if (playing) {
+    } else if (playing && want == null) {
       dwell -= dt;
       if (dwell <= 0) { if (cur < STOPS.length - 1) { go(cur + 1); } else { setPlaying(false); } }
       active = playing;
     }
+    /* pictures that take too long: show the stop with what has arrived */
+    if (want != null) { if (ts - wantT > 8000) { var w8 = want; want = null; busy(false); commit(w8); } active = true; }
     if (ana !== anaTarget) { ana = SG.clamp(ana + (anaTarget > ana ? 1 : -1) * dt / 650, 0, 1); active = true; }
     if (dirty || wantLive || u !== u0 || ana !== a0 || cur !== c0) { dirty = false; draw(); }
     if ((active || wantLive) && visible) { raf = requestAnimationFrame(tick); } else { lastTs = null; }
@@ -528,7 +594,7 @@
   var api = {
     SG: SG, fig: fig, def: def, sctx: sctx, timeCv: timeCv, COLS: COLS, ROWS: ROWS, CELL: CELL, CTX: CTX,
     HOLE: HOLE, CASE: CASE, RED: RED, CYAN: CYAN, RAMP: RAMP,
-    seg: seg, ez: ez, viewAt: viewAt, cellPx: cellPx, cx: cx, cy: cy, span: span, inPane: inPane, img: img, video: video,
+    seg: seg, ez: ez, viewAt: viewAt, cellPx: cellPx, cx: cx, cy: cy, span: span, inPane: inPane, img: img, video: video, videoFrame: videoFrame,
     drawImg: drawImg, drawSrc: drawSrc, drawSeq: drawSeq, grid: grid, fillCells: fillCells, outline: outline, shiftTint: shiftTint,
     noise: noise, emptyPane: emptyPane, label: label, arrow: arrow, loop: loop, isH: isH, isP: isP, isKept: isKept,
     isCovered: isCovered, tiles: tiles, tile: tile, drawTiles: drawTiles, gutterArrow: gutterArrow, gutterLoop: gutterLoop,
@@ -562,16 +628,26 @@
     bPrev.disabled = cur === 0; bNext.disabled = cur === STOPS.length - 1;
     stageEl.setAttribute("aria-label", "Step " + s.item + " of " + n + ": " + TITLES[s.item - 1] + ". " + capEl.textContent);
   }
+  /* Go to a stop. Its pictures are asked for first; until they are here the figure stays as it is (and says that it is
+     loading), so a step is never drawn with an empty pane. With the pictures cached this is immediate. */
   function go(i) {
-    cur = SG.clamp(i, 0, STOPS.length - 1);
+    if (!W) { return; }                                      /* a control pressed before the data is here */
+    i = SG.clamp(i, 0, STOPS.length - 1);
+    if (ready(stopImgs(i))) { want = null; busy(false); commit(i); return; }
+    want = i; wantT = performance.now(); busy(true); kick();
+  }
+  function commit(i) {
+    cur = i;
     u = SG.reduced ? stopDur(cur) : 0;
-    if (cur !== STOPS.length - 1) { ana = anaTarget = 0; }
+    /* every stop starts side by side, also the last one when it is started again */
+    ana = anaTarget = 0; paintSwitch();
+    Object.keys(vids).forEach(function (n) { vids[n].fresh = true; vids[n].blocked = false; });
     paintDom();
     dwell = dwellFor(cur);
-    stopImgs(cur).forEach(img);
     if (cur + 1 < STOPS.length) { stopImgs(cur + 1).forEach(img); }
     kick();
   }
+  function target() { return want != null ? want : cur; }
   function setPlaying(on) {
     playing = on;
     bPlay.setAttribute("data-state", on ? "playing" : "paused");
@@ -579,20 +655,22 @@
     if (on) { kick(); }
   }
   function hold() { started = true; setPlaying(false); }
-  function next() { hold(); go(cur + 1); }
-  function prev() { hold(); go(cur - 1); }
+  function next() { hold(); go(target() + 1); }
+  function prev() { hold(); go(target() - 1); }
 
   bNext.addEventListener("click", next);
   bPrev.addEventListener("click", prev);
   bPlay.addEventListener("click", function () {
+    if (!W) { return; }
     started = true;
     if (playing) { setPlaying(false); return; }
     if (cur === STOPS.length - 1 && u >= stopDur(cur)) { go(0); } else { dwell = Math.min(dwell, 900); }
     setPlaying(true);
   });
-  bReplay.addEventListener("click", function () { started = true; go(0); setPlaying(!SG.reduced); });
+  bReplay.addEventListener("click", function () { if (!W) { return; } started = true; go(0); setPlaying(!SG.reduced); });
   items.forEach(function (li) {
     li.querySelector("button").addEventListener("click", function () {
+      if (!W) { return; }
       var st = +li.getAttribute("data-stop");
       hold();
       /* an item that holds several stops: a click on it while it is shown moves on to its next stop */
@@ -603,13 +681,14 @@
     b.addEventListener("click", function () {
       P = +b.getAttribute("data-p");
       padBtns.forEach(function (x) { x.setAttribute("aria-pressed", x === b ? "true" : "false"); });
+      if (!W) { return; }
       shownPhase = "";
       capEl.innerHTML = W.caption(cur);
       kick();
     });
   });
   fig.addEventListener("keydown", function (e) {
-    if (e.altKey || e.ctrlKey || e.metaKey) { return; }
+    if (!W || e.altKey || e.ctrlKey || e.metaKey) { return; }
     var onButton = e.target && e.target.tagName === "BUTTON";
     if (e.key === "ArrowRight") { e.preventDefault(); next(); }
     else if (e.key === "ArrowLeft") { e.preventDefault(); prev(); }
@@ -619,7 +698,50 @@
   });
   fig.addEventListener("pointerdown", function (e) { if (!(e.target.closest && e.target.closest("button"))) { fig.focus({ preventScroll: true }); } });
 
-  function relayout() { if (!W) { return; } if (layout()) { tileKey = ""; anaKey = ""; draw(); } }
+  /* The caption, the key line and (narrow layout) the step title change with every step. A figure that asks for it
+     (def.reserve) gets the height of the tallest one of each at the current width, so nothing moves between steps.
+     The texts are measured in hidden copies of the three elements; the shown ones are not touched. */
+  function tallest(el, htmls) {
+    var w = el.getBoundingClientRect().width, h = 0, c;
+    if (!w) { return 0; }                                    /* not shown in this layout */
+    c = el.cloneNode(false);
+    ["data-hw", "aria-live", "id"].forEach(function (n) { c.removeAttribute(n); });
+    c.setAttribute("aria-hidden", "true");
+    c.style.cssText = "position:absolute;left:0;top:0;visibility:hidden;pointer-events:none;width:" + w + "px;";
+    el.parentNode.appendChild(c);
+    htmls.forEach(function (t) { c.innerHTML = t; h = Math.max(h, c.getBoundingClientRect().height); });
+    el.parentNode.removeChild(c);
+    return h;
+  }
+  function reserve() {
+    if (!def.reserve || !W) { return; }
+    var p0 = P, caps = [], keys = [], titles = [];
+    [capEl, keyEl, nowT].forEach(function (e) { e.style.minHeight = ""; });
+    [1, 0].forEach(function (p) {
+      P = p;                                                 /* the texts of both padding settings */
+      STOPS.forEach(function (s, i) {
+        caps.push(W.caption(i));
+        s.ph.forEach(function (ph) { var k = W.phaseText(ph[0], s.k).key; keys.push(k === "__switch__" ? SWITCH : k); });
+        titles.push(TITLES[s.item - 1] + (W.pips(s).title || ""));
+      });
+    });
+    P = p0;
+    [[capEl, caps], [keyEl, keys], [nowT, titles]].forEach(function (a) {
+      var h = tallest(a[0], a[1]);
+      if (h > 0) { a[0].style.minHeight = (Math.round(h * 100) / 100) + "px"; }
+    });
+  }
+  /* A figure whose last step plays a stereo video (def.followView) answers the page-wide Anaglyph / Side by side
+     switch there, like every other video on the page. It still starts side by side, as its two panes promise. */
+  if (def.followView && SG.onView) {
+    SG.onView(function (m) {
+      if (!W || cur !== STOPS.length - 1 || u < stopDur(cur)) { return; }
+      anaTarget = m === "ana" ? 1 : 0;
+      if (SG.reduced) { ana = anaTarget; }
+      paintSwitch(); kick();
+    });
+  }
+  function relayout() { if (!W) { return; } reserve(); if (layout()) { tileKey = ""; anaKey = ""; shownPhase = ""; draw(); if (!ptA.hidden) { fitAna(); } } }
   SG.onResize(relayout);
   SG.onTheme(function () { if (W) { draw(); } });
   if ("ResizeObserver" in window) { new ResizeObserver(function () { if (W && lay && Math.floor(stageBox.clientWidth) !== lay.W) { relayout(); } }).observe(stageBox); }
@@ -631,10 +753,14 @@
     W = def.define(api);
     PH = W.PH; STOPS = W.STOPS; TITLES = W.TITLES;
     paintDom();
+    reserve();
+    if (def.reserve && document.fonts && document.fonts.ready) { document.fonts.ready.then(relayout); }     /* the web font changes the line breaks */
     u = SG.reduced ? stopDur(0) : 0;
     stopImgs(0).forEach(img);
     draw();
     SG.watchVisible(fig, function (on) { visible = on; if (on) { stopImgs(cur).forEach(img); kick(); } else { pauseVideos(true); } }, { rootMargin: "200px 0px" });
+    /* a clip does not run in a tab that is not shown */
+    document.addEventListener("visibilitychange", function () { if (document.hidden) { pauseVideos(true); } else if (visible) { kick(); } });
     /* autoplay once, when most of the figure is on screen */
     SG.onceVisible(fig, function () { if (!started && !SG.reduced) { started = true; go(0); setPlaying(true); } }, 0.5);
   }).catch(function () { capEl.textContent = "The interactive figure could not be loaded."; });

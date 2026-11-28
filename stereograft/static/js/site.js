@@ -158,7 +158,7 @@
   Slot.prototype.src = function () { return this.mode === "sbs" ? this.url.sbs : this.url.ana; };
   Slot.prototype.poster = function () { return this.mode === "sbs" ? this.url.psbs : this.url.pana; };
   Slot.prototype.refreshMode = function () {
-    var m = modeFor(this.el);
+    var m = this.forceMode || modeFor(this.el);          /* forceMode: intro.js plays the anaglyph in the full-window hero */
     if (m === this.mode) { return false; }
     this.mode = m;
     this.el.setAttribute("data-mode", m);
@@ -257,6 +257,7 @@
     host.style.setProperty("--hero-ar", String(t.ar || 16 / 9));
     s.v.addEventListener("loadedmetadata", function () { host.style.setProperty("--hero-ar", String(s.ar)); });
     watch(s);
+    SG.teaser = s;                                         /* for intro.js */
   })();
 
   /* ------------------------------------------------------------------ galleries */

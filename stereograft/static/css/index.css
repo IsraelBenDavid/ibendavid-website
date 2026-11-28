@@ -456,6 +456,13 @@ summary:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
 .hw-nav .transport [data-hw="next"] { border-color: var(--ink); background: var(--ink); color: var(--bg); }
 .hw-nav .transport [data-hw="next"]:hover:not(:disabled) { background: var(--btn-hover); }
 .hw-count { min-width: 3.6em; color: var(--muted); font-size: 13px; font-weight: 600; font-variant-numeric: tabular-nums; text-align: right; }
+/* the pictures of the step that was asked for are still on their way: the figure stays as it is and the counter waits */
+.hw.is-loading .hw-count, .hw.is-loading .hw-now-pill, .hw-list li.is-wait .n { animation: hw-wait 0.9s ease-in-out infinite alternate; }
+.hw-list li.is-wait .n { border-color: var(--ink); }
+.hw-list li.is-wait button { color: var(--ink); }
+.hw.is-loading .hw-nav .transport button, .hw.is-loading .hw-list button { cursor: progress; }
+@keyframes hw-wait { from { opacity: 1; } to { opacity: 0.35; } }
+@media (prefers-reduced-motion: reduce) { .hw.is-loading .hw-count, .hw.is-loading .hw-now-pill, .hw-list li.is-wait .n { animation: none; opacity: 0.5; } }
 
 .hw-after { margin-top: 20px; }
 .hw-credit { margin: 0 auto; max-width: 60em; color: var(--muted); font-size: 14px; line-height: 1.5; text-align: center; }

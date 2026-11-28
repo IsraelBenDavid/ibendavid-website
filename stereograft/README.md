@@ -107,8 +107,13 @@ asset scripts kept with the paper sources (not part of this site). Re-run those 
 | Method, video-to-stereo (the same stepper) | `static/js/stepper.js` + `static/js/v2s.js` | `images/v2s/`, `data/v2s.json`, `media/method/` (one Wan 2.1 conversion of a Stereo4D test clip at the paper's setting: 100 steps, inversion to step 30, warps after steps 30/40/.../80, P = 1; decoded inverted states, the right view's predictions, one fixed shift and hole set) |
 
 `stepper.js` is the shared figure: timeline canvas, numbered list, the two-pane stage, caption, transport, keyboard.
+A walkthrough can ask for two extras in its definition: `reserve: true` keeps the figure's height fixed by reserving
+the tallest caption, key line and step title at the current width, and `followView: true` lets the page-wide
+Anaglyph / Side by side switch drive the last step (the video-to-stereo figure sets both).
 Each walkthrough file holds its step list, captions, phase drawings and timeline. Frames load per step, and the
-next step is preloaded; the two clips of the video-to-stereo figure play only in its first and last steps.
+next step is preloaded; a step is shown only once its pictures are there. The video-to-stereo figure has one clip
+(`media/method/v2s_sbs.mp4`: the input in the left half, the generated right view in the right half). It plays only in
+the first and last steps, and the anaglyph of the last step is composed from its two halves in the browser.
 
 Keyboard:
 - Depth figure: the arrow keys move along the steps, and Page Up / Page Down jump by five.
