@@ -47,34 +47,29 @@ window.SG_CONFIG = {
   posterExt: "jpg",
   teaser: { id: "teaser", ar: 1280 / 704, caption: "Text-to-stereo with LTX-2.3, from a text prompt alone. Put on red-cyan glasses, or switch to side by side." },
 
+  // Add an entry per video; the pickers are built from the backbones and resolutions present.
   t2s: [
-    { id: "wan21_720p_1",  backbone: "wan21", res: "720p",  ar: 16 / 9, prompt: "" },
-    { id: "wan21_720p_2",  backbone: "wan21", res: "720p",  ar: 16 / 9, prompt: "" },
-    { id: "wan21_720p_3",  backbone: "wan21", res: "720p",  ar: 16 / 9, prompt: "" },
-    { id: "wan21_720p_4",  backbone: "wan21", res: "720p",  ar: 16 / 9, prompt: "" },
-    { id: "wan21_1080p_1", backbone: "wan21", res: "1080p", ar: 16 / 9, prompt: "" },
-    { id: "wan21_1080p_2", backbone: "wan21", res: "1080p", ar: 16 / 9, prompt: "" },
-    { id: "wan21_1080p_3", backbone: "wan21", res: "1080p", ar: 16 / 9, prompt: "" },
-    { id: "wan21_1080p_4", backbone: "wan21", res: "1080p", ar: 16 / 9, prompt: "" },
-    { id: "ltx23_720p_1",  backbone: "ltx23", res: "720p",  ar: 16 / 9, prompt: "" },
-    { id: "ltx23_720p_2",  backbone: "ltx23", res: "720p",  ar: 16 / 9, prompt: "" },
-    { id: "ltx23_720p_3",  backbone: "ltx23", res: "720p",  ar: 16 / 9, prompt: "" },
-    { id: "ltx23_720p_4",  backbone: "ltx23", res: "720p",  ar: 16 / 9, prompt: "" },
-    { id: "ltx23_1080p_1", backbone: "ltx23", res: "1080p", ar: 16 / 9, prompt: "" },
-    { id: "ltx23_1080p_2", backbone: "ltx23", res: "1080p", ar: 16 / 9, prompt: "" },
-    { id: "ltx23_1080p_3", backbone: "ltx23", res: "1080p", ar: 16 / 9, prompt: "" },
-    { id: "ltx23_1080p_4", backbone: "ltx23", res: "1080p", ar: 16 / 9, prompt: "" }
+    { id: "ltx23_1080p_cape_buffalo", backbone: "ltx23", res: "1080p", ar: 1920 / 1088,
+      prompt: "Photorealistic wildlife documentary footage, medium close-up. A single old Cape buffalo stands close to the camera in the centre of the frame, its massive dark head with heavy curved horns meeting in a thick boss in the upper middle of the frame and its chest, continuing down out of the bottom of the frame, well away from the left and right edges. It chews slowly, flicks its ears and turns its head to look around every few seconds. A few metres behind it on the left, a single small thorn bush; far away, a pale golden grassland and low blue hills under big white clouds drifting steadily across the sky. Clean empty pale sky to the right of its head. Soft warm late-afternoon light, sharp skin and horn detail." }
   ],
 
   v2s: [
-    { id: "wan21_1", backbone: "wan21", res: "720p", ar: 16 / 9, source: "" },
-    { id: "wan21_2", backbone: "wan21", res: "720p", ar: 16 / 9, source: "" },
-    { id: "wan21_3", backbone: "wan21", res: "720p", ar: 16 / 9, source: "" },
-    { id: "wan21_4", backbone: "wan21", res: "720p", ar: 16 / 9, source: "" },
-    { id: "ltx23_1", backbone: "ltx23", res: "720p", ar: 16 / 9, source: "" },
-    { id: "ltx23_2", backbone: "ltx23", res: "720p", ar: 16 / 9, source: "" },
-    { id: "ltx23_3", backbone: "ltx23", res: "720p", ar: 16 / 9, source: "" },
-    { id: "ltx23_4", backbone: "ltx23", res: "720p", ar: 16 / 9, source: "" }
+    { id: "wan21_720p_train_autumn_forest", backbone: "wan21", res: "720p", ar: 1280 / 720,
+      source: "Input: the Hogwarts Express in an autumn forest, from the official Harry Potter “Hogwarts Express” compilation." },
+    { id: "wan21_720p_platform_goodbye", backbone: "wan21", res: "720p", ar: 1280 / 720,
+      source: "Input: a goodbye on the station platform, from the official Harry Potter “Hogwarts Express” compilation." },
+    { id: "wan21_720p_jeep_visitors", backbone: "wan21", res: "720p", ar: 1280 / 720,
+      source: "Input: Jurassic Park, extended preview (Universal Pictures)." },
+    { id: "wan21_720p_coast_aerial", backbone: "wan21", res: "720p", ar: 1280 / 528,
+      source: "Input: The Mandalorian and Grogu, official trailer (Lucasfilm)." },
+    { id: "wan21_720p_bear_cubs_shore", backbone: "wan21", res: "720p", ar: 1280 / 624,
+      source: "Input: Seven Worlds, One Planet (BBC Earth)." },
+    { id: "wan21_1080p_dune_harvester", backbone: "wan21", res: "1080p", ar: 1920 / 800,
+      source: "Input: Dune, official movie clip “Spice” (Warner Bros.)." },
+    { id: "ltx23_1080p_hermione_train", backbone: "ltx23", res: "1080p", ar: 1920 / 1056,
+      source: "Input: a train compartment, from the official Harry Potter “Hogwarts Express” compilation." },
+    { id: "ltx23_720p_dune_paul", backbone: "ltx23", res: "720p", ar: 1280 / 512,
+      source: "Input: Dune, official movie clip “Spice” (Warner Bros.)." }
   ]
 };
 </script>

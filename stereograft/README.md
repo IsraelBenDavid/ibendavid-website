@@ -46,8 +46,8 @@ An entry may instead give explicit paths: `files: { a: "...", s: "...", pa: "...
 | section | ids in the current config | files |
 |---|---|---|
 | teaser | `teaser` | `media/teaser/teaser_anaglyph.mp4`, `media/teaser/teaser_sbs.mp4` |
-| text-to-stereo | `wan21_720p_1..4`, `wan21_1080p_1..4`, `ltx23_720p_1..4`, `ltx23_1080p_1..4` | `media/t2s/<id>_anaglyph.mp4`, `media/t2s/<id>_sbs.mp4` |
-| video-to-stereo | `wan21_1..4`, `ltx23_1..4` | `media/v2s/<id>_anaglyph.mp4`, `media/v2s/<id>_sbs.mp4` |
+| text-to-stereo | one id per entry of `t2s` in the config | `media/t2s/<id>_anaglyph.mp4`, `media/t2s/<id>_sbs.mp4` |
+| video-to-stereo | one id per entry of `v2s` in the config | `media/v2s/<id>_anaglyph.mp4`, `media/v2s/<id>_sbs.mp4` |
 
 For example, the first Wan 2.1 720p text-to-stereo slot is `media/t2s/wan21_720p_1_anaglyph.mp4` plus
 `media/t2s/wan21_720p_1_sbs.mp4`. Each `t2s` entry also takes its `prompt`, and each `v2s` entry its `source`
