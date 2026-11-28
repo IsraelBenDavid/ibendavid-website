@@ -123,16 +123,22 @@ summary:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
 .site-header { position: relative; padding: clamp(48px, 7vh, 84px) 0 clamp(28px, 4vh, 48px); text-align: center; }
 .site-header .theme-btn { position: absolute; top: 18px; right: 18px; border-color: transparent; color: var(--muted); }
 .site-header .theme-btn:hover { color: var(--ink); }
-.site-header h1 {
-  margin: 0 auto 26px; max-width: 24em;
-  font-size: clamp(28px, 3.2vw, 44px); font-weight: 650; letter-spacing: -0.03em; line-height: 1.15;
+.site-header h1 { margin: 0 auto 30px; font-weight: 650; }
+/* the wordmark: one large anaglyph word; the rest of the title sits under it in plain ink */
+.site-header h1 .name {
+  display: block; width: max-content; max-width: 100%; margin: 0 auto;
+  font-size: clamp(44px, 14vw, 148px); font-weight: 700; letter-spacing: -0.045em; line-height: 0.98;
 }
-.site-header h1 .name { display: block; }
-.authors { margin: 0; font-size: clamp(18px, 1.15vw, 24px); line-height: 1.8; overflow-wrap: break-word; }
+.site-header h1 .sub {
+  display: block; max-width: 30em; margin: 0.55em auto 0; text-wrap: balance;
+  font-size: clamp(18px, 2vw, 30px); font-weight: 500; letter-spacing: -0.02em; line-height: 1.25; color: var(--ink);
+}
+.authors { margin: 0; font-size: clamp(18px, 1.3vw, 24px); line-height: 1.8; overflow-wrap: break-word; }
+.authors .author + .author { margin-left: 0.5em; }
 .authors .author { white-space: nowrap; }
 .authors sup, .affiliations sup { font-size: 0.62em; }
 .affiliations { margin: 8px 0 0; color: var(--muted); font-size: clamp(15px, 0.95vw, 20px); }
-.affiliations span + span { margin-left: 1em; }
+.affiliations span { display: inline-block; white-space: nowrap; margin: 0 0.5em; }
 .author-notes { margin: 6px 0 0; color: var(--muted); font-size: clamp(13px, 0.8vw, 16px); }
 .venue { margin: 10px 0 0; color: var(--muted); font-size: clamp(14px, 0.9vw, 18px); font-weight: 500; }
 .is-placeholder { color: var(--muted); border-bottom: 1px dashed var(--line); }
@@ -192,15 +198,25 @@ summary:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
 /* alternates, switched on <html>: data-ana="deep" puts the title 1.5x further in front (0.06 em);
    data-ana="title-only" keeps the top-bar wordmark in plain ink */
 :root[data-ana="deep"] .site-header .ana[data-text] { --ana-d: 0.06em; }
+/* the large wordmark: 0.045 em is about 6 px at 135 px, further in front than the old title and still easy to fuse */
+:root .site-header h1 .name.ana[data-text] { --ana-d: 0.045em; }
+@media (prefers-reduced-motion: no-preference) {
+  .site-header h1 .name.ana[data-text]::after { animation: ana-in 1.2s cubic-bezier(.2, .7, .2, 1) both; }
+}
+@keyframes ana-in { from { transform: translateX(calc(var(--ana-dir) * 0.2em)); } }
 :root[data-ana="title-only"] .topbar .ana[data-text] { color: var(--ink); mix-blend-mode: normal; }
 :root[data-ana="title-only"] .topbar .ana[data-text]::after { display: none; }
 
 /* ---------------------------------------------------------------- hero: teaser video */
 .hero-stage { padding: 8px 0 48px; }
 .hero-stage > .wrap { width: var(--story-width); }
-.hero-teaser { width: min(100%, 1180px); margin: 0 auto; }
+.hero-teaser { width: min(100%, 1500px); margin: 0 auto; }
+.sv-hero .sv-box { border-radius: 18px; box-shadow: 0 34px 90px -36px rgb(0 0 0 / 0.45), 0 2px 10px rgb(0 0 0 / 0.06); }
+.hero-caption .glasses { width: 30px; height: 12px; margin-right: 9px; vertical-align: -1px; fill: none; stroke: currentColor; stroke-width: 1.4; }
+.hero-caption .glasses .gl-l { fill: rgb(255 0 0 / 0.75); stroke: none; }
+.hero-caption .glasses .gl-r { fill: rgb(0 220 235 / 0.8); stroke: none; }
 .hero-meta { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: 10px; }
-.hero-caption { margin: 0; color: var(--muted); font-size: clamp(13px, 0.75vw, 16px); text-align: left; }
+.hero-caption { margin: 0; color: var(--muted); font-size: clamp(14px, 0.95vw, 17px); text-align: left; }
 .tldr {
   margin: 36px auto 8px; max-width: 36em; text-align: center;
   font-size: clamp(26px, 1.7vw, 38px); font-weight: 550; letter-spacing: -0.025em; line-height: 1.3;
@@ -210,18 +226,16 @@ summary:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
 .hero-abstract p { margin: 16px 0 0; padding: 18px 20px; border-radius: 12px; background: var(--panel); text-align: left; }
 
 @media (min-width: 861px) {
-  .intro { display: flex; flex-direction: column; min-height: 100svh; }
-  .intro .site-header { display: flex; flex: 0 0 auto; min-height: 34svh; align-items: center; padding: 4svh 0 2.5svh; }
+  /* the header takes its natural height; the teaser is as large as the window allows (whole video in view at once) */
+  .intro .site-header { padding: clamp(40px, 7svh, 88px) 0 clamp(22px, 3.2svh, 40px); }
   .intro .site-header > .wrap { width: min(1240px, calc(100% - 48px)); }
-  .intro .site-header h1 { font-size: clamp(28px, 4.4svh, 48px); margin-bottom: 2.4svh; }
-  .intro .authors { font-size: clamp(16px, 2.1svh, 24px); }
-  .intro .affiliations { font-size: clamp(14px, 1.75svh, 20px); }
-  .intro .links { margin-top: 2.6svh; }
-  .intro .btn { font-size: clamp(14px, 1.75svh, 20px); }
-  .intro .hero-stage { flex: 1 1 auto; display: flex; flex-direction: column; justify-content: center; padding: 1svh 0 4svh; }
-  .intro .hero-teaser { width: min(100%, calc((41svh) * var(--hero-ar, 1.7778))); }
-  .intro .tldr { margin-top: 3svh; max-width: 46em; font-size: clamp(22px, 3.1svh, 36px); }
-  .intro .hero-abstract { margin-top: 1.6svh; }
+  .intro .site-header h1 .name { font-size: clamp(72px, 16svh, 156px); }
+  .intro .site-header h1 .sub { font-size: clamp(20px, 3svh, 30px); }
+  .intro .links { margin-top: 28px; }
+  .intro .hero-stage { padding: 6px 0 clamp(36px, 6svh, 72px); }
+  .intro .hero-stage > .wrap { width: min(1500px, calc(100% - 48px)); }
+  .intro .hero-teaser { width: min(100%, calc(84svh * var(--hero-ar, 1.7778))); }
+  .intro .tldr { margin-top: clamp(40px, 7svh, 72px); max-width: 40em; }
 }
 
 /* ---------------------------------------------------------------- stereo video slot */

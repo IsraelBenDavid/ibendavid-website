@@ -16,12 +16,12 @@ window.SG_CONFIG = {
 
   authors: [
     // { name: "First Last", url: "https://...", affil: [1, 2], mark: "*" }
-    { name: "", url: "", affil: [1] },
-    { name: "", url: "", affil: [1] },
-    { name: "", url: "", affil: [2] },
-    { name: "", url: "", affil: [1] }
+    { name: "Israel Ben David", url: "https://www.ibendavid.com/", affil: [1] },
+    { name: "Noam Issachar", url: "", affil: [1] },
+    { name: "Matan Levy", url: "", affil: [2] },
+    { name: "Dani Lischinski", url: "", affil: [1] }
   ],
-  affiliations: ["", ""],            // index 0 is affiliation 1
+  affiliations: ["Hebrew University of Jerusalem", "Cornell University"],            // index 0 is affiliation 1
   authorNotes: "",                   // e.g. "* Equal contribution"
   venue: "",                         // venue / date line, e.g. "arXiv 2026"; empty hides it once draft is false
 
@@ -33,11 +33,11 @@ window.SG_CONFIG = {
   },
 
   bibtex:
-"@article{stereograft,\n" +
+"@article{bendavid2026stereograft,\n" +
 "  title   = {StereoGraft: Training-Free Text-To-Stereo Video Generation Via Stereo Branching},\n" +
-"  author  = {Author, First and Author, Second and Author, Third and Author, Fourth},\n" +
-"  journal = {arXiv preprint arXiv:XXXX.XXXXX},\n" +
-"  year    = {XXXX}\n" +
+"  author  = {Ben David, Israel and Issachar, Noam and Levy, Matan and Lischinski, Dani},\n" +
+"  journal = {arXiv preprint},\n" +
+"  year    = {2026}\n" +
 "}",
 
   acknowledgements: "",
@@ -46,7 +46,7 @@ window.SG_CONFIG = {
   // Each slot plays media/<section>/<id>_anaglyph.mp4 or <id>_sbs.mp4 (posters <id>_anaglyph.jpg / <id>_sbs.jpg).
   // ar = width / height of ONE view (the anaglyph); it is corrected automatically once a file loads.
   posterExt: "jpg",
-  teaser: { id: "teaser", ar: 1280 / 704, caption: "" },
+  teaser: { id: "teaser", ar: 1280 / 704, caption: "Text-to-stereo with LTX-2.3, from a text prompt alone. Put on red-cyan glasses, or switch to side by side." },
 
   t2s: [
     { id: "wan21_720p_1",  backbone: "wan21", res: "720p",  ar: 16 / 9, prompt: "" },
@@ -120,9 +120,9 @@ window.SG_CONFIG = {
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@450;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="static/css/index.css?v=5">
+<link rel="stylesheet" href="static/css/index.css?v=6">
 <script defer src="static/js/util.js?v=1"></script>
-<script defer src="static/js/site.js?v=5"></script>
+<script defer src="static/js/site.js?v=6"></script>
 <script defer src="static/js/traj.js?v=1"></script>
 <script defer src="static/js/stepper.js?v=4"></script>
 <script defer src="static/js/method.js?v=4"></script>
@@ -162,7 +162,7 @@ window.SG_CONFIG = {
     </button>
     <div class="wrap">
       <!-- class "ana": printed as a red-cyan anaglyph of itself; data-text feeds the second copy (CSS ::after, empty alt text, so screen readers read the title once); site.js keeps it equal to the text -->
-      <h1 class="ana" data-text="StereoGraft: Training-Free Text-To-Stereo Video Generation Via Stereo Branching">StereoGraft: Training-Free Text-To-Stereo Video Generation Via Stereo Branching</h1>
+      <h1><span class="name ana" data-text="StereoGraft">StereoGraft</span><span class="sub">Training-Free Text-To-Stereo Video Generation Via Stereo Branching</span></h1>
       <p class="authors" id="authors"></p>
       <p class="affiliations" id="affiliations"></p>
       <p class="author-notes" id="author-notes" hidden></p>

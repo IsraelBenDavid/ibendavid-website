@@ -35,7 +35,7 @@
       span.appendChild(el);
       var sup = (a.affil || []).join(",") + (a.mark || "");
       if (sup) { span.appendChild(h("sup", null, sup)); }
-      if (A.childNodes.length) { A.appendChild(document.createTextNode(", ")); }
+      if (A.childNodes.length) { A.appendChild(document.createTextNode(" ")); }
       A.appendChild(span);
     });
     (C.affiliations || []).forEach(function (f, i) {
@@ -48,7 +48,7 @@
     if (C.authorNotes) { var n = $("#author-notes"); n.textContent = C.authorNotes; n.hidden = false; }
     var V = $("#venue");
     if (C.venue) { V.textContent = C.venue; V.hidden = false; }
-    else if (draft) { V.appendChild(placeholder("Venue and date")); V.hidden = false; }
+    else if (draft && !(C.authors || []).some(function (a) { return a.name; })) { V.appendChild(placeholder("Venue and date")); V.hidden = false; }
     $$("#links [data-link]").forEach(function (a) {
       var url = (C.links || {})[a.getAttribute("data-link")];
       if (url) { a.href = url; a.target = "_blank"; a.rel = "noopener"; }
@@ -244,7 +244,10 @@
     host.appendChild(s.el);
     var meta = h("div", "hero-meta");
     var cap = h("p", "hero-caption");
-    if (t.caption) { cap.textContent = t.caption; } else if (draft) { cap.appendChild(placeholder("Teaser caption")); }
+    if (t.caption) {
+      cap.innerHTML = '<svg class="glasses" viewBox="0 0 34 14" aria-hidden="true"><rect class="gl-l" x="1" y="2" width="13" height="10" rx="3"/><rect class="gl-r" x="20" y="2" width="13" height="10" rx="3"/><path d="M14 6c1.5-1.6 4.5-1.6 6 0"/></svg>';
+      cap.appendChild(document.createTextNode(t.caption));
+    } else if (draft) { cap.appendChild(placeholder("Teaser caption")); }
     meta.appendChild(cap);
     var seg = h("div", "seg");
     seg.setAttribute("role", "group"); seg.setAttribute("aria-label", "View of the teaser");
