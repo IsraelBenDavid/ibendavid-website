@@ -25,7 +25,7 @@ Everything an author edits is in the `window.SG_CONFIG` block at the top of `ind
 | `authors` | `{ name, url, affil: [1, 2], mark: "*" }` per author. |
 | `affiliations`, `authorNotes` | affiliation names (index 0 is affiliation 1) and an optional note such as "* Equal contribution". |
 | `venue` | the venue / date line. It stays hidden when empty and `draft` is `false`. |
-| `links` | `paper`, `arxiv`, `code`, `supplementary`. An empty URL shows the button disabled. |
+| `links` | `paper`, `arxiv`, `code`. An empty URL shows the button disabled. |
 | `bibtex` | the BibTeX entry. The Copy button copies it. |
 | `acknowledgements` | one paragraph. The section is hidden when empty and `draft` is `false`. |
 | `teaser`, `t2s`, `v2s` | the video slots (see below). Add, remove or reorder entries freely. |
