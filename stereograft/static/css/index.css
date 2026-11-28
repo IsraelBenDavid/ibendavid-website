@@ -159,14 +159,14 @@ summary:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
    front of the page the title needs crossed disparity (the left eye's copy to the RIGHT of the right eye's), so the
    cyan copy sits right of the red one on the light theme and left of it on the dark theme (--ana-dir). */
 :root {
-  --ana-red: rgb(255 29 31);
-  --ana-cyan: rgb(29 255 255);
+  --ana-red: rgb(255 0 0);
+  --ana-cyan: rgb(0 255 255);
   --ana-blend: multiply;
   --ana-dir: 1;
 }
 :root[data-theme="dark"] {
-  --ana-red: rgb(241 0 0);
-  --ana-cyan: rgb(0 241 241);
+  --ana-red: rgb(255 0 0);
+  --ana-cyan: rgb(0 255 255);
   --ana-blend: screen;
   --ana-dir: -1;
 }
