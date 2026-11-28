@@ -61,6 +61,9 @@
     else { $("#acknowledgements").hidden = true; }
   })();
 
+  /* ------------------------------------------------------------------ anaglyph title: its second copy (CSS ::after) repeats the text */
+  $$(".ana").forEach(function (e) { e.setAttribute("data-text", e.textContent.replace(/\s+/g, " ").trim()); });
+
   /* ------------------------------------------------------------------ theme */
   function themeUI() {
     var dark = root.getAttribute("data-theme") === "dark";

@@ -146,6 +146,55 @@ summary:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
 .btn.is-disabled { pointer-events: none; opacity: 0.45; }
 .btn-icon { width: 1em; height: 1em; flex: none; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.8; }
 
+/* ---------------------------------------------------------------- anaglyph title and top-bar wordmark
+   Both are printed as a real red-cyan anaglyph of themselves, in the convention of the page's videos (red channel =
+   left view, green + blue = right view). The element's own text is one copy, in red; ::after repeats it from
+   data-text in cyan, with empty alt text, so screen readers, copy and find-in-page still get the title once.
+   Both copies multiply onto the light page (screen onto the dark one) and hold the blend's neutral value (255 for
+   multiply, 0 for screen) in the channels they must not touch, so each filter of red-cyan glasses passes exactly
+   one copy, and where the copies overlap they print the page ink.
+   Sign: the red filter is on the LEFT eye, so the left eye sees the red channel. On the light page the red copy
+   has the paper's red and vanishes in it while the cyan copy is dark: the left eye's title is the CYAN copy. On the
+   dark page the red copy is the bright one in the red channel: the left eye's title is the RED copy. To float in
+   front of the page the title needs crossed disparity (the left eye's copy to the RIGHT of the right eye's), so the
+   cyan copy sits right of the red one on the light theme and left of it on the dark theme (--ana-dir). */
+:root {
+  --ana-red: rgb(255 29 31);
+  --ana-cyan: rgb(29 255 255);
+  --ana-blend: multiply;
+  --ana-dir: 1;
+}
+:root[data-theme="dark"] {
+  --ana-red: rgb(241 0 0);
+  --ana-cyan: rgb(0 241 241);
+  --ana-blend: screen;
+  --ana-dir: -1;
+}
+.site-header .ana[data-text], .topbar .ana[data-text] {
+  --ana-d: 0.04em;                                 /* 1.6 px on the 40 px desktop title, 1.1 px on the 28 px phone title */
+  position: relative; color: var(--ana-red); mix-blend-mode: var(--ana-blend);
+}
+.topbar .ana[data-text] { --ana-d: 0.0625em; }   /* 1 px on the 16 px wordmark */
+/* selection: pin the copy colour (the browser would recolour only the selectable copy) on a light wash of the system highlight */
+.ana[data-text]::selection { color: var(--ana-red); background-color: Highlight; background-color: color-mix(in srgb, Highlight 40%, transparent); }
+.ana[data-text]::after {
+  content: attr(data-text);
+  content: attr(data-text) / "";
+  position: absolute; inset: 0;
+  color: var(--ana-cyan); mix-blend-mode: var(--ana-blend);
+  transform: translateX(calc(var(--ana-dir) * var(--ana-d)));
+  pointer-events: none; -webkit-user-select: none; user-select: none;
+}
+@media (forced-colors: active) {
+  .site-header .ana[data-text], .topbar .ana[data-text] { color: CanvasText; mix-blend-mode: normal; }
+  .ana[data-text]::after { display: none; }
+}
+/* alternates, switched on <html>: data-ana="deep" puts the title 1.5x further in front (0.06 em);
+   data-ana="title-only" keeps the top-bar wordmark in plain ink */
+:root[data-ana="deep"] .site-header .ana[data-text] { --ana-d: 0.06em; }
+:root[data-ana="title-only"] .topbar .ana[data-text] { color: var(--ink); mix-blend-mode: normal; }
+:root[data-ana="title-only"] .topbar .ana[data-text]::after { display: none; }
+
 /* ---------------------------------------------------------------- hero: teaser video */
 .hero-stage { padding: 8px 0 48px; }
 .hero-stage > .wrap { width: var(--story-width); }
