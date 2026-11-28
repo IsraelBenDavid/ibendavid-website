@@ -28,7 +28,7 @@ Everything an author edits is in the `window.SG_CONFIG` block at the top of `ind
 | `links` | `paper`, `arxiv`, `code`, `supplementary`. An empty URL shows the button disabled. |
 | `bibtex` | the BibTeX entry. The Copy button copies it. |
 | `acknowledgements` | one paragraph. The section is hidden when empty and `draft` is `false`. |
-| `teaser`, `t2s`, `v2s`, `comparisons` | the video slots (see below). Add, remove or reorder entries freely. |
+| `teaser`, `t2s`, `v2s` | the video slots (see below). Add, remove or reorder entries freely. |
 
 Before publishing, also fill in and uncomment the two commented `<head>` blocks: the 1200x630 social card
 (`static/images/social-card.jpg`) and the Google Scholar `citation_*` tags.
@@ -48,7 +48,6 @@ An entry may instead give explicit paths: `files: { a: "...", s: "...", pa: "...
 | teaser | `teaser` | `media/teaser/teaser_anaglyph.mp4`, `media/teaser/teaser_sbs.mp4` |
 | text-to-stereo | `wan21_720p_1..4`, `wan21_1080p_1..4`, `ltx23_720p_1..4`, `ltx23_1080p_1..4` | `media/t2s/<id>_anaglyph.mp4`, `media/t2s/<id>_sbs.mp4` |
 | video-to-stereo | `wan21_1..4`, `ltx23_1..4` | `media/v2s/<id>_anaglyph.mp4`, `media/v2s/<id>_sbs.mp4` |
-| comparisons | `t2s_1`, `v2s_1` | `media/compare/<id>/<method>_anaglyph.mp4` and `_sbs.mp4` for `stereograft`, `dissolvestereo`, `svg`, `stereocrafter`, `stereoworld` |
 
 For example, the first Wan 2.1 720p text-to-stereo slot is `media/t2s/wan21_720p_1_anaglyph.mp4` plus
 `media/t2s/wan21_720p_1_sbs.mp4`. Each `t2s` entry also takes its `prompt`, and each `v2s` entry its `source`
@@ -80,23 +79,40 @@ ffmpeg -ss 2 -i ID_anaglyph.mp4 -frames:v 1 -q:v 3 ID_anaglyph.jpg
 ffmpeg -ss 2 -i ID_sbs.mp4 -frames:v 1 -q:v 3 ID_sbs.jpg
 ```
 
+## Comparison with prior methods
+
+The "Against prior methods" section is one widget (`static/js/compare.js`): a baseline chosen by a pill row on the
+left, StereoGraft on the right, the same example at the same disparity setting, played together. Its media are
+ready-made and live in `media/compare/<example>/`:
+
+```
+<method>_d<setting>_anaglyph.mp4   <method>_d<setting>_sbs.mp4   (+ a .webp poster beside each)   thumb.webp
+method:  dissolvestereo | dissolvestereo-dagger | svg | stereocrafter | stereograft      setting: 20 | 24 | 30
+```
+
+The examples, their captions and the one sentence shown per (example, baseline) are in `static/data/compare.json`.
+To add an example, add its folder with all 30 videos and posters and one entry to that file. Nothing in this section
+loads until it is near the viewport, and only the selected pair's two files are requested. "Right view" shows the
+right half of the side-by-side file. The page-wide Anaglyph / Side by side switch also sets this section's view.
+
 ## Interactive figures
 
-The page has two. Both use real data from the paper's runs, precomputed into `static/images/` and `static/data/` by
+The page has three. All use real data from the paper's runs, precomputed into `static/images/` and `static/data/` by
 asset scripts kept with the paper sources (not part of this site). Re-run those scripts to regenerate them.
 
 | section | script | data |
 |---|---|---|
 | Key observation (depth settles early) | `static/js/traj.js` | `images/traj/`, `data/traj.json` (the artist's-studio run: Wan 2.1, 50 steps; median Pearson correlation over 50 videos) |
-| Method (how StereoGraft works, a step-by-step walkthrough) | `static/js/method.js` | `images/method/`, `data/method.json` (the penguin run of the overview figure: Wan 2.1, d_max 32 px, warps after steps 5/10/15/20, P = 1, frame 40; shifts, holes and padding cells of the whole latent frame at each warp) |
+| Method, text-to-stereo (step-by-step walkthrough) | `static/js/stepper.js` + `static/js/method.js` | `images/method/`, `data/method.json` (the penguin run of the overview figure: Wan 2.1, d_max 32 px, warps after steps 5/10/15/20, P = 1, frame 40; shifts, holes and padding cells of the whole latent frame at each warp) |
+| Method, video-to-stereo (the same stepper) | `static/js/stepper.js` + `static/js/v2s.js` | `images/v2s/`, `data/v2s.json`, `media/method/` (one Wan 2.1 conversion of a Stereo4D test clip at the paper's setting: 100 steps, inversion to step 30, warps after steps 30/40/.../80, P = 1; decoded inverted states, the right view's predictions, one fixed shift and hole set) |
 
-The method figure walks through the ten steps of the algorithm on that run. Its frames load per step, and the next
-step is preloaded. `static/js/method.js` holds the step list, the captions and the drawing code; the masks and noise
-levels come from `method.json`.
+`stepper.js` is the shared figure: timeline canvas, numbered list, the two-pane stage, caption, transport, keyboard.
+Each walkthrough file holds its step list, captions, phase drawings and timeline. Frames load per step, and the
+next step is preloaded; the two clips of the video-to-stereo figure play only in its first and last steps.
 
 Keyboard:
 - Depth figure: the arrow keys move along the steps, and Page Up / Page Down jump by five.
-- Method figure (when focused): left and right arrows change the step, space plays or pauses, Home and End jump.
+- Method figures (when focused): left and right arrows change the step, space plays or pauses, Home and End jump.
 - `A` and `S` switch every video to anaglyph or side by side.
 - `Esc` closes the video viewer.
 

@@ -320,85 +320,7 @@
     var k = sec.getAttribute("data-gallery");
     if (k === "t2s") { galleries.push(new Gallery(sec, C.t2s, "t2s")); }
     else if (k === "v2s") { galleries.push(new Gallery(sec, C.v2s, "v2s")); }
-    else if (k === "compare") { buildComparisons(sec); }
   });
-
-  /* ------------------------------------------------------------------ comparisons */
-  function buildComparisons(sec) {
-    sec.setAttribute("data-view-scope", "");
-    var host = $("[data-grid]", sec);
-    var methods = C.comparisonMethods || [];
-    (C.comparisons || []).forEach(function (cmp, ci) {
-      var wrap = h("article", "cmp");
-      var head = h("div", "cmp-head");
-      var p = h("p", "cmp-prompt");
-      var bb = BACKBONE[cmp.backbone] || cmp.backbone || "";
-      p.appendChild(h("span", "sv-meta", [cmp.task, bb].filter(Boolean).join(" · ")));
-      if (cmp.text) { p.appendChild(document.createTextNode(cmp.task === "Text-to-stereo" ? "“" + cmp.text + "”" : cmp.text)); }
-      else if (draft) { p.appendChild(placeholder(cmp.task === "Text-to-stereo" ? "Prompt of this comparison" : "Source of the input video")); }
-      head.appendChild(p);
-      var tools = h("div", "cmp-tools");
-      var pick = h("div", "picker");
-      pick.setAttribute("role", "group"); pick.setAttribute("aria-label", "Baseline shown on the left");
-      tools.appendChild(pick);
-      var tr = h("div", "transport");
-      tr.innerHTML = '<button type="button" class="c-play" aria-label="Pause" data-state="playing"><svg class="i-play" viewBox="0 0 20 20" aria-hidden="true"><path d="m6.5 4.5 9 5.5-9 5.5z"/></svg><svg class="i-pause" viewBox="0 0 20 20" aria-hidden="true"><path d="M6.5 4.5v11M13.5 4.5v11"/></svg></button><button type="button" class="c-restart" aria-label="Restart"><svg viewBox="0 0 20 20" aria-hidden="true" style="fill:none"><path d="M4.5 10a5.5 5.5 0 1 0 1.8-4.1M4.5 4v3.5H8"/></svg></button>';
-      tools.appendChild(tr);
-      head.appendChild(tools);
-      wrap.appendChild(head);
-      var pair = h("div", "cmp-pair");
-      var base = "media/compare/" + cmp.id + "/";
-      var colL = h("div"), colR = h("div");
-      var labL = h("p", "vis-label", methods.length ? methods[0].name : "Baseline");
-      var labR = h("p", "vis-label", "StereoGraft (ours)");
-      colL.appendChild(labL); colR.appendChild(labR);
-      var mk = function (slug, name, ours) {
-        return new Slot({ base: base + slug, ar: cmp.ar, label: name + ", comparison " + (ci + 1), phTitle: name, ours: ours });
-      };
-      var cur = methods.length ? methods[0] : { slug: "baseline", name: "Baseline" };
-      var left = mk(cur.slug, cur.name, false), right = mk("stereograft", "StereoGraft", true);
-      colL.appendChild(left.el); colR.appendChild(right.el);
-      pair.appendChild(colL); pair.appendChild(colR);
-      wrap.appendChild(pair);
-      host.appendChild(wrap);
-      var group = { slots: [left, right], playing: false, held: false };
-      left.group = right.group = group;
-      [left, right].forEach(watch);
-      var bPlay = $(".c-play", tr);
-      function ui() { bPlay.setAttribute("data-state", group.playing ? "playing" : "paused"); bPlay.setAttribute("aria-label", group.playing ? "Pause" : "Play"); }
-      group.play = function () { group.playing = true; left.play(); right.play(); ui(); };
-      group.pause = function () { group.playing = false; left.pause(); right.pause(); ui(); };
-      bPlay.addEventListener("click", function () { if (group.playing) { group.held = true; group.pause(); } else { group.held = false; group.play(); } });
-      $(".c-restart", tr).addEventListener("click", function () { [left, right].forEach(function (s) { s.load(); seek(s.v, 0); }); group.held = false; group.play(); });
-      ui();
-      SG.watchVisible(pair, function (on) { if (on && !group.held) { group.play(); } else if (!on) { group.pause(); } }, { threshold: 0.4 });
-      // keep the baseline locked to ours
-      setInterval(function () {
-        var m = right.v, s = left.v;
-        if (!group.playing || m.paused || m.readyState < 2 || s.readyState < 2) { return; }
-        if (Math.abs(s.currentTime - m.currentTime) > 0.12 && Math.abs((s.duration || 0) - (m.duration || 0)) < 0.2) { seek(s, m.currentTime); }
-        if (s.paused) { playV(s); }
-      }, 400);
-      pickerButtons(pick, methods.map(function (m) { return m.slug; }),
-        methods.reduce(function (acc, m) { acc[m.slug] = m.name; return acc; }, {}), cur.slug, function (slug) {
-          var m = methods.filter(function (x) { return x.slug === slug; })[0];
-          labL.textContent = m.name;
-          var t = right.v.currentTime || 0;
-          left.url.ana = base + slug + "_anaglyph.mp4"; left.url.sbs = base + slug + "_sbs.mp4";
-          var ext = C.posterExt || "jpg";
-          left.url.pana = base + slug + "_anaglyph." + ext; left.url.psbs = base + slug + "_sbs." + ext;
-          left.missing = {}; left.postered = null; left.el.classList.remove("is-ready", "has-poster", "is-missing");
-          left.box.setAttribute("aria-label", "Enlarge: " + m.name);
-          if (left.phFile) { left.phFile.textContent = left.src(); }
-          var ph = $(".ph-title", left.el); if (ph) { ph.textContent = m.name; }
-          if (left.loaded) {
-            left.v.src = left.src();
-            left.v.addEventListener("loadedmetadata", function () { seek(left.v, t); if (group.playing) { playV(left.v); } }, { once: true });
-          }
-          left.setPoster();
-        });
-    });
-  }
 
   /* ------------------------------------------------------------------ view switch */
   var scopes = $$("[data-view-scope]");
@@ -412,12 +334,15 @@
     Lightbox.paint();
   }
   function viewsChanged() { slots.forEach(function (s) { s.viewChanged(); }); Lightbox.viewChanged(); paintViews(); }
+  var viewCbs = [];
+  SG.onView = function (cb) { viewCbs.push(cb); };          /* called when the page-wide view changes */
   function setView(m) {
     view = m;
     root.setAttribute("data-view", m);
     store.set("sg-view", m);
     scopes.forEach(function (s) { s.removeAttribute("data-view"); });
     viewsChanged();
+    viewCbs.forEach(function (cb) { try { cb(m); } catch (e) { /* keep going */ } });
   }
   function setScopeView(s, m) {
     if (m === view) { s.removeAttribute("data-view"); } else { s.setAttribute("data-view", m); }
@@ -503,7 +428,7 @@
     var io = new IntersectionObserver(function (es) {
       es.forEach(function (e) {
         if (!e.isIntersecting) { return; }
-        var id = e.target.id;
+        var id = e.target.id === "v2s" ? "t2s" : e.target.id;       /* both galleries sit under "Results" */
         Object.keys(links).forEach(function (k) { links[k].classList.toggle("is-on", k === id); });
       });
     }, { rootMargin: "-45% 0px -54% 0px" });

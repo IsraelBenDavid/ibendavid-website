@@ -76,18 +76,6 @@ window.SG_CONFIG = {
     { id: "ltx23_2", backbone: "ltx23", res: "720p", ar: 16 / 9, source: "" },
     { id: "ltx23_3", backbone: "ltx23", res: "720p", ar: 16 / 9, source: "" },
     { id: "ltx23_4", backbone: "ltx23", res: "720p", ar: 16 / 9, source: "" }
-  ],
-
-  // Comparisons: media/compare/<id>/<method>_anaglyph.mp4 and <method>_sbs.mp4 for every method listed.
-  comparisonMethods: [
-    { slug: "dissolvestereo", name: "DissolveStereo†" },
-    { slug: "svg",            name: "SVG" },
-    { slug: "stereocrafter",  name: "StereoCrafter" },
-    { slug: "stereoworld",    name: "StereoWorld" }
-  ],
-  comparisons: [
-    { id: "t2s_1", task: "Text-to-stereo", backbone: "wan21", ar: 16 / 9, text: "" },
-    { id: "v2s_1", task: "Video-to-stereo", backbone: "wan21", ar: 16 / 9, text: "" }
   ]
 };
 </script>
@@ -132,11 +120,14 @@ window.SG_CONFIG = {
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@450;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="static/css/index.css?v=3">
+<link rel="stylesheet" href="static/css/index.css?v=4">
 <script defer src="static/js/util.js?v=1"></script>
-<script defer src="static/js/site.js?v=3"></script>
+<script defer src="static/js/site.js?v=4"></script>
 <script defer src="static/js/traj.js?v=1"></script>
-<script defer src="static/js/method.js?v=3"></script>
+<script defer src="static/js/stepper.js?v=4"></script>
+<script defer src="static/js/method.js?v=4"></script>
+<script defer src="static/js/v2s.js?v=4"></script>
+<script defer src="static/js/compare.js?v=4"></script>
 </head>
 <body>
 
@@ -146,8 +137,8 @@ window.SG_CONFIG = {
     <nav class="topnav" aria-label="Sections">
       <a href="#observation">Observation</a>
       <a href="#method">Method</a>
-      <a href="#t2s">Text-to-stereo</a>
-      <a href="#v2s">Video-to-stereo</a>
+      <a href="#v2s-method">Video-to-stereo</a>
+      <a href="#t2s">Results</a>
       <a href="#compare">Comparisons</a>
       <a href="#bibtex">BibTeX</a>
     </nav>
@@ -259,7 +250,7 @@ window.SG_CONFIG = {
 <section class="story method" id="method">
   <div class="wrap-wide">
     <div class="story-head">
-      <p class="kicker">Method</p>
+      <p class="kicker">Method &middot; text-to-stereo</p>
       <h2>Branch the right view early, then refresh it along a donor chain.</h2>
       <p class="lead">Follow one real Wan 2.1 sample from noise to a stereo pair. Press Next to take the algorithm one step at a time.</p>
     </div>
@@ -274,47 +265,47 @@ window.SG_CONFIG = {
           <button type="button" data-p="0" aria-pressed="false">0</button>
           <button type="button" data-p="1" aria-pressed="true">1</button>
         </div>
-        <button class="pill" type="button" id="hw-replay" aria-label="Replay the walkthrough from the first step">&#8635; Replay</button>
+        <button class="pill" type="button" data-hw="replay" aria-label="Replay the walkthrough from the first step">&#8635; Replay</button>
       </div>
     </div>
-    <canvas class="hw-time" id="hw-time" aria-hidden="true"></canvas>
+    <canvas class="hw-time" data-hw="time" aria-hidden="true"></canvas>
 
     <div class="hw-main">
-      <ol class="hw-list" id="hw-list" aria-label="The algorithm">
+      <ol class="hw-list" data-hw="list" aria-label="The algorithm">
         <li data-stop="0"><button type="button"><span class="n">1</span><span class="t">Sample the left view up to step <i class="m">r</i><sub>0</sub>.</span></button></li>
         <li data-stop="1"><button type="button"><span class="n">2</span><span class="t">Estimate depth from its clean prediction <i class="m">L&#770;</i>.</span></button></li>
         <li data-stop="2"><button type="button"><span class="n">3</span><span class="t">Turn depth into a shift per latent cell.</span></button></li>
         <li data-stop="3"><button type="button"><span class="n">4</span><span class="t">Branch: shift the left latent <i class="m">L</i> to start the right view <i class="m">R</i>. Empty cells are holes <i class="m">H</i>.</span></button></li>
         <li data-stop="4"><button type="button"><span class="n">5</span><span class="t">Fill the holes with a background guess and fresh noise.</span></button></li>
-        <li data-stop="5" class="in-loop"><button type="button"><span class="n">6</span><span class="t">Denoise both views until the next refresh step.</span></button></li>
+        <li data-stop="5" class="in-loop is-first"><button type="button"><span class="n">6</span><span class="t">Denoise both views until the next refresh step.</span></button></li>
         <li data-stop="6" class="in-loop"><button type="button"><span class="n">7</span><span class="t">Refresh: new depth, new shift, new holes, grown by <i class="m">P</i> cells.</span></button></li>
-        <li data-stop="7" class="in-loop"><button type="button"><span class="n">8</span><span class="t">Outside the holes, copy the shifted <i class="m">L</i> again. Inside, keep the right view's own <i class="m">R&#770;</i>.</span></button></li>
+        <li data-stop="7" class="in-loop is-last"><button type="button"><span class="n">8</span><span class="t">Outside the holes, copy the shifted <i class="m">L</i> again. Inside, keep the right view's own <i class="m">R&#770;</i>.</span></button></li>
         <li data-stop="8"><button type="button"><span class="n">9</span><span class="t">Repeat 6 to 8 at <i class="m">r</i><sub>2</sub>, &hellip;, <i class="m">r<sub>m</sub></i>.
-          <span class="hw-pips" id="hw-pips"><i></i><i></i><i></i><em id="hw-pips-t">3 refreshes</em></span></span></button></li>
+          <span class="hw-pips" data-hw="pips"><i></i><i></i><i></i><em data-hw="pips-t">3 refreshes</em></span></span></button></li>
         <li data-stop="10"><button type="button"><span class="n">10</span><span class="t">Finish both views and decode.</span></button></li>
       </ol>
 
       <div class="hw-right">
-        <p class="hw-now" id="hw-now"><span class="hw-now-pill" id="hw-now-pill">Step 1 / 10</span><span class="hw-now-t" id="hw-now-t"></span></p>
-        <div class="hw-stage" id="hw-stage-box">
-          <p class="hw-pt" id="hw-pt-l"><span class="l">Left view</span> <span class="nt" id="hw-note-l"></span></p>
-          <p class="hw-pt" id="hw-pt-r"><span class="r">Right view</span> <span class="nt" id="hw-note-r"></span></p>
-          <p class="hw-pt" id="hw-pt-a" hidden><span>Anaglyph</span> <span class="nt">red = left view, cyan = right view</span></p>
-          <canvas id="hw-stage" role="img" aria-label="Left view and right view at the current step of the algorithm."></canvas>
+        <p class="hw-now" data-hw="now"><span class="hw-now-pill" data-hw="now-pill">Step 1 / 10</span><span class="hw-now-t" data-hw="now-t"></span></p>
+        <div class="hw-stage" data-hw="stage-box">
+          <p class="hw-pt" data-hw="pt-l"><span class="l">Left view</span> <span class="nt" data-hw="note-l"></span></p>
+          <p class="hw-pt" data-hw="pt-r"><span class="r">Right view</span> <span class="nt" data-hw="note-r"></span></p>
+          <p class="hw-pt" data-hw="pt-a" hidden><span>Anaglyph</span> <span class="nt">red = left view, cyan = right view</span></p>
+          <canvas data-hw="stage" role="img" aria-label="Left view and right view at the current step of the algorithm."></canvas>
         </div>
-        <div class="hw-key" id="hw-key"></div>
+        <div class="hw-key" data-hw="key"></div>
         <div class="hw-bar">
-          <p class="hw-cap" id="hw-cap" aria-live="polite"></p>
+          <p class="hw-cap" data-hw="cap" aria-live="polite"></p>
           <div class="hw-nav">
             <div class="transport" role="group" aria-label="Walkthrough">
-              <button type="button" id="hw-prev" aria-label="Previous step"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 4v12M16 4.5 7.5 10l8.5 5.5z"/></svg></button>
-              <button type="button" id="hw-play" aria-label="Play" data-state="paused">
+              <button type="button" data-hw="prev" aria-label="Previous step"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 4v12M16 4.5 7.5 10l8.5 5.5z"/></svg></button>
+              <button type="button" data-hw="play" aria-label="Play" data-state="paused">
                 <svg class="i-play" viewBox="0 0 20 20" aria-hidden="true"><path d="m6.5 4.5 9 5.5-9 5.5z"/></svg>
                 <svg class="i-pause" viewBox="0 0 20 20" aria-hidden="true"><path d="M6.5 4.5v11M13.5 4.5v11"/></svg>
               </button>
-              <button type="button" id="hw-next" aria-label="Next step"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M16 4v12M4 4.5l8.5 5.5L4 15.5z"/></svg></button>
+              <button type="button" data-hw="next" aria-label="Next step"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M16 4v12M4 4.5l8.5 5.5L4 15.5z"/></svg></button>
             </div>
-            <span class="hw-count" id="hw-count">1 / 10</span>
+            <span class="hw-count" data-hw="count">1 / 10</span>
           </div>
         </div>
       </div>
@@ -323,7 +314,75 @@ window.SG_CONFIG = {
 
   <div class="wrap-wide hw-after">
     <p class="hw-credit">Wan 2.1 text-to-stereo, frame 40 of 81, shown as decoded clean predictions. 8-px latent cells, <i class="m">d</i><sub>max</sub> = 32 px, warps after steps 5, 10, 15 and 20 of 50. The frames come from a run with <i class="m">P</i> = 1.</p>
-    <p class="hw-v2s"><b>Video-to-stereo.</b> The input video is the left view, so step 1 is replaced by inverting it back to step <i class="m">r</i><sub>0</sub>, keeping the states at <i class="m">r</i><sub>1</sub>, &hellip;, <i class="m">r<sub>m</sub></i> for the refreshes. Depth is estimated once, from the input, so the shift and the holes stay fixed.</p>
+    <p class="hw-v2s">Converting an existing video uses the same branch and the same refreshes, after one extra stage: an inversion. <a href="#v2s-method">The next figure</a> walks through it.</p>
+  </div>
+</section>
+
+<!-- 3. video-to-stereo (the second method figure, same stepper) -------------------------------------- -->
+<section class="story method" id="v2s-method">
+  <div class="wrap-wide">
+    <div class="story-head">
+      <p class="kicker">Method &middot; video-to-stereo</p>
+      <h2>For an existing video, invert first, then branch.</h2>
+      <p class="lead">The input video is the left view. Its sampling trajectory is recovered by inversion, and the right view branches from it and is refreshed as before.</p>
+    </div>
+  </div>
+
+  <figure class="hw" id="hw2" tabindex="0" aria-label="Video-to-stereo, step by step. Left and right arrow keys change the step, space plays or pauses.">
+    <div class="hw-top">
+      <p class="vis-label">100 sampling steps, from noise to video</p>
+      <div class="hw-tools">
+        <div class="seg hw-pad" role="group" aria-label="Boundary padding P, used at the refreshes">
+          <span class="seg-label">Padding <i class="m">P</i></span>
+          <button type="button" data-p="0" aria-pressed="false">0</button>
+          <button type="button" data-p="1" aria-pressed="true">1</button>
+        </div>
+        <button class="pill" type="button" data-hw="replay" aria-label="Replay the walkthrough from the first step">&#8635; Replay</button>
+      </div>
+    </div>
+    <canvas class="hw-time" data-hw="time" aria-hidden="true"></canvas>
+
+    <div class="hw-main">
+      <ol class="hw-list" aria-label="The algorithm">
+        <li data-stop="0"><button type="button"><span class="n">1</span><span class="t">Encode the input video <i class="m">V</i>. It is the left view.</span></button></li>
+        <li data-stop="1"><button type="button"><span class="n">2</span><span class="t">Invert: run the sampler backward to step <i class="m">r</i><sub>0</sub>, keeping the states at <i class="m">r<sub>m</sub></i>, &hellip;, <i class="m">r</i><sub>1</sub>, <i class="m">r</i><sub>0</sub>.</span></button></li>
+        <li data-stop="2"><button type="button"><span class="n">3</span><span class="t">Estimate depth once, from <i class="m">V</i>. Compute the shift and the holes <i class="m">H</i>; they stay fixed.</span></button></li>
+        <li data-stop="4"><button type="button"><span class="n">4</span><span class="t">First warp at <i class="m">r</i><sub>0</sub>: shift the kept state to start the right view <i class="m">R</i>; fill <i class="m">H</i> with a guess and fresh noise.</span></button></li>
+        <li data-stop="6" class="in-loop is-first"><button type="button"><span class="n">5</span><span class="t">Denoise the right view until the next refresh step.</span></button></li>
+        <li data-stop="7" class="in-loop is-last"><button type="button"><span class="n">6</span><span class="t">Refresh: outside the holes, copy the shifted kept state of that step. Inside, keep <i class="m">R&#770;</i>.
+          <span class="hw-pips"><i></i><i></i><i></i><i></i><i></i><em data-hw="pips-t">5 refreshes</em></span></span></button></li>
+        <li data-stop="12"><button type="button"><span class="n">7</span><span class="t">Finish the right view and decode. The left view is <i class="m">V</i>.</span></button></li>
+      </ol>
+
+      <div class="hw-right">
+        <p class="hw-now"><span class="hw-now-pill" data-hw="now-pill">Step 1 / 7</span><span class="hw-now-t" data-hw="now-t"></span></p>
+        <div class="hw-stage" data-hw="stage-box">
+          <p class="hw-pt" data-hw="pt-l"><span class="l">Left view</span> <span class="nt" data-hw="note-l"></span></p>
+          <p class="hw-pt" data-hw="pt-r"><span class="r">Right view</span> <span class="nt" data-hw="note-r"></span></p>
+          <p class="hw-pt" data-hw="pt-a" hidden><span>Anaglyph</span> <span class="nt">red = left view, cyan = right view</span></p>
+          <canvas data-hw="stage" role="img" aria-label="Left view and right view at the current step of the algorithm."></canvas>
+        </div>
+        <div class="hw-key" data-hw="key"></div>
+        <div class="hw-bar">
+          <p class="hw-cap" data-hw="cap" aria-live="polite"></p>
+          <div class="hw-nav">
+            <div class="transport" role="group" aria-label="Walkthrough">
+              <button type="button" data-hw="prev" aria-label="Previous step"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 4v12M16 4.5 7.5 10l8.5 5.5z"/></svg></button>
+              <button type="button" data-hw="play" aria-label="Play" data-state="paused">
+                <svg class="i-play" viewBox="0 0 20 20" aria-hidden="true"><path d="m6.5 4.5 9 5.5-9 5.5z"/></svg>
+                <svg class="i-pause" viewBox="0 0 20 20" aria-hidden="true"><path d="M6.5 4.5v11M13.5 4.5v11"/></svg>
+              </button>
+              <button type="button" data-hw="next" aria-label="Next step"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M16 4v12M4 4.5l8.5 5.5L4 15.5z"/></svg></button>
+            </div>
+            <span class="hw-count" data-hw="count">1 / 7</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </figure>
+
+  <div class="wrap-wide hw-after">
+    <p class="hw-credit">Wan 2.1 video-to-stereo on a clip of the Stereo4D test set (512&nbsp;&times;&nbsp;512, 81 frames; a horizontal band of frame 12 is shown). 100 Euler steps, inversion from the video back to step 30, warps after steps 30, 40, &hellip;, 80, 8-px latent cells, <i class="m">d</i><sub>max</sub> = 31 px, <i class="m">P</i> = 1. Stills are decoded states and clean predictions; the first and last steps play the clip itself.</p>
   </div>
 </section>
 
@@ -365,20 +424,49 @@ window.SG_CONFIG = {
   </div>
 </section>
 
-<section class="samples" id="compare" data-gallery="compare">
-  <div class="wrap-wide">
+<section class="samples cmp-sec" id="compare">
+  <div class="wrap-wide" id="cmp">
     <div class="samples-head">
       <p class="kicker">Comparisons</p>
       <h2>Against prior methods</h2>
-      <p class="lead">Every method starts from the same left video. All but StereoWorld, which has no disparity control, run at the same disparity setting. DissolveStereo&dagger; is DissolveStereo adapted to the same backbone.</p>
+      <p class="lead">Five examples from the paper's figures, selected by us. Pick a baseline and watch it beside StereoGraft at the same disparity setting.</p>
     </div>
-    <div class="gal-controls">
-      <div class="seg" role="group" aria-label="View of this section only">
+
+    <div class="cmp-examples" data-cmp="examples" role="group" aria-label="Example"></div>
+
+    <div class="cmp-controls">
+      <div class="picker" role="group" aria-label="Baseline shown on the left"><span class="plab">Baseline</span><span class="cmp-pills" data-cmp="methods"></span></div>
+      <div class="picker" role="group" aria-label="Disparity setting"><span class="plab">Disparity</span><span class="cmp-pills" data-cmp="settings"></span></div>
+      <div class="seg" role="group" aria-label="View of this comparison" data-cmp="view">
         <button type="button" data-view="ana">Anaglyph</button>
         <button type="button" data-view="sbs">Side by side</button>
+        <button type="button" data-view="right">Right view</button>
       </div>
     </div>
-    <div data-grid></div>
+
+    <div class="cmp-pair" data-cmp="pair">
+      <figure class="cmp-col">
+        <figcaption class="vis-label" data-cmp="label-b">Baseline</figcaption>
+        <div class="cmp-box" data-cmp="box-b"><video data-cmp="video-b" muted playsinline preload="none" disablepictureinpicture></video></div>
+      </figure>
+      <figure class="cmp-col is-ours">
+        <figcaption class="vis-label">StereoGraft (ours)</figcaption>
+        <div class="cmp-box" data-cmp="box-o"><video data-cmp="video-o" muted loop playsinline preload="none" disablepictureinpicture></video></div>
+      </figure>
+    </div>
+
+    <div class="cmp-foot">
+      <div class="transport"><button type="button" data-cmp="play" aria-label="Pause both videos" data-state="playing">
+        <svg class="i-play" viewBox="0 0 20 20" aria-hidden="true"><path d="m6.5 4.5 9 5.5-9 5.5z"/></svg>
+        <svg class="i-pause" viewBox="0 0 20 20" aria-hidden="true"><path d="M6.5 4.5v11M13.5 4.5v11"/></svg>
+      </button></div>
+      <div class="cmp-words">
+        <p class="cmp-look" data-cmp="look" aria-live="polite"></p>
+        <p class="cmp-text" data-cmp="text"></p>
+        <p class="cmp-note" data-cmp="note" hidden></p>
+      </div>
+    </div>
+    <p class="cmp-fine">Wan 2.1. DissolveStereo&dagger; is DissolveStereo run on our backbone. The settings are 20, 24 and 30% of the frame width on DissolveStereo's disparity control, and every method runs at the same one. The sentences are from the captions of the paper's figures.</p>
   </div>
 </section>
 

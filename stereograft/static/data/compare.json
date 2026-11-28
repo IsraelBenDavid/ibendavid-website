@@ -1,0 +1,72 @@
+{
+ "settings": ["20", "24", "30"],
+ "methods": [
+  {"slug": "dissolvestereo", "name": "DissolveStereo"},
+  {"slug": "dissolvestereo-dagger", "name": "DissolveStereo†"},
+  {"slug": "svg", "name": "SVG"},
+  {"slug": "stereocrafter", "name": "StereoCrafter"}
+ ],
+ "notes": {
+  "t2s": {
+   "dissolvestereo": "The original DissolveStereo animates the first frame with its own video model, so its left view is a different, 16-frame video.",
+   "svg": "SVG returns 16 frames of a vertically centred crop at its own resolution.",
+   "stereocrafter": "StereoCrafter works on the top-left 768×384 crop of the left view."
+  },
+  "v2s": {
+   "dissolvestereo": "The original DissolveStereo animates the first frame with its own video model, so its left view is a different, 16-frame video.",
+   "svg": "SVG returns the first 16 frames of the clip."
+  }
+ },
+ "examples": [
+  {
+   "key": "potter", "task": "t2s", "name": "Potter's wheel", "ar": 1.7333,
+   "text": "A potter's wheel with wet clay turning, the potter's hands above it, shelves of bisque ware in the background.",
+   "look": {
+    "dissolvestereo": "Look behind the potter's hands: DissolveStereo leaves traces of the foreground in the newly visible background, which StereoGraft fills.",
+    "dissolvestereo-dagger": "Look behind the potter's hands: DissolveStereo† leaves traces of the foreground in the newly visible background, which StereoGraft fills.",
+    "svg": "SVG frays the edge of the pot; StereoGraft keeps it whole.",
+    "stereocrafter": "StereoCrafter leaves black gaps behind the hands, which StereoGraft fills."
+   }
+  },
+  {
+   "key": "carousel", "task": "t2s", "name": "Carousel horse", "ar": 1.7333,
+   "text": "A carousel horse standing still in the foreground, painted and chipped, the rest of the ride and a fairground behind it at dusk.",
+   "look": {
+    "dissolvestereo": "The original DissolveStereo adds a second horse.",
+    "dissolvestereo-dagger": "DissolveStereo† streaks the background behind the horse.",
+    "svg": "The paper has no note on this pair: compare the background beside the horse.",
+    "stereocrafter": "StereoCrafter leaves black gaps beside the horse."
+   }
+  },
+  {
+   "key": "bridge", "task": "t2s", "name": "Rope bridge", "ar": 1.7333,
+   "text": "A rope bridge's first planks filling the foreground, the span sagging away across a gorge, far cliffs in haze.",
+   "look": {
+    "dissolvestereo": "The original DissolveStereo bends the deck of the bridge.",
+    "dissolvestereo-dagger": "DissolveStereo† smears the railing.",
+    "svg": "The paper has no note on this pair: compare the deck and the railing.",
+    "stereocrafter": "StereoCrafter leaves gaps along the bridge."
+   }
+  },
+  {
+   "key": "excavator", "task": "v2s", "name": "Excavator", "ar": 1,
+   "text": "Stereo4D test clip: an excavator's bucket close to the camera, a harbour behind it.",
+   "look": {
+    "dissolvestereo": "The original DissolveStereo doubles the bucket.",
+    "dissolvestereo-dagger": "DissolveStereo† blurs the lower edge of the arm.",
+    "svg": "SVG smears the arm.",
+    "stereocrafter": "StereoCrafter leaves black borders."
+   }
+  },
+  {
+   "key": "pole", "task": "v2s", "name": "Utility pole", "ar": 1,
+   "text": "Stereo4D test clip: a street from a moving camera, a utility pole close on the left.",
+   "look": {
+    "dissolvestereo": "The paper has no note on this pair: follow the utility pole.",
+    "dissolvestereo-dagger": "Follow the utility pole: DissolveStereo† adds stripes along it, and with StereoGraft it keeps a single outline.",
+    "svg": "Follow the utility pole: SVG leaves a faint second pole, and with StereoGraft it keeps a single outline.",
+    "stereocrafter": "Follow the utility pole: StereoCrafter breaks up the background alongside it."
+   }
+  }
+ ]
+}
