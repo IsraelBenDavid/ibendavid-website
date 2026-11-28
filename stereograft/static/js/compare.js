@@ -69,9 +69,8 @@
     textEl.textContent = e.task === "t2s" ? "Prompt: “" + e.text + "”" : e.text;
     noteEl.textContent = n;
     noteEl.hidden = !n;
-    var d = D.settings[set] + "% disparity";
-    vB.setAttribute("aria-label", m.name + ", " + e.name + ", " + d);
-    vO.setAttribute("aria-label", "StereoGraft, " + e.name + ", " + d);
+    vB.setAttribute("aria-label", m.name + ", " + e.name);
+    vO.setAttribute("aria-label", "StereoGraft, " + e.name);
   }
   function load() {
     if (!D) { return; }
@@ -118,7 +117,7 @@
       exEl.appendChild(b);
     });
     pills(methEl, D.methods.map(function (m) { return m.name; }), meth, function (i) { meth = i; load(); });
-    pills(setEl, D.settings.map(function (s) { return s + "%"; }), set, function (i) { set = i; load(); });
+    if (setEl) { pills(setEl, D.settings.map(function (s) { return s + "%"; }), set, function (i) { set = i; load(); }); }
     Array.prototype.forEach.call(viewEl.querySelectorAll("button"), function (b) {
       b.addEventListener("click", function () {
         var v = b.getAttribute("data-view"), g = SG.view ? SG.view() : "ana";
@@ -160,7 +159,7 @@
     pick: function (e, m, s, v) {
       if (e != null) { exEl.children[e].click(); }
       if (m != null) { methEl.children[m].click(); }
-      if (s != null) { setEl.children[s].click(); }
+      if (s != null && setEl) { setEl.children[s].click(); }
       if (v) { viewEl.querySelector("[data-view=\"" + v + "\"]").click(); }
     },
     state: function () {

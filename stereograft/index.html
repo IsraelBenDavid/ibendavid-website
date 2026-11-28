@@ -126,7 +126,7 @@ window.SG_CONFIG = {
 <script defer src="static/js/stepper.js?v=4"></script>
 <script defer src="static/js/method.js?v=4"></script>
 <script defer src="static/js/v2s.js?v=4"></script>
-<script defer src="static/js/compare.js?v=4"></script>
+<script defer src="static/js/compare.js?v=5"></script>
 </head>
 <body>
 
@@ -425,14 +425,13 @@ window.SG_CONFIG = {
     <div class="samples-head">
       <p class="kicker">Comparisons</p>
       <h2>Against prior methods</h2>
-      <p class="lead">Five examples from the paper's figures, selected by us. Pick a baseline and watch it beside StereoGraft at the same disparity setting.</p>
+      <p class="lead">Five examples from the paper's figures. Pick a baseline and watch it beside StereoGraft.</p>
     </div>
 
     <div class="cmp-examples" data-cmp="examples" role="group" aria-label="Example"></div>
 
     <div class="cmp-controls">
       <div class="picker" role="group" aria-label="Baseline shown on the left"><span class="plab">Baseline</span><span class="cmp-pills" data-cmp="methods"></span></div>
-      <div class="picker" role="group" aria-label="Disparity setting"><span class="plab">Disparity</span><span class="cmp-pills" data-cmp="settings"></span></div>
       <div class="seg" role="group" aria-label="View of this comparison" data-cmp="view">
         <button type="button" data-view="ana">Anaglyph</button>
         <button type="button" data-view="sbs">Side by side</button>
@@ -462,7 +461,7 @@ window.SG_CONFIG = {
         <p class="cmp-note" data-cmp="note" hidden></p>
       </div>
     </div>
-    <p class="cmp-fine">Wan 2.1. DissolveStereo&dagger; is DissolveStereo run on our backbone. The settings are 20, 24 and 30% of the frame width on DissolveStereo's disparity control, and every method runs at the same one. The sentences are from the captions of the paper's figures.</p>
+    <p class="cmp-fine">Wan 2.1. DissolveStereo&dagger; is DissolveStereo run on our backbone. Every method runs at the same disparity setting. The sentences are from the captions of the paper's figures.</p>
   </div>
 </section>
 
